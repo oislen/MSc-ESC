@@ -25,8 +25,7 @@ library(dplyr)
 ############
 
 # set the working directory
-setwd('C:/Users/User/Documents/GitHub/MSc-ESC')
-
+setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
 # load in the historic voting data for deriving the voting blocs
 past_voting_data <- read.csv(file = "Data/ESC_hist_voting_data.csv", header = T)
 
@@ -36,13 +35,10 @@ past_voting_data <- read.csv(file = "Data/ESC_hist_voting_data.csv", header = T)
 
 # the head of the data
 head(past_voting_data)
-
 # structure of the data
 str(past_voting_data)
-
 # summary statistics of the data
 summary(past_voting_data)
-
 # there is no missing data
 anyNA(past_voting_data)
 
@@ -69,60 +65,50 @@ write.csv(x = pvd, file = "Data/Reference_Data/average_points.csv", row.names = 
 G <- graph_from_data_frame(d = pvd[pvd$Average.Points >= 8, 1:2], directed = T)
 E(G)$weight <- as.numeric(pvd[pvd$Average.Points >= 8, 3])
 # check the graph is weighted
-is_weighted(G)
+if (is_weighted(G) == FALSE){
+  stop("Voting Network Graph is Unweighted.")
+}
 
 ###############################
 #-- Derive the Voting Blocs --#
 ###############################
 
-#--- Edge Betweeness Clsutering --#
-
-# Perform Edge between clustering
-cluster_edge_betweenness(graph = G, weights = E(G)$weight)
+#--- Edge Betweeness Clustering --#
 
 # Extract the voting blocs
 # 21 groups
 # global modularity = 0.057
+# Perform Edge between clustering
 com1 <- cluster_edge_betweenness(graph = G, weights = E(G)$weight)
 com1df <- rbind(com1$names, com1$membership)
 row.names(com1df) <- c("Country", "Group")
 com1df
-
 # construct a dendrogram (hierarchical clustering method)
-plt = plot_dendrogram(cluster_edge_betweenness(graph = G, weights = E(G)$weight))
+plt = plot_dendrogram(com1, main = "Dendrogram of EDge Betweeness Clustering")
 
 #-- Short Random Walks --#
-
-# perform short random walks clustering
-cluster_walktrap(graph = G, weights = E(G)$weight)
 
 # Extract voting blocs
 # 6 groups
 # global modularity = 0.3
-com6 <- cluster_walktrap(graph = G, weights = E(G)$weight)
-com6 <- cluster_spinglass(graph = G, weights = E(G)$weight)
-com6 <- cluster_infomap(graph = G, e.weights = E(G)$weight)
-com6df <- rbind(com6$names, com6$membership)
+# perform short random walks clustering
+com2 <- cluster_walktrap(graph = G, weights = E(G)$weight)
+com2df <- rbind(com2$names, com2$membership)
 row.names(com6df) <- c("Country", "Group")
-com6df
-
+com2df
 # construct a dendrogram (hierarchical clustering method)
-plot_dendrogram(cluster_walktrap(graph = G, weights = E(G)$weight), main = "Dendrogram of Short Random Walk Clustering")
+plot_dendrogram(com2, main = "Dendrogram of Short Random Walk Clustering")
 
 ########################################
-#-- Construct voting blocs datadrame --#
+#-- Construct voting blocs dataframe --#
 ########################################
 
-# UPDATE: for the prepose of this research we shall only include hierarchical clustering methods
+# UPDATE: for the propose of this research we shall only include hierarchical clustering methods
 # (1) Edge-betweenness 
 # (2) Short Random Walks
-
-voting_bloc_data <- as.data.frame(cbind(com1$names, com1$membership, com6$membership))
+voting_bloc_data <- as.data.frame(cbind(com1$names, com1$membership, com2$membership))
 colnames(voting_bloc_data) <- c("Country", "VBlocs1_EB", "VBlocs2_SRW")
 head(voting_bloc_data)
 summary(voting_bloc_data)
-
-#-- Write the voting bloc data to a csv file --#
-
 # Writing Voting Bloc Data to csv file
 write.csv(x = voting_bloc_data, file = "Data/Reference_Data/voting_bloc_data.csv", row.names = F)
