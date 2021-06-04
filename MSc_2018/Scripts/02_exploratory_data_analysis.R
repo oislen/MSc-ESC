@@ -2,16 +2,16 @@
 ## SECTION 2 - EXPLORATORY ANALYSIS ####################################################################################
 ########################################################################################################################
 
-# This section is specifically for visualising and deriving descriptive statistics on the data
+# This section is specifically for visualizing and deriving descriptive statistics on the data
 # In order to understand the underlying the structures and patterns in the data
 
 # A variety of descriptive statistics will be generated for both the numeric data and the categorical data
-# Similarly a variety of visualisations will be generated for both the numeric data and the categorical data
-# Further more some visualisation on the patterns of diaspora will be generated using Social Networks
+# Similarly a variety of visualizations will be generated for both the numeric data and the categorical data
+# Further more some visualization on the patterns of diaspora will be generated using Social Networks
 
 
 ###################
-## Prelimineries ##
+## Preliminaries ##
 ###################
 
 #-- Libraries --#
@@ -19,118 +19,54 @@
 # Load in relevant libraries
 # igraph will be used for SNA
 library(igraph)
-# ggplot2 will be used for data visuaisation
+# ggplot2 will be used for data visualization
 library(ggplot2)
 
 #-- Data --#
 
 # set the working directory
-setwd('C:/Users/User/Documents/GitHub/MSc-ESC')
-
+setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
 # load in the raw ESC 2016 data for the analysis
 ESCdata <- read.csv(file = "Data/ESC_2016_voting_data.csv", header = T)
+# load in custom utility functions
+source("Scripts/utilities.R")
 
-#-- Some Intial Data Processing --#
+#-- Some Initial Data Processing --#
 
 # Some of the numeric music features need to be redefined as nominal variables
 # the variables are key, mode and time signature
 to_factor_cols = c('key', 'mode', 'time_signature', 'VBlocs1_FC', 'VBlocs2_FC', 'VBlocs1_TC', 'VBlocs2_TC')
-for (col in to_factor_cols){
-  ESCdata[, col] <- as.factor(ESCdata[, col])
-}
+# convert he specified columns to factors
+ESCdata = column_to_factor(dataset = ESCdata, col_names = to_factor_cols)
 
 ##############################
 #-- Descriptive Statistics --#
 ##############################
 
 # Here I shall derive relevant descriptive statistics for the exploratory analysis
-# To do this I shall define two function which save the descriptive statistics in twp seperate data frames
+# To do this I shall define two function which save the descriptive statistics in twp separate data frames
 # specifically for categorical data and numeric data
 
 #-- CATEGORICAL VARIABLES --#
 
-# define a function to calculate descriptive statistics for categorical varibales
-factor_descriptive_statistics <- function(dataset) {
-  # function that automatically prints relevant descriptive statistics for attributes in a given dataset
-  library(moments)
-  l = 1 # row index for categorical variables
-  # create the data frame to hold the categorical descriptive statistics
-  factor_num_col <- 6
-  factor_num_row <- sum(sapply(X = dataset, FUN = function(x) is.factor(x)))
-  factor_descriptive_statistics <- as.data.frame(matrix(nrow = factor_num_row, ncol = factor_num_col))
-  colnames(factor_descriptive_statistics) <- c("nlevels", "1st mode", "1st mode %", "2nd mode", "2nd mode %", "NA %")
-  for (i in 1:ncol(dataset)) {
-    if (is.factor(dataset[,i])){
-      # first write in the row name i.e. the attribute name
-      rownames(factor_descriptive_statistics)[l] <- colnames(dataset)[i]
-      # next compute the descriptive statistics for each cell in the row
-      factor_descriptive_statistics[l, 1] <- nlevels(dataset[, i])
-      factor_descriptive_statistics[l, 2] <- names(which.max(summary(dataset[,i])))
-      factor_descriptive_statistics[l, 3] <- round(summary(dataset[, i])[which.max(summary(dataset[,i]))] * 100 / sum(summary(dataset[,i])), digits = 2)
-      factor_descriptive_statistics[l, 4] <- names(sort(summary(dataset[, i]), decreasing = T)[2])
-      factor_descriptive_statistics[l, 5] <- round(sort(summary(dataset[, i]), decreasing = T)[2] * 100/ sum(summary(dataset[,i])), digits = 2)
-      factor_descriptive_statistics[l, 6] <- length(which(is.na(dataset[,i]))) * 100 / sum(summary(dataset[,i]))
-      # print(paste("Categorical Attribute:", colnames(dataset)[i], sep = " "))
-      # print(summary(dataset[,i]))
-      l = l + 1
-    } 
-  }
-  return(factor_descriptive_statistics)
-}
-# NOTE: could code up a table of descriptive statistics for continuous and decrete variables, metadata
-# descriptive_statistics(dataset = train)
+# NOTE: could code up a table of descriptive statistics for continuous and discrete variables, metadata
 # factor_descriptive_statistics(dataset = reduceddata)
 full_data_factor_descriptive_statistics_df <- factor_descriptive_statistics(dataset = ESCdata)
 # View(full_data_factor_descriptive_statistics_df)
-write.csv(x = full_data_factor_descriptive_statistics_df,
-          file = "../Report/Stats/categorical_descriptive_statistics.csv")
+write.csv(x = full_data_factor_descriptive_statistics_df, file = "Report/Stats/categorical_descriptive_statistics.csv")
 
 #-- CONTINUOUS FEATURES --#
 
-# define a function to calculate descriptive statistics for continuous varibales
-numeric_descriptive_statistics <- function(dataset) {
-  # IMPORTANT NOTE: all the descriptive statistics are calculated with the NA values removed
-  # function that automatically prints relevant descriptive statistics for attributes in a given dataset
-  library(moments)
-  k = 1 # row index for numeric variables
-  # create the data frame to hold the numeric descriptive statistics
-  numeric_num_col <- 6
-  numeric_num_row <- sum(sapply(X = dataset, FUN = function(x) is.numeric(x)))
-  numeric_descriptive_statistics <- as.data.frame(matrix(nrow = numeric_num_row, ncol = numeric_num_col))
-  colnames(numeric_descriptive_statistics) <- c("mean", "variance", "min", "max", "range", "NA %")
-  for (i in 1:ncol(dataset)) {
-    if (is.numeric(dataset[,i])) {
-      # first write in the row name i.e. the aattribute name
-      rownames(numeric_descriptive_statistics)[k] <- colnames(dataset)[i]
-      # next compute the descriptive statistics for each cell in the row
-      numeric_descriptive_statistics[k, 1] <- round(mean(dataset[,i], na.rm = T),
-                                                    digits = 2)
-      numeric_descriptive_statistics[k, 2] <- round(var(dataset[,i], na.rm = T),
-                                                    digits = 2)
-      numeric_descriptive_statistics[k, 3] <- round(min(dataset[,i], na.rm = T),
-                                                    digits = 2)
-      numeric_descriptive_statistics[k, 4] <- round(max(dataset[,i], na.rm = T),
-                                                    digits = 2)
-      numeric_descriptive_statistics[k, 5] <- round(max(dataset[,i], na.rm = T) - min(dataset[,i], na.rm = T),
-                                                    digits = 2)
-      numeric_descriptive_statistics[k, 6] <- round(length(which(is.na(dataset[,i]))) * 100 / nrow(dataset),
-                                                    digits = 3)
-      k = k + 1
-    }
-    # print("############################")
-  }
-  return(numeric_descriptive_statistics)
-}
+# generate numeric descriptive statistics
 full_data_numeric_descriptive_statistics_df <- numeric_descriptive_statistics(dataset = ESCdata)
 # View(full_data_numeric_descriptive_statistics_df)
-write.csv(x = full_data_numeric_descriptive_statistics_df,
-          file = "../Report/Stats/numeric_descriptive_statistics.csv")
+write.csv(x = full_data_numeric_descriptive_statistics_df, file = "Report/Stats/numeric_descriptive_statistics.csv")
 
 ##################################################
 #-- Individual Categorical Variable Bar Charts --#
 ##################################################
 
-# In this section I shall generate a variety of data visualisations
+# In this section I shall generate a variety of data visualizations
 # This allows us to see the underlying structures within each variable
 # I shall generate bar charts for categorical variables
 
