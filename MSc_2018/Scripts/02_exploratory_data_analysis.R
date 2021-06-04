@@ -9,7 +9,6 @@
 # Similarly a variety of visualizations will be generated for both the numeric data and the categorical data
 # Further more some visualization on the patterns of diaspora will be generated using Social Networks
 
-
 ###################
 ## Preliminaries ##
 ###################
@@ -29,7 +28,11 @@ setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
 # load in the raw ESC 2016 data for the analysis
 ESCdata <- read.csv(file = "Data/ESC_2016_voting_data.csv", header = T)
 # load in custom utility functions
-source("Scripts/utilities.R")
+source("Scripts/utilities/column_to_factor.R")
+source("Scripts/utilities/factor_descriptive_statistics.R")
+source("Scripts/utilities/numeric_descriptive_statistics.R")
+source("Scripts/utilities/plot_bar_chart.R")
+source("Scripts/utilities/plot_histogram.R")
 
 #-- Some Initial Data Processing --#
 
@@ -37,7 +40,7 @@ source("Scripts/utilities.R")
 # the variables are key, mode and time signature
 to_factor_cols = c('key', 'mode', 'time_signature', 'VBlocs1_FC', 'VBlocs2_FC', 'VBlocs1_TC', 'VBlocs2_TC')
 # convert he specified columns to factors
-ESCdata = column_to_factor(dataset = ESCdata, col_names = to_factor_cols)
+ESCdata <- column_to_factor(dataset = ESCdata, col_names = to_factor_cols)
 
 ##############################
 #-- Descriptive Statistics --#
@@ -69,92 +72,46 @@ write.csv(x = full_data_numeric_descriptive_statistics_df, file = "Report/Stats/
 # In this section I shall generate a variety of data visualizations
 # This allows us to see the underlying structures within each variable
 # I shall generate bar charts for categorical variables
-
-
-voting_factors = c('From_country', 'To_country', 'Points')
-comp_factors = c('Round', 'Voting_Method', 'Host_Nation', 'OOA')
-ext_factors = c('VBlocs1_TC', 'VBlocs2_TC', 'VBlocs1_FC', 'VBlocs2_FC', 'ComVBlocs', 'ComVBlocs2', 'LANGFAM', 'ComLANGFAM', 'Neighbours', 'TC_NumNeigh')
-perf_factors = c('ComSONGLAN', 'key', 'mode', 'time_signature', 'TC_PerfType', 'TC_SingerGender')
-all_factors = c(voting_factors, comp_factors, comp_factors, perf_factors)
-all_factors_data = ESCdata[all_factors]
-
-# use a for loop to generate a bar plot for each categorical attributes
-for (idx in 1:length(all_factors)){
-  
-  # extract the column
-  col_chr <- all_factors[idx]
-  
-  # create the ploy
-  plt = ggplot(data = all_factors_data, 
-               mapping = aes(x = as.factor(all_factors_data[,idx]), 
-                             fill = as.factor(all_factors_data[,idx])
-                             )
-               ) + 
-          geom_bar(stat = "count", width = 0.7) + 
-          labs(title = paste("Bar Chart of ", col_chr), x = col_chr, y = "Count") +
-          theme_minimal() +
-          theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-          guides(fill = FALSE)
-  
-  # print the plot
-  print(plt)
-  
-  # save plot
-  ggsave(paste('Report/Plots/Bar_Charts/', col_chr,'_bar_chart.png'))
-  
-}
+voting_factors <- c('From_country', 'To_country', 'Points')
+comp_factors <- c('Round', 'Voting_Method', 'Host_Nation', 'OOA')
+ext_factors <- c('VBlocs1_TC', 'VBlocs2_TC', 'VBlocs1_FC', 'VBlocs2_FC', 'ComVBlocs', 'ComVBlocs2', 'LANGFAM', 'ComLANGFAM', 'Neighbours', 'TC_NumNeigh')
+perf_factors <- c('ComSONGLAN', 'key', 'mode', 'time_signature', 'TC_PerfType', 'TC_SingerGender')
+all_factors <- c(voting_factors, comp_factors, comp_factors, perf_factors)
+all_factors_data <- ESCdata[all_factors]
+# call bar chart plotting function
+plot_bar_chart(dataset = all_factors_data, col_names = all_factors)
 
 #########################################
 #-- Individual Numeric Variable Plots --#
 #########################################
 
-# In this section I shall generate a variety of data visualisations
+# In this section I shall generate a variety of data visualizations
 # This allows us to see the underlying structures within each variable
 # I shall generate histograms for the numeric variables
-
-avg_point_num = c('Average_Points')
-mig_num = c('FC_NonCOB', 'FC_NonCitzens', 'FC_COB', 'FC_Citizens', 'FC_Population', 'METRIC_COB', 'METRIC_Citizens', 'METRIC_COBCit')
-mus_num = c('danceability', 'loudiness', 'energy', 'speechiness', 'acousticness', 'instrumentalness', 'acousticness', 'valence', 'tempo', 'duration_ms')
-demo_num = c('FC_GDP_mil', 'TC_GDP_mil', 'GDP_PROP', 'CAP_DIST_km')
-all_num = c(avg_point_num, mig_num, mus_num, demo_num)
-all_numeric_data = ESCdata[all_num]
-
-# use a for loop to generate histograms for each numeric attribute
-for (idx in 1:length(all_num)){
-  
-  # extract the column
-  col_chr <- all_num[idx]
-  
-  # Histogram of Average_Points
-  plt = ggplot(data = all_numeric_data, 
-               mapping = aes(x = all_numeric_data[,idx])) + 
-          geom_histogram(col = "black", fill = "steelblue") + 
-          labs(title = paste("Histogram of ", col_chr), x = col_chr, y = "Total") + 
-          theme_minimal()
-  
-  # print the plot
-  print(plt)
-  
-  # save plot
-  ggsave(paste('Report/Plots/Histograms/', col_chr,'_histogram.png'))
-  
-}
+avg_point_num <- c('Average_Points')
+mig_num <- c('FC_NonCOB', 'FC_NonCitzens', 'FC_COB', 'FC_Citizens', 'FC_Population', 'METRIC_COB', 'METRIC_Citizens', 'METRIC_COBCit')
+mus_num <- c('danceability', 'loudiness', 'energy', 'speechiness', 'acousticness', 'instrumentalness', 'acousticness', 'valence', 'tempo', 'duration_ms')
+demo_num <- c('FC_GDP_mil', 'TC_GDP_mil', 'GDP_PROP', 'CAP_DIST_km')
+all_num <- c(avg_point_num, mig_num, mus_num, demo_num)
+all_numeric_data <- ESCdata[all_num]
+# call histogram plotting function
+plot_histogram(dataset = all_numeric_data, col_names = all_num)
 
 ########################################
 #-- CHI-SQUARED TESTS OF ASSOCIATION --#
 ########################################
 
-# In this section I shall conduct chi-squared tests of assocition
+# In this section I shall conduct chi-squared tests of association
 # for each categorical predictor variable and the response variable
 # Hypothesis:
-# Ho: x is independant of y
+# Ho: x is independent of y
 # Ha: x is associated with y
 
 # There are two parts to it
-# (1) Create the data frameto store the chi-squared tests
+# (1) Create the data frame to store the chi-squared tests
 # (2) Fill the data frame with the relevant information
 
-# First create a dataframe to store the relevent chi-squared test data
+# First create a data frame to store the relevant chi-squared test data
 chi_sq_test_data <- subset(x = ESCdata,
                            select = c(From_country, To_country, Round,
                                       Voting_Method, Host_Nation, OOA,
@@ -175,7 +132,7 @@ for (i in 1:25) {
   # Save the variables name being tested
   chisqtestdf[i,1] <- colnames(chi_sq_test_data)[i]
   chisqtestdf[i,2] <- "Points"
-  # Conduct the chi-squared test and savethe p-value
+  # Conduct the chi-squared test and save the p-value
   chisqtestdf[i,3] <- round(x = chisq.test(x = as.factor(chi_sq_test_data[,i]),
                                            y = as.factor(ESCdata$Points))$p.value,
                             digits = 5)
