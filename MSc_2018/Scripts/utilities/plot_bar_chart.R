@@ -7,9 +7,9 @@ plot_bar_chart <- function(dataset, col_names){
   for (col in all_factors){
     
     # create the ploy
-    plt = ggplot(data = all_factors_data, 
-                 mapping = aes(x = as.factor(all_factors_data[,col]), 
-                               fill = as.factor(all_factors_data[,col])
+    plt = ggplot(data = dataset, 
+                 mapping = aes(x = as.factor(dataset[,col]), 
+                               fill = as.factor(dataset[,col])
                  )
     ) + 
       geom_bar(stat = "count", width = 0.7) + 
@@ -26,7 +26,7 @@ plot_bar_chart <- function(dataset, col_names){
     
     # create output file path
     output_fpath <- file.path('Report/Plots/Bar_Charts', plot_name)
-    
+  
     # save plot
     ggsave(output_fpath)
     
