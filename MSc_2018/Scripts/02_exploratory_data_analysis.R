@@ -20,6 +20,7 @@
 library(igraph)
 # ggplot2 will be used for data visualization
 library(ggplot2)
+library(dplyr)
 
 #-- Data --#
 
@@ -33,14 +34,30 @@ source("Scripts/utilities/factor_descriptive_statistics.R")
 source("Scripts/utilities/numeric_descriptive_statistics.R")
 source("Scripts/utilities/plot_bar_chart.R")
 source("Scripts/utilities/plot_histogram.R")
+source("Scripts/utilities/chisq_assoc_test.R")
+source("Scripts/utilities/plot_scatter.R")
+source("Scripts/utilities/corr_tests.R")
+source("Scripts/utilities/pred_corr_tests.R")
+source("Scripts/utilities/graph_network.R")
 
 #-- Some Initial Data Processing --#
 
-# Some of the numeric music features need to be redefined as nominal variables
-# the variables are key, mode and time signature
-to_factor_cols = c('key', 'mode', 'time_signature', 'VBlocs1_FC', 'VBlocs2_FC', 'VBlocs1_TC', 'VBlocs2_TC')
-# convert he specified columns to factors
-ESCdata <- column_to_factor(dataset = ESCdata, col_names = to_factor_cols)
+# define vectors for all numeric columns
+avg_point_num <- c('Average_Points')
+mig_num <- c('FC_NonCOB', 'FC_NonCitzens', 'FC_COB', 'FC_Citizens', 'FC_Population', 'METRIC_COB', 'METRIC_Citizens', 'METRIC_COBCit')
+mus_num <- c('danceability', 'loudiness', 'liveness', 'energy', 'speechiness', 'acousticness', 'instrumentalness', 'acousticness', 'valence', 'tempo', 'duration_ms')
+demo_num <- c('TC_NumNeigh', 'FC_CAP_LON', 'FC_CAP_LAT', 'TC_CAP_LON', 'TC_CAP_LAT', 'FC_GDP_mil', 'TC_GDP_mil', 'GDP_PROP', 'CAP_DIST_km')
+comp_num <- c('OOA')
+# consolidate all numeric columns
+all_num <- c(avg_point_num, mig_num, mus_num, demo_num, comp_num)
+
+# define vectors for all categorical columns
+voting_factors <- c('From_country', 'To_country', 'Points')
+comp_factors <- c('Round', 'Voting_Method', 'Host_Nation', 'OOA')
+ext_factors <- c('VBlocs1_TC', 'VBlocs2_TC', 'VBlocs1_FC', 'VBlocs2_FC', 'ComVBlocs1', 'ComVBlocs2', 'FC_LANGFAM', 'TC_LANGFAM', 'ComLANGFAM', 'Neighbours', 'TC_NumNeigh')
+perf_factors <- c('FC_SONGLANG', 'TC_SONGLANG','ComSONGLAN', 'TC_PerfType', 'TC_SingerGender', 'key', 'mode', 'time_signature')
+# consolidate all factor columns
+all_factors <- c(voting_factors, comp_factors, ext_factors, perf_factors)
 
 ##############################
 #-- Descriptive Statistics --#
@@ -54,14 +71,14 @@ ESCdata <- column_to_factor(dataset = ESCdata, col_names = to_factor_cols)
 
 # NOTE: could code up a table of descriptive statistics for continuous and discrete variables, metadata
 # factor_descriptive_statistics(dataset = reduceddata)
-full_data_factor_descriptive_statistics_df <- factor_descriptive_statistics(dataset = ESCdata)
+full_data_factor_descriptive_statistics_df <- factor_descriptive_statistics(dataset = ESCdata, col_names = all_factors)
 # View(full_data_factor_descriptive_statistics_df)
 write.csv(x = full_data_factor_descriptive_statistics_df, file = "Report/Stats/categorical_descriptive_statistics.csv")
 
 #-- CONTINUOUS FEATURES --#
 
 # generate numeric descriptive statistics
-full_data_numeric_descriptive_statistics_df <- numeric_descriptive_statistics(dataset = ESCdata)
+full_data_numeric_descriptive_statistics_df <- numeric_descriptive_statistics(dataset = ESCdata, col_names = all_num)
 # View(full_data_numeric_descriptive_statistics_df)
 write.csv(x = full_data_numeric_descriptive_statistics_df, file = "Report/Stats/numeric_descriptive_statistics.csv")
 
@@ -72,14 +89,8 @@ write.csv(x = full_data_numeric_descriptive_statistics_df, file = "Report/Stats/
 # In this section I shall generate a variety of data visualizations
 # This allows us to see the underlying structures within each variable
 # I shall generate bar charts for categorical variables
-voting_factors <- c('From_country', 'To_country', 'Points')
-comp_factors <- c('Round', 'Voting_Method', 'Host_Nation', 'OOA')
-ext_factors <- c('VBlocs1_TC', 'VBlocs2_TC', 'VBlocs1_FC', 'VBlocs2_FC', 'ComVBlocs', 'ComVBlocs2', 'LANGFAM', 'ComLANGFAM', 'Neighbours', 'TC_NumNeigh')
-perf_factors <- c('ComSONGLAN', 'key', 'mode', 'time_signature', 'TC_PerfType', 'TC_SingerGender')
-all_factors <- c(voting_factors, comp_factors, comp_factors, perf_factors)
-all_factors_data <- ESCdata[all_factors]
 # call bar chart plotting function
-plot_bar_chart(dataset = all_factors_data, col_names = all_factors)
+plot_bar_chart(dataset = ESCdata, col_names = all_factors)
 
 #########################################
 #-- Individual Numeric Variable Plots --#
@@ -88,14 +99,8 @@ plot_bar_chart(dataset = all_factors_data, col_names = all_factors)
 # In this section I shall generate a variety of data visualizations
 # This allows us to see the underlying structures within each variable
 # I shall generate histograms for the numeric variables
-avg_point_num <- c('Average_Points')
-mig_num <- c('FC_NonCOB', 'FC_NonCitzens', 'FC_COB', 'FC_Citizens', 'FC_Population', 'METRIC_COB', 'METRIC_Citizens', 'METRIC_COBCit')
-mus_num <- c('danceability', 'loudiness', 'energy', 'speechiness', 'acousticness', 'instrumentalness', 'acousticness', 'valence', 'tempo', 'duration_ms')
-demo_num <- c('FC_GDP_mil', 'TC_GDP_mil', 'GDP_PROP', 'CAP_DIST_km')
-all_num <- c(avg_point_num, mig_num, mus_num, demo_num)
-all_numeric_data <- ESCdata[all_num]
 # call histogram plotting function
-plot_histogram(dataset = all_numeric_data, col_names = all_num)
+plot_histogram(dataset = ESCdata, col_names = all_num)
 
 ########################################
 #-- CHI-SQUARED TESTS OF ASSOCIATION --#
@@ -111,234 +116,60 @@ plot_histogram(dataset = all_numeric_data, col_names = all_num)
 # (1) Create the data frame to store the chi-squared tests
 # (2) Fill the data frame with the relevant information
 
-# First create a data frame to store the relevant chi-squared test data
-chi_sq_test_data <- subset(x = ESCdata,
-                           select = c(From_country, To_country, Round,
-                                      Voting_Method, Host_Nation, OOA,
-                                      VBlocs1_FC, VBlocs2_FC,
-                                      VBlocs1_TC, VBlocs2_TC,
-                                      ComVBlocs1, ComVBlocs2,
-                                      FC_LANGFAM, TC_LANGFAM, ComLANGFAM,
-                                      Neighbours, TC_NumNeigh, TC_PerfType,
-                                      TC_SingerGender, FC_SONGLANG, TC_SONGLANG,
-                                      ComSONGLAN, key, mode, time_signature))
-chisqtestdf <- as.data.frame(matrix(nrow = 25, 
-                                    ncol = 4))
-# rename the columns of the data frame
-colnames(chisqtestdf) <- c("X", "Y", "P-Value", "Significant")
+# perform chi-sq tests of association with Points
+chisqtestdf <- chisq_assoc_test(data = ESCdata, col_names = all_factors)
 
-# Use a for loop to fill in the data frame
-for (i in 1:25) {
-  # Save the variables name being tested
-  chisqtestdf[i,1] <- colnames(chi_sq_test_data)[i]
-  chisqtestdf[i,2] <- "Points"
-  # Conduct the chi-squared test and save the p-value
-  chisqtestdf[i,3] <- round(x = chisq.test(x = as.factor(chi_sq_test_data[,i]),
-                                           y = as.factor(ESCdata$Points))$p.value,
-                            digits = 5)
-  chisqtestdf[i,4] <- ifelse(test = round(x = chisq.test(x = as.factor(chi_sq_test_data[,i]),
-                                                         y = as.factor(ESCdata$Points))$p.value,
-                                          digits = 5) < 0.05,
-                             yes = "y",
-                             no = "n")
-}
 # write the data frame to a csv file
-write.csv(x = chisqtestdf,
-          file = "Report/Stats/chi_sq_tests_response.csv",
-          row.names = F)
+write.csv(x = chisqtestdf, file = "Report/Stats/chi_sq_tests_response.csv", row.names = F)
 
-#################################
-#-- Correlation Scatter Plots --#
-#################################
+################################################################
+#-- Correlation Scatter Plots and Response Correlation Tests --#
+################################################################
 
-avg_point_num = c('Average_Points')
-mig_num = c('FC_NonCOB', 'FC_NonCitzens', 'FC_COB', 'FC_Citizens', 'FC_Population', 'METRIC_COB', 'METRIC_Citizens', 'METRIC_COBCit')
-mus_num = c('danceability', 'loudiness', 'energy', 'speechiness', 'acousticness', 'instrumentalness', 'acousticness', 'valence', 'tempo', 'duration_ms')
-demo_num = c('TC_NumNeigh', 'FC_CAP_LON', 'FC_CAP_LAT', 'TC_CAP_LON', 'TC_CAP_LON', 'TC_CAP_LAT', 'FC_GDP_mil', 'TC_GDP_mil', 'GDP_PROP', 'CAP_DIST_km')
-comp_num = c('OOA')
-all_cor_num = c('Points', avg_point_num, mig_num, mus_num, demo_num, comp_num)
-all_cor_numeric_data = ESCdata[all_cor_num]
-
-# use a for loop to generate correlation scatter plots
-for (idx in 1:length(all_cor_num)){
-  
-  # extract the column
-  col_chr <- all_cor_num[idx]
-  
-  # create the xaxis limits
-  lims = c("1","2","3","4","5","6","7","8","","10","","12")
-  
-  # create the corelation scatter plot
-  plt = ggplot(data = all_cor_numeric_data, 
-               mapping = aes(x = Points, 
-                             y = all_cor_numeric_data[,idx]
-                             )
-               ) + 
-          geom_point(shape = 16, colour = "blue") + 
-          labs(title = paste("Scatterplot of Points vs ",col_chr), 
-               x = "Points", 
-               y = col_chr
-               )  +  
-          geom_smooth(method ='lm', 
-                      linetype = "dashed", 
-                      color="darkred", 
-                      fill = "red"
-                      ) +
-          scale_x_discrete(limits = lims) + 
-          theme_minimal()
-  
-  # print the plot
-  print(plt)
-  
-  # save plot
-  ggsave(paste('Report/Plots/Scatterplots/', col_chr,'_vs_Points_Scatterplot_.png'))
-  
-}
-
-##################################
-#-- Response Correlation Tests --#
-##################################
-
+# plot scatter plot
+plot_scatter(data = ESCdata, col_names = all_num)
 # Correlation Test
 # Ho: x is not correlated with y
 # Ha: x is correlated with y
-
-# Select the relevant numeric data from the ESCdata data frame
-cor_test_response_data <- subset(x = ESCdata,
-                                 select = c(Average_Points, OOA, TC_NumNeigh,
-                                            FC_NonCOB, FC_NonCitzens, FC_COB,
-                                            FC_Citizens, FC_Population, METRIC_COB,
-                                            METRIC_Citizens, METRIC_COBCit, FC_GDP_mil,
-                                            TC_GDP_mil, GDP_PROP, FC_CAP_LAT, FC_CAP_LON,
-                                            TC_CAP_LAT, TC_CAP_LON, CAP_DIST_km, danceability,
-                                            energy, key, loudiness, mode, speechiness, acousticness,
-                                            instrumentalness, liveness, valence, tempo, duration_ms))
-# Define a function to perform Correlation Tests
-# Create a data frame to hold the correlation test data
-cor_test_df <- as.data.frame(matrix(nrow = 31, ncol = 5))
-# Name the columns of the Correlation Test Data Frame
-colnames(cor_test_df) <- c("X", "Y", "Correlation", "P-Value", "Significant")
-# run a for loop to populate the data frame
-for (i in 1:31) {
-  # Perform Correlation Test
-  c.t. <- cor.test(x = as.numeric(cor_test_response_data[,i]),
-                   y = as.numeric(ESCdata$Points),
-                   na.action = "na.omit")
-  # Fill in the X Variable Name
-  cor_test_df[i, 1] <- colnames(cor_test_response_data)[i]
-  # Fill in the Y Variable Name
-  cor_test_df[i, 2] <- "Points"
-  # Fill in the correlation
-  cor_test_df[i, 3] <- round(c.t.$estimate, digits = 2)
-  # Fill in the p-value
-  cor_test_df[i, 4] <- round(c.t.$p.value, digits = 2)
-  # Fill in the significance column
-  cor_test_df[i, 5] <- ifelse(test = round(c.t.$p.value, digits = 5) < 0.05,
-                              yes = "y",
-                              no = "n")
-}
-# Write the cor_test_df to  csv file
-write.csv(x = cor_test_df,
-          file = "Report/Stats/cor_tests_response.csv",
-          row.names = F)
+# execute the correlation tests
+cor_test_df <- corr_tests(data = ESCdata, col_names = all_num)
+# Write the correlation results to  a .csv file
+write.csv(x = cor_test_df, file = "Report/Stats/cor_tests_response.csv", row.names = F)
 
 #############################################
 #-- Predictor Correlation Plots and Tests --#
 #############################################
 
-# IMPORTANT: Correlation does not imply causality
+# run correlation tests for all predictors
+c.t. <- pred_corr_tests(ESCdata[all_num])
 
-# Define a function to perform Correlation Tests
-correlation_tests <- function (dataset) {
-  # extract the unique column names
-  n_cols = ncol(dataset)
-  dataset_cols = unique(colnames(dataset))
-  cor_test_df <- as.data.frame(matrix(ncol = 4))
-  # Name the columns of the Correlation Test Data Frame
-  colnames(cor_test_df) <- c("X", "Y", "Correlation", "P-Value")
-  # Create a row index to populate the data frame with
-  r = 1
-  for (i in 1:n_cols) {
-    j = i + 1
-    while (j <= n_cols) {
-      # Perform Correlation Test
-      c.t. <- cor.test(x = dataset[,dataset_cols[i]],
-                       y = dataset[,dataset_cols[j]],
-                       na.action = "na.omit")
-      # Fill in the X Variable Name
-      cor_test_df[r, 1] <- dataset_cols[i]
-      # Fill in the Y Variable Name
-      cor_test_df[r, 2] <- dataset_cols[j]
-      # Fill in the correlation
-      #cor_test_df[r, 3] <- round(c.t.$estimate, digits = 5)
-      cor_test_df[r, 3] <- round(cor(x = dataset[,dataset_cols[i]],
-                                     y = dataset[,dataset_cols[j]],
-                                     use = "complete.obs"), 
-                                 digits = 5)
-      # Fill in the p-value
-      cor_test_df[r, 4] <- round(c.t.$p.value, digits = 5)
-      # Update the row index
-      r = r + 1
-      # Update the j index
-      j = j + 1
-    }
-  }
-  # return the cor_test_df
-  return(cor_test_df)
-}
-
-comp_num = c('Average_Points', 'OOA')
-perf_num = c('danceability', 'energy', 'loudiness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms')
-ext_num = c('TC_NumNeigh', 'FC_NonCOB', 'FC_NonCitzens', 'FC_COB', 'FC_Citizens', 'FC_Population', 'METRIC_COB', 'METRIC_Citizens', 'METRIC_COBCit', 'FC_GDP_mil', 'TC_GDP_mil', 'GDP_PROP', 'FC_CAP_LAT', 'FC_CAP_LON', 'TC_CAP_LAT', 'TC_CAP_LON', 'CAP_DIST_km')
-all_cor_test_num = c(comp_num, perf_num, ext_num)
-
-# Correlation Tests
-c.t. <- correlation_tests(ESCdata[all_cor_test_num])
-
-write.csv(x = c.t.,
-          file = "Report/Stats/cor_tests_predictors.csv",
-          row.names = F)
+# output results as a .csv file
+write.csv(x = c.t., file = "Report/Stats/cor_tests_predictors.csv", row.names = F)
 
 # Determine which variables are highly correlated
 c.t.[c.t.$Correlation > 0.8 & c.t.$Correlation < 1,]
 
-######################
-#-- Socai Networks --#
-######################
+#######################
+#-- Social Networks --#
+#######################
 
-networkdata <- subset(x = ESCdata[complete.cases(ESCdata),],
-                      select = c(From_country, To_country, Points, Round, 
-                                 Voting_Method, Average_Points, VBlocs1_FC,
-                                 VBlocs1_TC, VBlocs2_FC, VBlocs2_TC, METRIC_COB,
-                                 METRIC_Citizens, METRIC_COBCit))
 # NOTE: that there is more data missing for METIC_Citizens than METRIC_COB
 sum(!is.na(ESCdata$METRIC_COB))
 sum(!is.na(ESCdata$METRIC_Citizens))
-networkdata <- ESCdata[!is.na(ESCdata$METRIC_Citizens),]
+networkdata <- ESCdata %>% filter(!is.na(METRIC_Citizens))
 
 # A variety of Social Networks based on different closeness metrics given a specified Voting_Method
 # Here I shall explore the effect of the televote and the Jury Vote
-
-#-- METRIC_COB --#
-
-summary(networkdata$METRIC_COB)
-# (1) Voting_Method = Televote
+# For example see below a high diaspora graph
+# filter out records for high diaspora in the televote
+high_diaspora_df <- networkdata %>% filter(Voting_Method == "T", METRIC_COB > 0.1)
 # Construct Social Network
-G <- graph_from_data_frame(d = networkdata[networkdata$Voting_Method == "T" & networkdata$METRIC_COB > 0.1, 1:2], directed = T)
-E(G)$weight <- as.numeric(networkdata[networkdata$Voting_Method == "T" & networkdata$METRIC_COB > 0.1, 3])
+G <- graph_from_data_frame(d = high_diaspora_df[, c('From_country', 'To_country')], directed = T)
+E(G)$weight <- as.numeric(high_diaspora_df[, 'Points'])
 is_weighted(graph = G)
-# interactive drag and place Social Network plot 
-tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
-
-# (2) Voting_Method = Jury
-# Construct Social Network
-G <- graph_from_data_frame(d = networkdata[networkdata$Voting_Method == "J" & networkdata$METRIC_COB > 0.1, 1:2], directed = T)
-E(G)$weight <- as.numeric(networkdata[networkdata$Voting_Method == "J" & networkdata$METRIC_COB > 0.1, 3])
-is_weighted(graph = G)
-# interactive drag and place plot 
-tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
-
-plot(G, main = "Graph of High Diaspora & Points in Televote", 
+# plot graph of high diaspora
+plot(G, 
+     main = "Graph of High Diaspora & Points in Televote", 
      layout = layout.fruchterman.reingold, 
      edge.color = "grey", 
      vertex.color = "orange", 
@@ -348,103 +179,55 @@ plot(G, main = "Graph of High Diaspora & Points in Televote",
      edge.label = E(G)$weight, 
      edge.label.color = "black")
 
+#-- METRIC_COB --#
+
+# generate a summary of metric cob
+summary(networkdata$METRIC_COB)
+# (1) Voting_Method = Televote
+graph_network(dataset = filter(networkdata, Voting_Method == "T" & METRIC_COB > 0.1), weights = 'Points')
+# (2) Voting_Method = Jury
+graph_network(dataset = filter(networkdata, Voting_Method == "J" & METRIC_COB > 0.1), weights = 'Points')
+
 #-- METRIC_Citizens --#
 
+# generate a summary of metric citizens
 summary(networkdata$METRIC_Citizens)
-
 # (1) Voting_Method = Televote
-# Construct Social Network
-G <- graph_from_data_frame(d = networkdata[networkdata$Voting_Method == "T" & networkdata$METRIC_Citizens > 0.1, 1:2], directed = T)
-E(G)$weight <- as.numeric(networkdata[networkdata$Voting_Method == "T" & networkdata$METRIC_Citizens > 0.1, 3])
-is_weighted(graph = G)
-# interactive drag and place Social Network plot 
-tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
-length(networkdata[networkdata$Voting_Method == "T" & networkdata$METRIC_Citizens > 0.1 & networkdata$Points >= 10, 1])
-
+graph_network(dataset = filter(networkdata, Voting_Method == "T" & METRIC_Citizens > 0.1), weights = 'Points')
 # (2) Voting_Method = Jury
 # Construct Social Network
-G <- graph_from_data_frame(d = networkdata[networkdata$Voting_Method == "J" & networkdata$METRIC_Citizens > 0.1, 1:2], directed = T)
-E(G)$weight <- as.numeric(networkdata[networkdata$Voting_Method == "J" & networkdata$METRIC_Citizens > 0.1, 3])
-is_weighted(graph = G)
-# interactive drag and place plot 
-tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
-length(networkdata[networkdata$Voting_Method == "J" & networkdata$METRIC_Citizens > 0.1 & networkdata$Points >= 10, 1])
+graph_network(dataset = filter(networkdata, Voting_Method == "J" & METRIC_Citizens > 0.1), weights = 'Points')
 
 #-- METRIC_COBCit --#
 
+# generate a summary of metric cobcit
 summary(networkdata$METRIC_COBCit)
 # (1) Voting_Method = Televote
-# Construct Social Network
-G <- graph_from_data_frame(d = networkdata[networkdata$Voting_Method == "T" & networkdata$METRIC_COBCit > 0.15, 1:2], directed = T)
-E(G)$weight <- as.numeric(networkdata[networkdata$Voting_Method == "T" & networkdata$METRIC_COBCit > 0.15, 3])
-is_weighted(graph = G)
-# interactive drag and place Social Network plot 
-tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
-length(networkdata[networkdata$Voting_Method == "T" & networkdata$METRIC_COBCit > 0.15 & networkdata$Points >= 10, 1])
-
+graph_network(dataset = filter(networkdata, Voting_Method == "T" & METRIC_COBCit > 0.15), weights = 'Points')
 # (2) Voting_Method = Jury
-# Construct Social Network
-G <- graph_from_data_frame(d = networkdata[networkdata$Voting_Method == "J" & networkdata$METRIC_COBCit > 0.15, 1:2], directed = T)
-E(G)$weight <- as.numeric(networkdata[networkdata$Voting_Method == "J" & networkdata$METRIC_COBCit > 0.15, 3])
-is_weighted(graph = G)
-# interactive drag and place plot 
-tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
-length(networkdata[networkdata$Voting_Method == "J" & networkdata$METRIC_COBCit > 0.15 & networkdata$Points >= 10, 1])
+graph_network(dataset = filter(networkdata, Voting_Method == "J" & METRIC_COBCit > 0.15), weights = 'Points')
 
 # Further subdivide the data into semi-finals and final
 # (1) Voting_Method = Televote & Round = sf1
-# Construct Social Network
-G <- graph_from_data_frame(d = networkdata[networkdata$Voting_Method == "T" & networkdata$METRIC_COBCit > 0.25 & networkdata$Round == "sf1", 1:2], directed = T)
-E(G)$weight <- as.numeric(networkdata[networkdata$Voting_Method == "T" & networkdata$METRIC_COBCit > 0.25 & networkdata$Round == "sf1", 3])
-is_weighted(graph = G)
-# interactive drag and place Social Network plot 
-tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
-length(networkdata[networkdata$Voting_Method == "T" & networkdata$METRIC_COBCit > 0.25 & networkdata$Points >= 10 & networkdata$Round == "sf1", 1])
+graph_network(dataset = filter(networkdata, Voting_Method == "T" & METRIC_COBCit > 0.25 & Round == "sf1"), weights = 'Points')
 # (2) Voting_Method = Jury
-# Construct Social Network
-G <- graph_from_data_frame(d = networkdata[networkdata$Voting_Method == "J" & networkdata$METRIC_COBCit > 0.25 & networkdata$Round == "sf1", 1:2], directed = T)
-E(G)$weight <- as.numeric(networkdata[networkdata$Voting_Method == "J" & networkdata$METRIC_COBCit > 0.25 & networkdata$Round == "sf1", 3])
-is_weighted(graph = G)
-# interactive drag and place plot 
-tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
-length(networkdata[networkdata$Voting_Method == "J" & networkdata$METRIC_COBCit > 0.25 & networkdata$Points >= 10 & networkdata$Round == "sf1", 1])
+graph_network(dataset = filter(networkdata, Voting_Method == "J" & METRIC_COBCit > 0.25 & Round == "sf1"), weights = 'Points')
 
 #-- CAP_DIST_km --#
 
+# generate a summary of capital distance in km
 summary(networkdata$CAP_DIST_km)
 # (1) Voting_Method = Televote
-# Construct Social Network
-G <- graph_from_data_frame(d = networkdata[networkdata$Voting_Method == "T" & networkdata$CAP_DIST_km < 500, 1:2], directed = T)
-E(G)$weight <- as.numeric(networkdata[networkdata$Voting_Method == "T" & networkdata$CAP_DIST_km < 500, 9])
-is_weighted(graph = G)
-# interactive drag and place Social Network plot 
-tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
-length(networkdata[networkdata$Voting_Method == "T" & networkdata$CAP_DIST_km < 500 & networkdata$Points >= 10, 1])
+graph_network(dataset = filter(networkdata, Voting_Method == "T" & CAP_DIST_km < 500), weights = 'Points')
 # (2) Voting_Method = Jury
-# Construct Social Network
-G <- graph_from_data_frame(d = networkdata[networkdata$Voting_Method == "J" & networkdata$CAP_DIST_km < 1500, 1:2], directed = T)
-E(G)$weight <- as.numeric(networkdata[networkdata$Voting_Method == "J" & networkdata$CAP_DIST_km < 1500, 9])
-is_weighted(graph = G)
-# interactive drag and place plot 
-tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
-length(networkdata[networkdata$Voting_Method == "T" & networkdata$CAP_DIST_km < 500 & networkdata$Points >= 10, 1])
+graph_network(dataset = filter(networkdata, Voting_Method == "J" & CAP_DIST_km < 500), weights = 'Points')
 
 #-- Average_Points --#
 
+# generate a summary of average point value
 summary(networkdata$Average_Points)
 # (1) Voting_Method = Televote
-# Construct Social Network
-G <- graph_from_data_frame(d = networkdata[networkdata$Voting_Method == "T" & networkdata$Average_Points > 8, 1:2], directed = T)
-E(G)$weight <- as.numeric(networkdata[networkdata$Voting_Method == "T" & networkdata$Average_Points > 8, 9])
-is_weighted(graph = G)
-# interactive drag and place Social Network plot 
-tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
-length(networkdata[networkdata$Voting_Method == "T" & networkdata$Average_Points > 8 & networkdata$Points >= 10, 1])
+graph_network(dataset = filter(networkdata, Voting_Method == "T" & Average_Points > 8), weights = 'Average_Points')
 # (2) Voting_Method = Jury
-# Construct Social Network
-G <- graph_from_data_frame(d = networkdata[networkdata$Voting_Method == "J" & networkdata$Average_Points > 8, 1:2], directed = T)
-E(G)$weight <- as.numeric(networkdata[networkdata$Voting_Method == "J" & networkdata$Average_Points > 8, 9])
-is_weighted(graph = G)
-# interactive drag and place plot 
-tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
-length(networkdata[networkdata$Voting_Method == "T" & networkdata$Average_Points > 8 & networkdata$Points >= 10, 1])
+graph_network(dataset = filter(networkdata, Voting_Method == "J" & Average_Points > 8), weights = 'Average_Points')
+
