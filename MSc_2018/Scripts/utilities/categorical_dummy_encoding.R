@@ -11,10 +11,9 @@ categorical_dummy_encoding <- function(dataset){
   # as regression functions cannot handle categorical variables
   # turn all variables into double precision numeric variables
   for (i in 1:length(dcvariables)) {
-    dcvariables[,i] <- as.double(dcvariables[,i])
+    dcvariables[,i] <- as.integer(dcvariables[,i])
   }
-  dcvariables[dcvariables == 1] <- 0
-  dcvariables[dcvariables == 2] <- 1
+  # convery dummy encoded variables to a data frame
   dcvariables <- as.data.frame(x = dcvariables)
   # subset continuous variables
   # use set operations
