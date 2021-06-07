@@ -5,7 +5,7 @@ extract_factor_data <- function(dataset) {
   # data set: the specified data set to extract the categorical attributes from
   
   # determine the factor columns in the data set
-  fact_col <- names(which(sapply(X = dataset, FUN = function(x) is.factor(x))))
+  fact_col <- names(which(sapply(X = dataset, FUN = function(x) is.factor(x) || is.character(x))))
 
   # extract out the numeric columns
   factor_data <- dataset %>% subset(select = fact_col)
