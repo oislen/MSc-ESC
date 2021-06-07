@@ -37,6 +37,8 @@
 # load required libraries
 library(ggplot2)
 library(dplyr)
+# set the working directory
+setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
 # load in custom utility functions
 source("Scripts/utilities/column_to_factor.R")
 source("Scripts/utilities/TC_FC_missing_observations.R")
@@ -48,11 +50,9 @@ source("Scripts/utilities/range_standardise_data.R")
 source("Scripts/utilities/normalise_data.R")
 source("Scripts/utilities/range_normalisation.R")
 source("Scripts/utilities/data_normalisation.R")
+source("Scripts/utilities/chisq_tests.R")
 
 #-- Data --#
-
-# set the working directory
-setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
 
 # load in the raw ESC 2016 data for the analysis
 ESCdata <- read.csv(file = "Data/ESC_2016_voting_data.csv", header = T)
@@ -73,7 +73,7 @@ ESCdata <- ESCdata %>% select(-c(id))
 # Some of the numeric music features need to be redefined as nominal variables
 # the variables are key, mode and time signature
 # define the columns to be converted to factor variables
-to_factor_cols = c('key', 'mode', 'time_signature', 'VBlocs1_FC', 'VBlocs2_FC', 'VBlocs1_TC', 'VBlocs2_TC', 'FC_LANGFAM', 'TC_LANGFAM')
+to_factor_cols <- c('key', 'mode', 'time_signature', 'VBlocs1_FC', 'VBlocs2_FC', 'VBlocs1_TC', 'VBlocs2_TC')
 # call the column to factor function 
 ESCdata <- column_to_factor(dataset = ESCdata, col_names = to_factor_cols)
 
@@ -205,7 +205,7 @@ voting_factors_categorical <- extract_factor_data(dataset = voting_factors)
 # as we will not be incorporating the into our analysis, as they are not appropriate
 
 # Competition Factors
-#competition_factors_categorical <- categorical_dummy_encoding(dataset = competition_factors_categorical)
+competition_factors_categorical <- categorical_dummy_encoding(dataset = competition_factors_categorical)
 
 # External Factors
 external_factors_categorical <- categorical_dummy_encoding(dataset = external_factors_categorical)
@@ -293,8 +293,11 @@ competition_factors_numeric[,2] <- OOA_df[,4]
 #-- External Factors --#
 
 # There are 22 categorical variables that have only 0 observations
-sum(apply(X = external_factors_categorical, MARGIN = 2, FUN = sum) == 0)
-
+zero_ext_fact_cats <- apply(X = external_factors_categorical, MARGIN = 2, FUN = sum) == 0
+zero_ext_fact_cats_cols <- names(which(zero_ext_fact_cats))
+non_zero_ext_fact_cols <- colnames(external_factors_categorical)[!(colnames(external_factors_categorical) %in% zero_ext_fact_cats_cols)]
+length(zero_ext_fact_cats_cols)
+# Caution below statement
 # The following external categorical variables have only 0 observations
 # (1) VBlocs1_FC_G
 # (2) VBlocs1_TC_U
@@ -307,72 +310,45 @@ sum(apply(X = external_factors_categorical, MARGIN = 2, FUN = sum) == 0)
 # (9) FC_LANGFAM_Turkic
 # (10) TC_LANGFAM_Albanian
 # (11) TC_LANGFAM_Kartvelian
-apply(X = external_factors_categorical, MARGIN = 2, FUN = sum) == 0
-
+# Also dropping sparse language family attributes
 # extract the external categorical features
-external_factors_categorical <-  subset(x = external_factors_categorical,
-                                        select = -c(VBlocs1_FC_3, VBlocs1_FC_4, VBlocs1_FC_6,
-                                                    VBlocs1_FC_9, VBlocs1_FC_11, VBlocs1_FC_12,
-                                                    VBlocs1_FC_13, VBlocs1_FC_14, VBlocs1_FC_19,
-                                                    VBlocs1_FC_20, VBlocs1_TC_12, VBlocs1_TC_14,
-                                                    VBlocs1_TC_20, FC_LANGFAM_Albanian, FC_LANGFAM_Armenian,
-                                                    FC_LANGFAM_Hellenic, FC_LANGFAM_Kartvelian, FC_LANGFAM_Semetic, 
-                                                    FC_LANGFAM_Semitic, FC_LANGFAM_Turkic, TC_LANGFAM_Albanian,
-                                                    TC_LANGFAM_Kartvelian))
+external_factors_categorical <- external_factors_categorical %>% subset(select = non_zero_ext_fact_cols)
 
 #-- Competition Factors --#
 
 # There are no competition categorical variables with only 0 observations
-sum(apply(X = competition_factors_categorical, 
-          MARGIN = 2,
-          FUN = sum) == 0)
+sum(apply(X = competition_factors_categorical, MARGIN = 2, FUN = sum) == 0)
 
 #-- Performance Factors--#
 
 # There are 2 performance categorical variables with only 0 observations
-sum(apply(X = performance_factors_categorical, 
-          MARGIN = 2,
-          FUN = sum) == 0)
+sum(apply(X = performance_factors_categorical,  MARGIN = 2, FUN = sum) == 0)
 
 # The following are the performance categorical variables with only 0 observations
 # (1) FC_SONGLANG_Bosnian
 # (2) FC_SONGLANG_Macedonian
-apply(X = performance_factors_categorical, 
-      MARGIN = 2,
-      FUN = sum) == 0
-
-performance_factors_categorical <- subset(x = performance_factors_categorical,
-                                          select = -c(FC_SONGLANG_Bosnian, FC_SONGLANG_Macedonian))
+sum(apply(X = performance_factors_categorical,  MARGIN = 2,FUN = sum) == 0)
 
 #-- Variables of Linear Combinations --#
 
 # Remove all categorical variables that are the binary opposites
 # (1) Performance variables
-performance_factors_categorical <- subset(performance_factors_categorical, 
-                                          select = -c(mode_0,
-                                                      time_signature_3))
-
+performance_factors_categorical <- performance_factors_categorical %>% subset(select = -c(mode_0, time_signature_3))
+                                  
 # (2) competition variables
-competition_factors_categorical <- subset(competition_factors_categorical,
-                                          select = -c(Host_Nation_n))
+competition_factors_categorical <- competition_factors_categorical %>% subset(select = -c(Host_Nation_n))
 
 # (3) external variables
-external_factors_categorical <- subset(external_factors_categorical,
-                                       select = -c(ComVBlocs1_n, ComVBlocs2_n,
-                                                   ComLANGFAM_n,
-                                                   Neighbours_n))
+external_factors_categorical <- external_factors_categorical %>% subset(select = -c(ComVBlocs1_n, ComVBlocs2_n, ComLANGFAM_n, Neighbours_n))
 
-# NOTE: also remove variables which are a linear combination of other varibles
+# NOTE: also remove variables which are a linear combination of other variables
 # (1) Competition Variables
-competition_factors_categorical <- subset(competition_factors_categorical,
-                                          select = -c(Round_sf2, Voting_Method_T))
+competition_factors_categorical <- competition_factors_categorical %>% subset(select = -c(Round_sf2, Voting_Method_T))
 
 # (2) External Variables
-performance_factors_categorical <- subset(performance_factors_categorical,
-                                          select = -c(TC_PerfType_Duet))
+performance_factors_categorical <- performance_factors_categorical %>% subset(select = -c(TC_PerfType_Duet))
 
-
-#-- Remove Unncessary Categorical Variables via Chi-squared Tests --#
+#-- Remove Unnecessary Categorical Variables via Chi-squared Tests --#
 
 # If two variables are feature a lot of 0s or 1s 
 # then there will be a strong association between the two variables
@@ -381,60 +357,12 @@ performance_factors_categorical <- subset(performance_factors_categorical,
 # this lowers the chance of collinearity and reduces the number of dimensions
 
 # First lets screen how many observations exist in each variable
-apply(X = external_factors_categorical, 
-      MARGIN = 2,
-      FUN = sum)
-
-# Define a Function to preform chi-squared tests and store the results as a data frame
-chisq_tests <- function(dataset) {
-  # FUNCTION OVERVIEW
-  # this function takes in a dataset of purely categroical variables
-  # and applies a chi-squared test of association between each one
-  # There are two parts to it
-  # (1) Create the data frameto store the chi-squared tests
-  # (2) Fill the data frame with the relevant information
-  # The underlying concept is that is valade to remove a variable if
-  # (1) It is highly associated with another variable
-  # (2) It is sparse
-  #-- PART 1
-  # First create a dataframe to store the relevent chi-squared test data
-  data_frame_rows <- ncol(dataset)
-  chisqtestdf <- as.data.frame(matrix(ncol = 5))
-  # rename the columns of the data frame
-  colnames(chisqtestdf) <- c("X", "Y", "X-Obs", "Y-Obs", "P-Value")
-  #-- PART 2
-  # r represents the row index and will be used to input the relevent data
-  r = 1
-  for (i in 1:data_frame_rows) {
-    j = i + 1
-    while (j <= data_frame_rows) {
-      # Save the variables name being tested
-      chisqtestdf[r,1] <- colnames(dataset)[i]
-      chisqtestdf[r,2] <- colnames(dataset)[j]
-      # Input the number of observations
-      chisqtestdf[r,3] <- apply(X = dataset, 
-                                MARGIN = 2,
-                                FUN = sum)[i]
-      chisqtestdf[r,4] <- apply(X = dataset, 
-                                MARGIN = 2,
-                                FUN = sum)[j]
-      # Conduct the chi-squared test and savethe p-value
-      chisqtestdf[r,5] <- round(x = chisq.test(x = as.factor(dataset[,i]),
-                                               y = as.factor(dataset[,j]))$p.value,
-                                digits = 5)
-      r = r + 1
-      j = j + 1
-    }
-  }
-  # Set the output of the function to be the chi-squared test dataframe
-  return(chisqtestdf)
-}
+apply(X = external_factors_categorical, MARGIN = 2, FUN = sum)
 
 #-- Voting Blocs --#
 
 # (1) FC_VBlocs1
-FC_VBlocs1_facts = c('VBlocs1_FC_1', 'VBlocs1_FC_2', 'VBlocs1_FC_5', 'VBlocs1_FC_7', 'VBlocs1_FC_8', 'VBlocs1_FC_10',
-                     'VBlocs1_FC_15', 'VBlocs1_FC_17', 'VBlocs1_FC_21')
+FC_VBlocs1_facts = c('VBlocs1_FC_1', 'VBlocs1_FC_2', 'VBlocs1_FC_5', 'VBlocs1_FC_7', 'VBlocs1_FC_8', 'VBlocs1_FC_10', 'VBlocs1_FC_15', 'VBlocs1_FC_17', 'VBlocs1_FC_21')
 # Subset the data to be tested
 FC_VBlocs_1df <- external_factors_categorical[,FC_VBlocs1_facts]
 # Run the Chi-Squared Tests
