@@ -50,7 +50,8 @@ source("Scripts/utilities/range_standardise_data.R")
 source("Scripts/utilities/normalise_data.R")
 source("Scripts/utilities/range_normalisation.R")
 source("Scripts/utilities/data_normalisation.R")
-source("Scripts/utilities/chisq_tests.R")
+source("Scripts/utilities/data_reduction_chisq.R")
+source("Scripts/utilities/data_reduction_corr.R")
 
 #-- Data --#
 
@@ -359,173 +360,78 @@ performance_factors_categorical <- performance_factors_categorical %>% subset(se
 # First lets screen how many observations exist in each variable
 apply(X = external_factors_categorical, MARGIN = 2, FUN = sum)
 
-#-- Voting Blocs --#
+#-- External Factors --#
 
-# (1) FC_VBlocs1
-FC_VBlocs1_facts = c('VBlocs1_FC_1', 'VBlocs1_FC_2', 'VBlocs1_FC_5', 'VBlocs1_FC_7', 'VBlocs1_FC_8', 'VBlocs1_FC_10', 'VBlocs1_FC_15', 'VBlocs1_FC_17', 'VBlocs1_FC_21')
-# Subset the data to be tested
-FC_VBlocs_1df <- external_factors_categorical[,FC_VBlocs1_facts]
-# Run the Chi-Squared Tests
-chisq_tests_FC_VBlocs1 <- chisq_tests(dataset = FC_VBlocs_1df)
-# Filter out the significant p-values
-chisq_tests_FC_VBlocs1[chisq_tests_FC_VBlocs1$'P-Value' < 0.05 & chisq_tests_FC_VBlocs1$`X-Obs` < 66,]
+# extract out the relevant voting blocks for each county
+FC_VBlocs1_facts <- external_factors_categorical %>% select(starts_with('VBlocs1_FC')) %>% colnames()
+FC_VBlocs2_facts <- external_factors_categorical %>% select(starts_with('VBlocs2_FC')) %>% colnames()
+TC_VBlocs1_facts <- external_factors_categorical %>% select(starts_with('VBlocs1_TC')) %>% colnames()
+TC_VBlocs2_facts <- external_factors_categorical %>% select(starts_with('VBlocs2_TC')) %>% colnames()
+FC_LANGFAM_facts <- external_factors_categorical %>% select(starts_with('FC_LANGFAM')) %>% colnames()
+TC_LANGFAM_facts <- external_factors_categorical %>% select(starts_with('TC_LANGFAM')) %>% colnames()
 
-# (2) FC_VBlocs2
-FC_VBlocs2_facts = c('VBlocs2_FC_1', 'VBlocs2_FC_2', 'VBlocs2_FC_3', 'VBlocs2_FC_4', 'VBlocs2_FC_5', 'VBlocs2_FC_6')
-# Subset the data to be tested
-FC_VBlocs_2df <- external_factors_categorical[,FC_VBlocs2_facts]
-# Run the Chi-Squared Tests
-chisq_tests_FC_VBlocs2 <- chisq_tests(dataset = FC_VBlocs_2df)
-# Filter out the significant p-values
-chisq_tests_FC_VBlocs2[chisq_tests_FC_VBlocs2$'P-Value' < 0.05 & chisq_tests_FC_VBlocs2$`X-Obs` < 66,]
+# extract out the column names for significant columns
+chisq_tests_FC_VBlocs1_cols <- data_reduction_chisq(dataset = external_factors_categorical, col_names = FC_VBlocs1_facts)
+chisq_tests_FC_VBlocs2_cols <- data_reduction_chisq(dataset = external_factors_categorical, col_names = FC_VBlocs2_facts)
+chisq_tests_TC_VBlocs1_cols <- data_reduction_chisq(dataset = external_factors_categorical, col_names = TC_VBlocs1_facts)
+chisq_tests_TC_VBlocs2_cols <- data_reduction_chisq(dataset = external_factors_categorical, col_names = TC_VBlocs2_facts)
+chisq_tests_FC_LANGFAM_cols <- data_reduction_chisq(dataset = external_factors_categorical, col_names = FC_LANGFAM_facts)
+chisq_tests_TC_LANGFAM_cols <- data_reduction_chisq(dataset = external_factors_categorical, col_names = TC_LANGFAM_facts)
 
-# (3) TC_VBlocs1
-TC_VBlocs1_facts = c('VBlocs1_TC_1', 'VBlocs1_TC_2', 'VBlocs1_TC_3', 'VBlocs1_TC_4', 'VBlocs1_TC_5',
-                     'VBlocs1_TC_6', 'VBlocs1_TC_7', 'VBlocs1_TC_8', 'VBlocs1_TC_9', 'VBlocs1_TC_10',
-                     'VBlocs1_TC_11', 'VBlocs1_TC_13', 'VBlocs1_TC_15',
-                     'VBlocs1_TC_16', 'VBlocs1_TC_17', 'VBlocs1_TC_18', 'VBlocs1_TC_19',
-                     'VBlocs1_TC_21')
-# Subset the data to be tested
-TC_VBlocs_1df <- external_factors_categorical[,TC_VBlocs1_facts]
-# Run the Chi-Squared Tests
-chisq_tests_TC_VBlocs1 <- chisq_tests(dataset = TC_VBlocs_1df)
-# Filter out the significant p-values
-chisq_tests_TC_VBlocs1[chisq_tests_TC_VBlocs1$'P-Value' < 0.05 & chisq_tests_TC_VBlocs1$`X-Obs` < 66,]
+# concatenate all columns to be removed
+remove_vblocs_cols <- c(chisq_tests_FC_VBlocs1_cols, chisq_tests_FC_VBlocs2_cols, chisq_tests_TC_VBlocs1_cols, chisq_tests_TC_VBlocs2_cols)
+remove_langfam_cols <- c(chisq_tests_FC_LANGFAM_cols, chisq_tests_TC_LANGFAM_cols)
+remove_ext_cols <- c(remove_vblocs_cols, remove_langfam_cols)
+# extract all the external factors categorical variables
+external_factors_categorical_cols <- colnames(external_factors_categorical)
+# determine the columns to keep
+keep_ext_cols <- external_factors_categorical_cols[!(external_factors_categorical_cols %in% remove_ext_cols)]
+# Remove Unnecessary Categorical Variables 
+external_factors_categorical <- external_factors_categorical %>% subset(select = keep_ext_cols)
 
-# (4) TC_VBlocs2
-TC_VBlocs2_facts = c('VBlocs2_TC_1', 'VBlocs2_TC_2', 'VBlocs2_TC_3', 'VBlocs2_TC_4', 'VBlocs2_TC_5', 'VBlocs2_TC_6')
-# Subset the data to be tested
-TC_VBlocs_2df <- external_factors_categorical[,TC_VBlocs2_facts]
-# Run the Chi-Squared Tests
-chisq_tests_TC_VBlocs2 <- chisq_tests(dataset = TC_VBlocs_2df)
-# Filter out the significant p-values
-chisq_tests_TC_VBlocs2[chisq_tests_TC_VBlocs2$'P-Value' < 0.05 & chisq_tests_TC_VBlocs2$`X-Obs` < 66,]
+#-- Performance Factors --#
 
-# Remove Unneccessary Categorical Variables 
-external_factors_categorical <- subset(external_factors_categorical,
-                                       select = -c(VBlocs1_FC_2, VBlocs1_FC_5, VBlocs1_FC_7, VBlocs1_FC_8,
-                                                   VBlocs1_FC_10, VBlocs1_FC_15, VBlocs1_FC_17, VBlocs1_FC_21,
-                                                   VBlocs2_FC_2, VBlocs1_TC_2, VBlocs1_TC_4, VBlocs1_TC_5,
-                                                   VBlocs1_TC_6, VBlocs1_TC_7, VBlocs1_TC_10, VBlocs1_TC_11,
-                                                   VBlocs1_TC_15, VBlocs1_TC_16, VBlocs1_TC_17, VBlocs1_TC_18, 
-                                                   VBlocs1_TC_19, VBlocs1_TC_21))
+# extract out the relevant from country and to country song language
+FC_SONGLANG_facts <- performance_factors_categorical %>% select(starts_with('FC_SONGLANG')) %>% colnames()
+TC_SONGLANG_facts <- performance_factors_categorical %>% select(starts_with('TC_SONGLANG')) %>% colnames()
+keys_fact <- performance_factors_categorical %>% select(starts_with('key_')) %>% colnames()
 
-#-- Language Family --#
+# extract out the column names for significant columns
+chisq_tests_FC_SONGLANG_cols <- data_reduction_chisq(dataset = performance_factors_categorical, col_names = FC_SONGLANG_facts)
+chisq_tests_TC_SONGLANG_cols <- data_reduction_chisq(dataset = performance_factors_categorical, col_names = TC_SONGLANG_facts)
+chisq_tests_keys_cols <- data_reduction_chisq(dataset = performance_factors_categorical, col_names = keys_fact)
 
-# Subset the data to be tested
-# (1)FC_LANGFAM
-FC_LANGFAM_facts = c('FC_LANGFAM_Baltic', 'FC_LANGFAM_Germanic', 'FC_LANGFAM_ItalicRomance', 'FC_LANGFAM_Slavic', 'FC_LANGFAM_Uralic')
-FC_LANGFAM_df <- external_factors_categorical[,FC_LANGFAM_facts]
-# (2) TC_LANGFAM
-TC_LANGFAM_facts = c('TC_LANGFAM_Armenian', 'TC_LANGFAM_Baltic', 'TC_LANGFAM_Germanic',
-                     'TC_LANGFAM_Hellenic', 'TC_LANGFAM_ItalicRomance', 'TC_LANGFAM_Semetic',
-                     'TC_LANGFAM_Semitic', 'TC_LANGFAM_Slavic', 'TC_LANGFAM_Turkic', 'TC_LANGFAM_Uralic')
-TC_LANGFAM_df <- external_factors_categorical[, TC_LANGFAM_facts]
-# Run the Chi-Squared Tests
-chisq_tests_FC_LANGFAM_df <- chisq_tests(dataset = FC_LANGFAM_df)
-chisq_tests_TC_LANGFAM_df <- chisq_tests(dataset = TC_LANGFAM_df)
-# Filter out the significant p-values
-chisq_tests_FC_LANGFAM_df[chisq_tests_FC_LANGFAM_df$'P-Value' < 0.05 & chisq_tests_FC_LANGFAM_df$`X-Obs` < 66,]
-chisq_tests_TC_LANGFAM_df[chisq_tests_TC_LANGFAM_df$'P-Value' < 0.05 & chisq_tests_TC_LANGFAM_df$`X-Obs` < 66,]
+# concatenate all columns to be removed
+remove_songlang_cols <- c(chisq_tests_FC_SONGLANG_cols, chisq_tests_TC_SONGLANG_cols)
+remove_perf_cols <- c(remove_songlang_cols, chisq_tests_keys_cols)
+# extract all the external factors categorical variables
+performance_factors_categorical_cols <- colnames(performance_factors_categorical)
+# determine the columns to keep
+keep_perf_cols <- performance_factors_categorical_cols[!(performance_factors_categorical_cols %in% remove_perf_cols)]
+# Remove Unnecessary Categorical Variables 
+performance_factors_categorical <- performance_factors_categorical %>% subset(select = keep_perf_cols)
 
-# Remove Unneccessary Categorical Variables 
-external_factors_categorical <- subset(x = external_factors_categorical,
-                                       select = -c(FC_LANGFAM_Baltic, FC_LANGFAM_ItalicRomance,
-                                                   TC_LANGFAM_ItalicRomance, TC_LANGFAM_Armenian,
-                                                   TC_LANGFAM_Baltic, TC_LANGFAM_Hellenic,
-                                                   TC_LANGFAM_Semetic, TC_LANGFAM_Semitic,
-                                                   TC_LANGFAM_Turkic, TC_LANGFAM_Uralic))
-
-#-- Song Language --#
-
-# Subset the data to be tested
-# (1) FC_SONGLANG
-FC_SONGLANG_facts = c('FC_SONGLANG_English', 'FC_SONGLANG_French', 'FC_SONGLANG_Mixed')
-FC_SONGLANG_df <- performance_factors_categorical[, FC_SONGLANG_facts]
-# (2) TC_SONGLANG
-TC_SONGLANG_facts = c('TC_SONGLANG_Bosnian', 'TC_SONGLANG_English', 'TC_SONGLANG_French', 'TC_SONGLANG_Macedonian', 'TC_SONGLANG_Mixed')
-TC_SONGLANG_df <- performance_factors_categorical[,TC_SONGLANG_facts]
-# Run the Chi-Squared Tests
-chisq_tests_FC_SONGLANG_df <- chisq_tests(dataset = FC_SONGLANG_df)
-chisq_tests_TC_SONGLANG_df <- chisq_tests(dataset = TC_SONGLANG_df)
-# Filter out the significant p-values
-chisq_tests_FC_SONGLANG_df[chisq_tests_FC_SONGLANG_df$'P-Value' < 0.05 & chisq_tests_FC_SONGLANG_df$`X-Obs` < 66,]
-chisq_tests_TC_SONGLANG_df[chisq_tests_TC_SONGLANG_df$'P-Value' < 0.05 & chisq_tests_TC_SONGLANG_df$`X-Obs` < 66,]
-
-# Remove Unneccessary Categorical Variables 
-performance_factors_categorical <- subset(x = performance_factors_categorical,
-                                          select = -c(FC_SONGLANG_French, FC_SONGLANG_Mixed,
-                                                      TC_SONGLANG_Bosnian, TC_SONGLANG_French,
-                                                      TC_SONGLANG_Macedonian))
-
-#-- Keys --#
-
-# Subset the data to be tested
-keys_fact = c('key_0', 'key_1', 'key_2', 'key_3', 'key_4', 'key_5', 'key_6', 'key_7', 'key_8', 'key_9', 'key_10', 'key_11')
-keys_df <- performance_factors_categorical[, keys_fact]
-# Run the Chi-Squared Tests
-chisq_tests_keys_df <- chisq_tests(dataset = keys_df)
-# Filter out the significant p-values
-chisq_tests_keys_df[chisq_tests_keys_df$'P-Value' < 0.05 & chisq_tests_keys_df$`X-Obs` < 66,]
-
-# Remove Unneccessary Categorical Variables 
-performance_factors_categorical <- subset(x = performance_factors_categorical,
-                                          select = -c(key_0, key_1, key_9, key_10))
-
-#####################################################################
-#-- Remove Unncessary Categorical Variables via Correlation Tests --#
-#####################################################################
+######################################################################
+#-- Remove Unnecessary Categorical Variables via Correlation Tests --#
+######################################################################
 
 # If two numeric variables are very highly correlated
 # and represent the same entity
-# then it is unncessary to include them in the data modelling stage
+# then it is unnecessary to include them in the data modeling stage
 # This is particular the case for the migration data
 
-# NOTE: I shall impelement the same correlation test function
+# NOTE: I shall implement the same correlation test function
 # that was used during the exploratory analysis section
-
-#-- Function Definition --#
-
-correlation_tests <- function (dataset) {
-  # Create a data frame to hold the correlation test data
-  cor_test_df <- as.data.frame(matrix(ncol = 4))
-  # Name the columns of the Correlation Test Data Frame
-  colnames(cor_test_df) <- c("X", "Y", "Correlation", "P-Value")
-  # Create a row index to populate the data frame with
-  r = 1
-  for (i in 1:ncol(dataset)) {
-    j = i + 1
-    while (j  <= ncol(dataset)) {
-      # Perform Correlation Test
-      c.t. <- cor.test(x = dataset[,i],
-                       y = dataset[,j],
-                       na.action = "na.omit")
-      # Fill in the X Variable Name
-      cor_test_df[r, 1] <- colnames(dataset)[i]
-      # Fill in the Y Variable Name
-      cor_test_df[r, 2] <- colnames(dataset)[j]
-      # Fill in the correlation
-      cor_test_df[r, 3] <- round(c.t.$estimate, digits = 5)
-      # Fill in the p-value
-      cor_test_df[r, 4] <- round(c.t.$p.value, digits = 5)
-      # Update the row index
-      r = r + 1
-      j = j + 1
-    }
-  }
-  # return the cor_test_df
-  return(cor_test_df)
-}
 
 #-- Migration Data --#
 
 # Perform the correlation tests
 mig_nums = c('FC_NonCOB', 'FC_NonCitzens', 'FC_COB', 'FC_Citizens', 'FC_Population', 'METRIC_COB','METRIC_Citizens', 'METRIC_COBCit')
-mig_df = external_factors_numeric[, mig_nums]
-c.t. <- correlation_tests(dataset = mig_df)
-# Determine which variables are highly correlated
-c.t.[c.t.$Correlation > 0.9 & c.t.$Correlation < 1,]
-# The following migration variables are very hevily correlated
+
+# extract out the column names for significant columns
+corr_tests_mig_cols <- data_reduction_corr(dataset = external_factors_numeric, col_names = mig_nums)
+
+# The following migration variables are very heavily correlated
 # (1) FC_COB & FC_Citizens
 # (2) FC_COB & FC_Population
 # (3) METRIC_COBCit & METRIC_COB
@@ -534,38 +440,27 @@ c.t.[c.t.$Correlation > 0.9 & c.t.$Correlation < 1,]
 # (1) FC_COB
 # (2) METRIC_COBCit
 
-# Remove the unneccessary variables
-external_factors_numeric <- subset(x = external_factors_numeric,
-                                   select = -c(FC_COB, FC_Citizens, FC_Population, METRIC_COB, METRIC_COBCit))
+# extract all the external factors categorical variables
+external_factors_numeric_cols <- colnames(external_factors_numeric)
+# determine the columns to keep
+keep_ext_num_cols <- external_factors_numeric_cols[!(external_factors_numeric_cols %in% corr_tests_mig_cols)]
+# Remove Unnecessary Categorical Variables 
+external_factors_numeric <- external_factors_numeric %>% subset(select = keep_ext_num_cols)
 
 ###############################
 #-- FINAL PROCESSED DATASET --#
 ###############################
 
 # The Voting Factors
-processed_voting_factors <-as.data.frame(cbind(voting_factors_categorical,
-                                               voting_factors_numeric))
-
+processed_voting_factors <- cbind(voting_factors_categorical, voting_factors_numeric)
 # The Competition Factors
-processed_competition_factors <-as.data.frame(cbind(competition_factors_categorical,
-                                                    competition_factors_numeric))
-
+processed_competition_factors <- cbind(competition_factors_categorical, competition_factors_numeric)
 # The External Factors
-processed_external_factors <- as.data.frame(cbind(external_factors_categorical,
-                                                  external_factors_numeric))
-
+processed_external_factors <- cbind(external_factors_categorical, external_factors_numeric)
 # The Performance Factors
-processed_performance_factors <- as.data.frame(cbind(performance_factors_categorical,
-                                                     performance_factors_numeric))
-
+processed_performance_factors <- cbind(performance_factors_categorical, performance_factors_numeric)
 # The final Processed Data Frame
-processed_data <- as.data.frame(cbind(processed_voting_factors,
-                                      processed_competition_factors,
-                                      processed_external_factors,
-                                      processed_performance_factors))
+processed_data <- cbind(processed_voting_factors, processed_competition_factors, processed_external_factors, processed_performance_factors)
 
 # write the processed data to a csv file
-write.csv(processed_data,
-          'Data/Reference_Data/processed_data.csv',
-          row.names = F
-)
+write.csv(processed_data, 'Data/Reference_Data/processed_data_v2.csv', row.names = F)
