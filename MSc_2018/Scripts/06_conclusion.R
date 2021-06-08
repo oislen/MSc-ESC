@@ -225,7 +225,7 @@ summary(tmodel_ex.mig)
 
 # power transformation of 3/4
 # define model formula
-# Note: thesis shows output for non-power transformed case (i.e. Points ~ key_3 + ... )
+# Note: thesis shows output for non-power transformed case (i.e. Points ~ VBlocs2_TC_4 + key_3 + ... )
 my_model_jury_form <- (Points)^(3/4) ~ VBlocs2_TC_4 + key_3 + TC_PerfType_Solo + 
                                        liveness + ComVBlocs1_y + ComLANGFAM_y
 # fit linear model
