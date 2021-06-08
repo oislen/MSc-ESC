@@ -1,5 +1,5 @@
 # Define a Function to preform chi-squared tests and store the results as a data frame
-chisq_tests <- function(dataset) {
+chisq_tests <- function(dataset, digits = 5) {
   # FUNCTION OVERVIEW
   # this function takes in a data set of purely categorical variables
   # and applies a chi-squared test of association between each one
@@ -25,20 +25,15 @@ chisq_tests <- function(dataset) {
       chisqtestdf[r,1] <- colnames(dataset)[i]
       chisqtestdf[r,2] <- colnames(dataset)[j]
       # Input the number of observations
-      chisqtestdf[r,3] <- apply(X = dataset, 
-                                MARGIN = 2,
-                                FUN = sum)[i]
-      chisqtestdf[r,4] <- apply(X = dataset, 
-                                MARGIN = 2,
-                                FUN = sum)[j]
-      # Conduct the chi-squared test and savethe p-value
-      chisqtestdf[r,5] <- round(x = chisq.test(x = as.factor(dataset[,i]),
-                                               y = as.factor(dataset[,j]))$p.value,
-                                digits = 5)
+      chisqtestdf[r,3] <- apply(X = dataset, MARGIN = 2, FUN = sum)[i]
+      chisqtestdf[r,4] <- apply(X = dataset,  MARGIN = 2, FUN = sum)[j]
+      # Conduct the chi-squared test and save the p-value
+      chisq_test_res <- chisq.test(x = as.factor(dataset[,i]), y = as.factor(dataset[,j]), simulate.p.value = TRUE)
+      chisqtestdf[r,5] <- round(x = chisq_test_res$p.value, digits = digits)
       r = r + 1
       j = j + 1
     }
   }
-  # Set the output of the function to be the chi-squared test dataframe
+  # Set the output of the function to be the chi-squared test data frame
   return(chisqtestdf)
 }
