@@ -2,7 +2,7 @@
 ## SECTION 3 - DATA PROCESSING ########################################################################################
 #######################################################################################################################
 
-# In this script I shall process the ESC data for the data zmodeling stage
+# In this script I shall process the ESC data for the data modeling stage
 # This will incorporate the following:
 # (1) Redefine variables as factor or numeric
 # (2) Dividing the variables into the three predefined groups; 
@@ -463,4 +463,4 @@ processed_performance_factors <- cbind(performance_factors_categorical, performa
 processed_data <- cbind(processed_voting_factors, processed_competition_factors, processed_external_factors, processed_performance_factors)
 
 # write the processed data to a csv file
-write.csv(processed_data, 'Data/Reference_Data/processed_data_v2.csv', row.names = F)
+write.csv(processed_data, 'Data/Reference_Data/processed_data.csv', row.names = F)
