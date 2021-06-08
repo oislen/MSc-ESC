@@ -17,13 +17,13 @@
 
 # NOTE: the models will be evaluated using the car package
 # MLR requires the residuals to be ~ IID N(0, sigma^2)
-# the residuals will be standardised for the accessment
+# the residuals will be standardized for the assessment
 # Normality Assumptions will be accessed using:
 # (i) Normality tests from the nortest package
-# (ii) Visualisations such as histograms, QQ-plots, Residual Plots and Add Variable Plots
+# (ii) Visualizations such as histograms, QQ-plots, Residual Plots and Add Variable Plots
 # Constant Variance will be accessed using:
-# (i) non-constand variance test
-# Multicollinearity will be accessed using:
+# (i) non-constant variance test
+# Multi-collinearity will be accessed using:
 # (i) variance inflation factors
 # Outliers will be accessed using:
 # (i) Cooks Distance
@@ -31,18 +31,21 @@
 
 #-- Libraries --#
 
-# the car library will be used for evaluting the models and for a box-cox transformation of the response variables
+# the car library will be used for evaluating the models and for a box-cox transformation of the response variables
 library(car)
+library(dplyr)
+# set the working directory
+setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
+# load custom functions
+source('Scripts/utilities/extract_preds_by_cats.R')
+source('Scripts/utilities/extract_sign_preds.R')
 
 #-- Data --#
-
-# set the working directory
-setwd(dir = "C:/Users/User/Documents/GitHub/MSc-ESC")
 
 # load in the historic voting data for deriving the voting blocs
 processed_data <- read.csv(file = "Data/Reference_Data/processed_data.csv", header = T)
 
-# Split the Datasets into the Televote and Jury datasets
+# Split the Data sets into the Televote and Jury data sets
 televote_data <- processed_data[processed_data$Voting_Method_J == 0,]
 jury_data <- processed_data[processed_data$Voting_Method_J == 1,]
 
@@ -50,8 +53,8 @@ jury_data <- processed_data[processed_data$Voting_Method_J == 1,]
 ## My Model - Overall Data ###########################################################################################
 ######################################################################################################################
 
-# Iteratively create my own mode; 
-# continusously noting the magnitude and significance of the predictors. 
+# iteratively create my own mode; 
+# continuously noting the magnitude and significance of the predictors. 
 # Fit the variables in groups/blocs; 
 # performance, competition and external variables. 
 # Fit each variable block independently. 
@@ -73,90 +76,108 @@ jury_data <- processed_data[processed_data$Voting_Method_J == 1,]
 # (5) Order of Appearance - the order of appearance for each participant
 
 # fit the model
-# stepwise 
+# define the minimum model 
 min_model <- lm(Points ~ 1, data = processed_data[,-c(1,2)])
-max_model <- formula(lm(Points ~ Average_Points + Round_f + Round_sf1 +
-                          Voting_Method_J + Host_Nation_y + OOA,
-                        data = processed_data))
+# define the competition factors
+competition_factors <- extract_preds_by_cats(cat = 'competition')
+# create a model formula
+model_form <- as.formula(paste('Points ~', paste(competition_factors, collapse = ' + ')))
+# create the maximum model
+max_model <- formula(lm(model_form, data = processed_data))
 # my_model_overall <- step(min_model, direction = 'forward', scope = max_model, steps = 100)
 my_model_overall <- step(min_model, direction = 'both', scope = max_model, steps = 100)
+# get model summary
 summary(my_model_overall)
+# get anova results
 anova(my_model_overall)
-
+# see variance inflation factors
+vif(my_model_overall)
+# extract out significant predictors
+sign_competition_factors <- extract_sign_preds(model = my_model_overall)
 
 #########################
 ## Performance Factors ##
 #########################
 
-# stepwise 
+# create minimum model
 min_model <- lm(Points ~ 1, data = processed_data[,-c(1,2)])
-max_model <- formula(lm(Points ~ TC_PerfType_Group  + TC_PerfType_Solo +
-                          TC_SingerGender_Female + TC_SingerGender_Male +
-                          FC_SONGLANG_English + TC_SONGLANG_English + TC_SONGLANG_Mixed + ComSONGLAN +
-                          key_2 + key_3 + key_4 + key_5 + key_6 + key_7 + key_8 + key_11 + mode_1 +
-                          time_signature_4 + danceability + energy + loudiness + speechiness +
-                          acousticness + instrumentalness + liveness + valence + tempo + duration_ms,
-                        data = processed_data))
+# define the performance factors
+performance_factors <- extract_preds_by_cats(cat = 'performance')
+# create a model formula
+model_form <- as.formula(paste('Points ~', paste(performance_factors, collapse = ' + ')))
+# create the maximum model
+max_model <- formula(lm(model_form, data = processed_data))
 # my_model_overall <- step(min_model, direction = 'forward', scope = max_model, steps = 100)
 my_model_overall <- step(min_model, direction = 'both', scope = max_model, steps = 100)
+# get model summary
 summary(my_model_overall)
+# get anova results
 anova(my_model_overall)
+# see variance inflation factors
 vif(my_model_overall)
+# extract out significant predictors
+sign_performance_factors <- extract_sign_preds(model = my_model_overall)
 
 ######################
 ## External Factors ##
 ######################
 
-# Fit Stepwise Model
+# create minimum model
 min_model <- lm(Points ~ 1, data = processed_data[,-c(1,2)])
-max_model <- formula(lm(Points ~ VBlocs1_FC_1 + VBlocs1_FC_18 +
-                          VBlocs2_FC_1 + VBlocs2_FC_3 + VBlocs2_FC_4 + 
-                          VBlocs2_FC_5 + VBlocs2_FC_6 + VBlocs1_TC_1 + 
-                          VBlocs1_TC_3 + VBlocs1_TC_8 + VBlocs1_TC_9 +
-                          VBlocs1_TC_13 + VBlocs2_TC_1 + VBlocs2_TC_2 + 
-                          VBlocs2_TC_3 + VBlocs2_TC_4 + VBlocs2_TC_5 +
-                          VBlocs2_TC_6 + ComVBlocs1_y + ComVBlocs2_y +
-                          FC_LANGFAM_Germanic + FC_LANGFAM_ItalianRomance +
-                          FC_LANGFAM_Slavic + FC_LANGFAM_Uralic + 
-                          TC_LANGFAM_Germanic + TC_LANGFAM_Slavic +
-                          ComLANGFAM_y + Neighbours_y + TC_NumNeigh + FC_NonCOB +
-                          FC_NonCitzens + METRIC_Citizens + CAP_DIST_km,
-                        data = processed_data))
+# define the performance factors
+external_factors <- extract_preds_by_cats(cat = 'external')
+# create a model formula
+model_form <- as.formula(paste('Points ~', paste(external_factors, collapse = ' + ')))
+# create the maximum model
+max_model <- formula(lm(model_form, data = processed_data))
 # my_model_overall <- step(min_model, direction = 'forward', scope = max_model, steps = 100)
 my_model_overall <- step(min_model, direction = 'both', scope = max_model, steps = 100)
+# get model summary
 summary(my_model_overall)
+# get anova results
+anova(my_model_overall)
+# see variance inflation factors
 vif(my_model_overall)
+# extract out significant predictors
+sign_external_factors <- extract_sign_preds(model = my_model_overall)
 
 #################
 ## All Factors ##
 #################
 
-# stepwise 
+# set minimum model
 min_model <- lm(Points ~ 1, data = processed_data[,-c(1,2)])
-max_model <- formula(lm(Points ~ Average_Points + OOA + speechiness + TC_PerfType_Solo +
-                          key_7 + ComSONGLAN + FC_SONGLANG_English + key_5 + key_2 + 
-                          key_6 + liveness + key_3 + time_signature_4 + 
-                          METRIC_Citizens + VBlocs1_TC_3 + ComLANGFAM_y + FC_NonCitzens +
-                          CAP_DIST_km + VBlocs1_TC_13 + ComVBlocs1_y + VBlocs1_TC_1,
-                        data = processed_data))
+# define the performance factors
+all_factors <- c(sign_competition_factors, sign_performance_factors, sign_external_factors)
+# create a model formula
+model_form <- as.formula(paste('Points ~', paste(all_factors, collapse = ' + ')))
+# create the maximum model
+max_model <- formula(lm(model_form, data = processed_data))
 # my_model_overall <- step(min_model, direction = 'forward', scope = max_model, steps = 100)
 my_model_overall <- step(min_model, direction = 'both', scope = max_model, steps = 100)
+# get model summary
 summary(my_model_overall)
+# get anova results
+anova(my_model_overall)
+# check variance inflation factors
 vif(my_model_overall)
+# extract out significant predictors
+sign_all_factors <- extract_sign_preds(model = my_model_overall)
 
 #################
 ## Final Model ##
 #################
 
-my_model_overall <- lm(formula = Points ~ Average_Points + VBlocs1_TC_3 + CAP_DIST_km + 
-                         FC_NonCitzens + ComLANGFAM_y + liveness + key_3 + METRIC_Citizens + 
-                         TC_PerfType_Solo + key_2 + VBlocs1_TC_13 + key_6 + time_signature_4 + 
-                         ComVBlocs1_y + VBlocs1_TC_1 + key_5 + OOA + speechiness, 
-                       data = processed_data[, -c(1, 2)])
-
+# create a model formula
+model_form <- as.formula(paste('Points ~', paste(sign_all_factors, collapse = ' + ')))
+# create the maximum model
+my_model_overall <- lm(model_form, data = processed_data)
+# get model summary
 summary(my_model_overall)
-vif(my_model_overall)
+# get anova results
 anova(my_model_overall)
+# check variance inflation factors
+vif(my_model_overall)
 
 ######################################################################################################################
 ## My Model - Split by Televote ######################################################################################
