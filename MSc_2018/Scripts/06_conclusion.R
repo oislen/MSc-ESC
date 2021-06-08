@@ -267,6 +267,7 @@ summary(my_model_jury)
 #-- Voting Blocs --#
 
 # define model formula
+# Note: thesis shows output for non-power transformed case (i.e. Points ~ key_3 + ... )
 jmodel_ex.vblocs_form <- (Points)^(3/4) ~ key_3 + TC_PerfType_Solo + 
                                           liveness + ComVBlocs1_y + ComLANGFAM_y
 # fit linear model
