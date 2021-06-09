@@ -61,6 +61,8 @@ my_model_overall_bct_from <- bctPoints ~ Average_Points + VBlocs1_TC_3 + CAP_DIS
 my_model_overall <- lm(my_model_overall_bct_from, data = processed_data)
 # generate final model summary
 summary(my_model_overall)
+# write the model to disk
+saveRDS(object = my_model_overall, file = 'Models/arch/overall_final_model.RDS')
 
 #############
 ## T-tests ##
@@ -154,6 +156,8 @@ my_model_tele_bct <- bctPoints ~ METRIC_Citizens + Average_Points + VBlocs1_TC_3
 my_model_tele <- lm(my_model_tele_bct, data = televote_data)
 # generate model summary
 summary(my_model_tele)
+# write the model to disk
+saveRDS(object = my_model_tele, file = 'Models/arch/televote_final_model.RDS')
 
 #############
 ## T-tests ##
@@ -232,6 +236,8 @@ my_model_jury_form <- (Points)^(3/4) ~ VBlocs2_TC_4 + key_3 + TC_PerfType_Solo +
 my_model_jury <- lm(formula = my_model_jury_form, data = jury_data)
 # generate model summary
 summary(my_model_jury)
+# write the model to disk
+saveRDS(object = my_model_jury, file = 'Models/arch/jury_final_model.RDS')
 
 #############
 ## T-tests ##
