@@ -129,6 +129,8 @@ summary(overall_final_model)
 anova(overall_final_model)
 # check variance inflation factors
 vif(overall_final_model)
+# write the model to disk
+saveRDS(object = overall_final_model, file = 'Models/overall_final_model.RDS')
 
 ######################################################################################################################
 ## My Model - Split by Televote ######################################################################################
@@ -192,6 +194,8 @@ summary(televote_final_model)
 anova(televote_final_model)
 # check variance inflation factors
 vif(televote_final_model)
+# write the model to disk
+saveRDS(object = televote_final_model, file = 'Models/televote_final_model.RDS')
 
 #######################################################################################################################
 ## My Model - Split by Jury ###########################################################################################
@@ -249,3 +253,5 @@ summary(jury_final_model)
 anova(jury_final_model)
 # check variance inflation factors
 vif(jury_final_model)
+# write the model to disk
+saveRDS(object = jury_final_model, file = 'Models/jury_final_model.RDS')
