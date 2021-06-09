@@ -1,4 +1,7 @@
 # define a function to perform chi-sq tests of association with the target variable Points
+# There are two parts to it
+# (1) Create the data frame to store the chi-squared tests
+# (2) Fill the data frame with the relevant information
 chisq_assoc_test <- function(data, col_names, digits = 5, sign_level = 0.05) {
 
   # set the names of the chi-sq test results
@@ -23,7 +26,7 @@ chisq_assoc_test <- function(data, col_names, digits = 5, sign_level = 0.05) {
     chisqtestdf[col, "P-Value"] <- round(x = chisqtest_res$p.value, digits = digits)
     
     # use if else logic to determine pass fail of chi-sq test
-    chisqtestdf[col, "Significant"] <- ifelse(test = round(x = chisqtest_res$p.value, digits = digits) < sign_level, yes = "y", no = "n")
+    chisqtestdf[col, "Significant"] <- ifelse(test = round(x = chisqtest_res$p.value, digits = digits) < sign_level, yes = TRUE, no = FALSE)
  
   }
   

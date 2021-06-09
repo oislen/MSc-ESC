@@ -17,7 +17,7 @@ corr_tests <- function(data, col_names, na.action = "na.omit", digits = 2, sign_
     # Fill in the p-value
     cor_test_df[col, "P-Value"] <- round(c.t.$p.value, digits = digits)
     # Fill in the significance column
-    cor_test_df[col, "Significant"] <- ifelse(test = round(c.t.$p.value, digits = digits) < sign_level, yes = "y", no = "n")
+    cor_test_df[col, "Significant"] <- ifelse(test = round(c.t.$p.value, digits = digits) < sign_level, yes = TRUE, no = FALSE)
   }
   return(cor_test_df)
 }
