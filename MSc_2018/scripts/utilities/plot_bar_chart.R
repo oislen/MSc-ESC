@@ -2,7 +2,7 @@
 library(ggplot2)
 
 # define function to plot and output bar charts for given data.frame and vector of column names
-plot_bar_chart <- function(dataset, col_names){
+plot_bar_chart <- function(dataset, col_names, output_dir = 'report/plots/bar_charts'){
   # use a for loop to generate a bar plot for each categorical attributes
   for (col in all_factors){
     
@@ -25,7 +25,7 @@ plot_bar_chart <- function(dataset, col_names){
     plot_name <- paste(col, '_bar_chart.png', sep = '')
     
     # create output file path
-    output_fpath <- file.path('Report/Plots/Bar_Charts', plot_name)
+    output_fpath <- file.path(output_dir, plot_name)
   
     # save plot
     ggsave(output_fpath)

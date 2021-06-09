@@ -2,7 +2,7 @@
 library(ggplot2)
 
 # define function to plot and output histograms for given data.frame and vector of column names
-plot_histogram <- function(dataset, col_names){
+plot_histogram <- function(dataset, col_names, output_dir = 'report/plots/histograms'){
   # use a for loop to generate histograms for each numeric attribute
   for (col in col_names){
     
@@ -20,7 +20,7 @@ plot_histogram <- function(dataset, col_names){
     plot_name <- paste(col, '_histogram.png', sep = '')
     
     # create output file path
-    output_fpath <- file.path('Report/Plots/Histograms/', plot_name)
+    output_fpath <- file.path(output_dir, plot_name)
     
     # save plot
     ggsave(output_fpath)

@@ -1,5 +1,5 @@
 # define a function to plot a scatter point with overlaid correlation / linear model results
-plot_scatter <- function(data, col_names){
+plot_scatter <- function(data, col_names, output_dir = 'report/plots/scatterplots'){
   
   # use a for loop to generate correlation scatter plots
   for (col in col_names){
@@ -33,7 +33,7 @@ plot_scatter <- function(data, col_names){
     plot_name <- paste(col, '_vs_Points_Scatterplot.png', sep = '')
     
     # create output file path
-    output_fpath <- file.path('Report/Plots/Scatterplots', plot_name)
+    output_fpath <- file.path(output_dir, plot_name)
     
     # save plot
     ggsave(output_fpath)
