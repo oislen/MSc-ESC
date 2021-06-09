@@ -23,15 +23,15 @@ library(dplyr)
 # set the working directory
 setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
 # load in custom utility functions
-source("Scripts/utilities/factor_descriptive_statistics.R")
-source("Scripts/utilities/numeric_descriptive_statistics.R")
-source("Scripts/utilities/plot_bar_chart.R")
-source("Scripts/utilities/plot_histogram.R")
-source("Scripts/utilities/plot_scatter.R")
-source("Scripts/utilities/chisq_assoc_test.R")
-source("Scripts/utilities/corr_tests.R")
-source("Scripts/utilities/pred_corr_tests.R")
-source("Scripts/utilities/graph_network.R")
+source("scripts/utilities/factor_descriptive_statistics.R")
+source("scripts/utilities/numeric_descriptive_statistics.R")
+source("scripts/utilities/plot_bar_chart.R")
+source("scripts/utilities/plot_histogram.R")
+source("scripts/utilities/plot_scatter.R")
+source("scripts/utilities/chisq_assoc_test.R")
+source("scripts/utilities/corr_tests.R")
+source("scripts/utilities/pred_corr_tests.R")
+source("scripts/utilities/graph_network.R")
 
 #-- Data --#
 
