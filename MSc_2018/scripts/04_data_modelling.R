@@ -1,19 +1,15 @@
-#######################################################################################################################
-## SECTION 4 - Data Modelling OVERVIEW ################################################################################
-#######################################################################################################################
+######################################################################################################################
+## SECTION 4 - Data Modeling OVERVIEW ################################################################################
+######################################################################################################################
 
 # A stratified analysis method will be implemented
 # (1) Test Overall Data
-# Create baseline model based on research
-# Create my own model, iteratively
-# Compare
-# (2) Split Data by Voting Method
-# Due to a lack of data I can't stratify the data by each country
+# Iteratively create model step wise, 
+# (2) Split and Test Data by Voting Method
+# Can't stratify the data by each country due to a lack of data
 # Need a minimum of 10/20 observations per covariate for regression analysis
 # Split data by voting method, research televote shows more bias than the jury
 # NOTE forward and step wise fitting will be utilized using AIC to determine model of best fit
-
-# NOTE: This script is a direct continuation on from the ESC_Data_Processing_II script
 
 # NOTE: the models will be evaluated using the car package
 # MLR requires the residuals to be ~ IID N(0, sigma^2)
@@ -28,21 +24,20 @@
 # Outliers will be accessed using:
 # (i) Cooks Distance
 
-
 #-- Libraries --#
 
-# the car library will be used for evaluating the models and for a box-cox transformation of the response variables
+# load the relevant libraries
 library(car)
 library(dplyr)
 # set the working directory
 setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
 # load custom functions
-source('Scripts/utilities/step_lm_model.R')
+source('scripts/utilities/step_lm_model.R')
 
 #-- Data --#
 
 # load in the historic voting data for deriving the voting blocs
-processed_data <- read.csv(file = "Data/Reference_Data/processed_data.csv", header = T)
+processed_data <- read.csv(file = "data/processed_data.csv", header = T)
 
 # Split the Data sets into the Televote and Jury data sets
 televote_data <- processed_data[processed_data$Voting_Method_J == 0,]
@@ -72,14 +67,6 @@ external_factors <- extract_preds_by_cats(cat = 'external')
 #################################
 ## Fitting Competition Factors ##
 #################################
-
-# Competition factors are the factors related to how the competition 
-# There are 5 factors in this bloc
-# (1) Average Points - The historical average number of points exchange between countries
-# (2) Round - The Competition Round (sf1, f2 or f)
-# (3) Voting_Method - The Voting Method (Televote or Jury)
-# (4) Host_Nation - The Host Nation of the competition (Sweden)
-# (5) Order of Appearance - the order of appearance for each participant
 
 # fit step wise linear model
 overall_competition_model <- step_lm_model(dataset = processed_data, pred_cols = competition_factors)
@@ -130,7 +117,7 @@ anova(overall_final_model)
 # check variance inflation factors
 vif(overall_final_model)
 # write the model to disk
-saveRDS(object = overall_final_model, file = 'Models/overall_final_model.RDS')
+saveRDS(object = overall_final_model, file = 'models/overall_final_model.RDS')
 
 ######################################################################################################################
 ## My Model - Split by Televote ######################################################################################
@@ -195,7 +182,7 @@ anova(televote_final_model)
 # check variance inflation factors
 vif(televote_final_model)
 # write the model to disk
-saveRDS(object = televote_final_model, file = 'Models/televote_final_model.RDS')
+saveRDS(object = televote_final_model, file = 'models/televote_final_model.RDS')
 
 #######################################################################################################################
 ## My Model - Split by Jury ###########################################################################################
@@ -254,4 +241,4 @@ anova(jury_final_model)
 # check variance inflation factors
 vif(jury_final_model)
 # write the model to disk
-saveRDS(object = jury_final_model, file = 'Models/jury_final_model.RDS')
+saveRDS(object = jury_final_model, file = 'models/jury_final_model.RDS')
