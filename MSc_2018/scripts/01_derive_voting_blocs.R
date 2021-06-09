@@ -5,14 +5,13 @@
 
 # This section is specifically for generating the the historic voting blocs
 
-# The following method for identify voting blocs is quote in multiple academic papers
-# It influences my research as I intend to use the voting blocs as an independant variable
-# to explain score
+# The following method for identify voting blocs is referenced in multiple academic papers
+# It influences the research as the voting blocs as can be used as independent variables to explain score
 
-# I shall attempt to cluster the countries into voting blocs using the historic avergae vote
-# The communities will be evaluated on modularity
-# The modularity of a graph with respect to some division (or vertex types) measures how good the division is. 
-# Thus the high the modularity the greater the division between communities
+# Countries will be clustered together into voting blocs using the historic average vote
+# The clusters / communities will be evaluated on modularity
+# The modularity of a graph with respect to some division (or vertex types) measures how good the grouping is. 
+# Thus the high the modularity the greater the division between communities and the better grouping
 
 #-- Libraries --#
 
@@ -27,7 +26,7 @@ library(dplyr)
 # set the working directory
 setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
 # load in the historic voting data for deriving the voting blocs
-past_voting_data <- read.csv(file = "Data/ESC_hist_voting_data.csv", header = T)
+past_voting_data <- read.csv(file = "data/ESC_hist_voting_data.csv", header = T)
 
 ######################
 #-- Data Profiling --#
@@ -54,7 +53,7 @@ pvd <- past_voting_data %>%
        as.data.frame()
 
 # write the average voting data to a csv file
-write.csv(x = pvd, file = "Data/Reference_Data/average_points.csv", row.names = F)
+write.csv(x = pvd, file = "data/average_points.csv", row.names = F)
 
 ##########################################
 #-- Construct the Average Points Graph --#
@@ -80,11 +79,18 @@ if (is_weighted(G) == FALSE){
 # global modularity = 0.057
 # Perform Edge between clustering
 com1 <- cluster_edge_betweenness(graph = G, weights = E(G)$weight)
+# calculate modularity of the graph
+modularity(com1)
+# get the number of groups
+max(com1$membership)
+# create a data frame out of the clustering results
 com1df <- rbind(com1$names, com1$membership)
+# assign the row names to the data frame
 row.names(com1df) <- c("Country", "Group")
-com1df
+# show head of results
+head(com1df)
 # construct a dendrogram (hierarchical clustering method)
-plt = plot_dendrogram(com1, main = "Dendrogram of EDge Betweeness Clustering")
+plot_dendrogram(com1, main = "Dendrogram of EDge Betweeness Clustering")
 
 #-- Short Random Walks --#
 
@@ -93,22 +99,33 @@ plt = plot_dendrogram(com1, main = "Dendrogram of EDge Betweeness Clustering")
 # global modularity = 0.3
 # perform short random walks clustering
 com2 <- cluster_walktrap(graph = G, weights = E(G)$weight)
+# calculate modularity of the graph
+modularity(com2)
+# get the number of groups
+max(com2$membership)
+# create a data frame out of the clustering results
 com2df <- rbind(com2$names, com2$membership)
-row.names(com6df) <- c("Country", "Group")
-com2df
+# assign the row names to the data frame
+row.names(com2df) <- c("Country", "Group")
+# show head of results
+head(com2df)
 # construct a dendrogram (hierarchical clustering method)
 plot_dendrogram(com2, main = "Dendrogram of Short Random Walk Clustering")
 
-########################################
-#-- Construct voting blocs dataframe --#
-########################################
+#########################################
+#-- Construct voting blocs data frame --#
+#########################################
 
 # UPDATE: for the propose of this research we shall only include hierarchical clustering methods
 # (1) Edge-betweenness 
 # (2) Short Random Walks
+# combine results over both clustering methods into a data frame
 voting_bloc_data <- as.data.frame(cbind(com1$names, com1$membership, com2$membership))
+# assign column names to the output data frame
 colnames(voting_bloc_data) <- c("Country", "VBlocs1_EB", "VBlocs2_SRW")
+# show head of results
 head(voting_bloc_data)
+# generate summary of data
 summary(voting_bloc_data)
 # Writing Voting Bloc Data to csv file
-write.csv(x = voting_bloc_data, file = "Data/Reference_Data/voting_bloc_data.csv", row.names = F)
+write.csv(x = voting_bloc_data, file = "data/voting_bloc_data.csv", row.names = F)
