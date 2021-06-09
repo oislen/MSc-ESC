@@ -2,7 +2,7 @@
 ## SECTION 4 - Data Modelling OVERVIEW ################################################################################
 #######################################################################################################################
 
-# A stratified analysis method will be implamented
+# A stratified analysis method will be implemented
 # (1) Test Overall Data
 # Create baseline model based on research
 # Create my own model, iteratively
@@ -11,7 +11,7 @@
 # Due to a lack of data I can't stratify the data by each country
 # Need a minimum of 10/20 observations per covariate for regression analysis
 # Split data by voting method, research televote shows more bias than the jury
-# NOTE forward and stepwise fitting will be utilised using AIC to determine model of best fit
+# NOTE forward and step wise fitting will be utilized using AIC to determine model of best fit
 
 # NOTE: This script is a direct continuation on from the ESC_Data_Processing_II script
 
