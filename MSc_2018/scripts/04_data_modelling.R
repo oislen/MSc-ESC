@@ -38,10 +38,10 @@ source('scripts/utilities/step_lm_model.R')
 
 # load in the historic voting data for deriving the voting blocs
 processed_data <- read.csv(file = "data/processed_data.csv", header = T)
-
-# Split the Data sets into the Televote and Jury data sets
-televote_data <- processed_data[processed_data$Voting_Method_J == 0,]
-jury_data <- processed_data[processed_data$Voting_Method_J == 1,]
+# split the televote data
+televote_data <- processed_data %>% filter(Voting_Method_J == 0)
+# split out the jury vote data
+jury_data <- processed_data %>% filter(Voting_Method_J == 1)
 
 # define the competition factors
 competition_factors <- extract_preds_by_cats(cat = 'competition')
