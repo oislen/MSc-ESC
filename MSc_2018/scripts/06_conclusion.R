@@ -5,32 +5,31 @@
 #-- Script Overview --#
 
 # This script specializes in analyzing the models and drawing inferences for the research question
-# The research question requires me to answer whether voting blocs, echo nest music features and migration patterns
+# The research question is whether voting blocs, echo nest music features and migration patterns
 # can explain the points and voting patterns of the 2016 ESC
-# This can be converted into a statistical problem using multiple linear regression whereby I am interested in whether
+# This can be converted into a statistical problem using multiple linear regression whereby determining whether
 # voting blocs, echo nest music features and migration patterns significantly explain the points and voting patterns
-# This question will be answer by
-# constricting tests
-# Observing the signs of the estimated coefficients
-# measuring the increase in variance (R-sq) with the addition of a predictor variable
-
+# This question will be answer by:
+# 1) Constricting t-tests
+# 2) Observing the signs of the estimated coefficients
+# 3) measuring the increase in variance explained (R-sq) with the addition of a predictor variable
 
 #-- Libraries --#
 
-# the car library will be used for evaluating the models and for a box-cox transformation of the response variables
+# load relevant libraries
 library(car)
-
+library(dplyr)
 # set the working directory
 setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
 
 #-- Data --#
 
 # load in the historic voting data for deriving the voting blocs
-processed_data <- read.csv(file = "Data/arch/processed_data.csv", header = T)
-
-# Split the Data sets into the Televote and Jury data sets
-televote_data <- processed_data[processed_data$Voting_Method_J == 0,]
-jury_data <- processed_data[processed_data$Voting_Method_J == 1,]
+processed_data <- read.csv(file = "data/arch/processed_data.csv", header = T)
+# split the televote data
+televote_data <- processed_data %>% filter(Voting_Method_J == 0)
+# split out the jury vote data
+jury_data <- processed_data %>% filter(Voting_Method_J == 1)
 
 
 ######################################################################################################################
@@ -62,7 +61,7 @@ my_model_overall <- lm(my_model_overall_bct_from, data = processed_data)
 # generate final model summary
 summary(my_model_overall)
 # write the model to disk
-saveRDS(object = my_model_overall, file = 'Models/arch/overall_final_model.RDS')
+saveRDS(object = my_model_overall, file = 'models/arch/overall_final_model.RDS')
 
 #############
 ## T-tests ##
@@ -157,7 +156,7 @@ my_model_tele <- lm(my_model_tele_bct, data = televote_data)
 # generate model summary
 summary(my_model_tele)
 # write the model to disk
-saveRDS(object = my_model_tele, file = 'Models/arch/televote_final_model.RDS')
+saveRDS(object = my_model_tele, file = 'models/arch/televote_final_model.RDS')
 
 #############
 ## T-tests ##
@@ -237,7 +236,7 @@ my_model_jury <- lm(formula = my_model_jury_form, data = jury_data)
 # generate model summary
 summary(my_model_jury)
 # write the model to disk
-saveRDS(object = my_model_jury, file = 'Models/arch/jury_final_model.RDS')
+saveRDS(object = my_model_jury, file = 'models/arch/jury_final_model.RDS')
 
 #############
 ## T-tests ##
