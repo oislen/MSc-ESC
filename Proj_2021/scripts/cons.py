@@ -13,7 +13,7 @@ import pandas as pd
 pd.set_option('display.max_rows', 20, 'display.max_columns', 10)
 
 # set root directory
-root_dir = 'C:\\Users\\User\\Documents\\GitHub\\ESC'
+root_dir = 'C:\\Users\\User\\Documents\\GitHub\\MSc-ESC\\Proj_2021'
 
 # set sub directories
 scripts_sub_dir = path.join(root_dir, 'scripts')
