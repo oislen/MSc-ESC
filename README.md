@@ -11,7 +11,7 @@ This repository is divided up into two main subdirectories; MSc-ESC and Proj_202
 	2. [scripts](https://github.com/oislen/MSc-ESC/tree/master/Proj_2021/scripts)
  
 The final submitted dissertation can be found here on the Technology University Dublin arrow website:
-(https://arrow.tudublin.ie/scschcomdis/155/)[https://arrow.tudublin.ie/scschcomdis/155/]
+https://arrow.tudublin.ie/scschcomdis/155/
 
 # Abstract
 
