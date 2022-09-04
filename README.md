@@ -1,14 +1,11 @@
 # Repository for MSc Dissertation on the Eurovision Song Contest
 
-This repository is divided up into two main subdirectories; MSc-ESC and Proj_2021. The MSc-ESC subdirectory contains the data, serialized models and code used during the original masters dissertation. The Proj_2021 subdirectory contains supplementary code for applying collaborative filtering to historic Eurovision Song Contest voting data.
+This repository contains the data, serialized models and code the Eurovision Song Contest masters dissertation.
  
- 1. [MSc-ESC](https://github.com/oislen/MSc-ESC/tree/master/MSc_2018)
-    1. [data](https://github.com/oislen/MSc-ESC/tree/master/MSc_2018/data)
-	2. [models](https://github.com/oislen/MSc-ESC/tree/master/MSc_2018/models)
-	3. [scripts](https://github.com/oislen/MSc-ESC/tree/master/MSc_2018/scripts)
-3. [Proj_2021](https://github.com/oislen/MSc-ESC/tree/master/Proj_2021)
-    1. [config](https://github.com/oislen/MSc-ESC/tree/master/Proj_2021/config)
-	2. [scripts](https://github.com/oislen/MSc-ESC/tree/master/Proj_2021/scripts)
+ 1. [MSc-ESC](https://github.com/oislen/MSc-ESC/tree/master)
+    1. [data](https://github.com/oislen/MSc-ESC/tree/master/data)
+	2. [models](https://github.com/oislen/MSc-ESC/tree/master/models)
+	3. [scripts](https://github.com/oislen/MSc-ESC/tree/master/scripts)
  
 The final submitted dissertation can be found here on the Technology University Dublin arrow website:
 https://arrow.tudublin.ie/scschcomdis/155/

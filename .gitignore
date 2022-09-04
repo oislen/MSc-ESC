@@ -1,4 +1,5 @@
-MSc_2018/report/
-Proj_2021/data/
+report/
 *.pyc
 *.Rhistory
+.Rproj.user
+MSc-ESC.Rproj
