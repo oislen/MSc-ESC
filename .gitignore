@@ -1,5 +1,6 @@
 report/
 *.pyc
 *.Rhistory
+*.html
 .Rproj.user
 MSc-ESC.Rproj
