@@ -1,7 +1,7 @@
 library(ggplot2)
 
 # define a function for plotting the effects of removing rows with na values before and after
-plot_missings_effect <- function(col_names, orig_data, comp_data){
+plot_missings_effect <- function(col_names, orig_data, comp_data, output_dir = './report/plots/missings/'){
   
   # loop through the column names
   for (col in col_names){
@@ -15,7 +15,7 @@ plot_missings_effect <- function(col_names, orig_data, comp_data){
       guides(fill = FALSE)
     
     # save the plot
-    ggsave(paste('Report/Plots/Missings/', col, 'All_Cases_Bar_Chart.png'))
+    ggsave(paste(output_dir, col, 'All_Cases_Bar_Chart.png'))
     
     # print the plot
     print(plt1)
@@ -29,7 +29,7 @@ plot_missings_effect <- function(col_names, orig_data, comp_data){
       guides(fill = FALSE)
     
     # save the plot
-    ggsave(paste('Report/Plots/Missings/', col, 'Complete_Cases_Bar_Chart.png'))
+    ggsave(paste(output_dir, col, 'Complete_Cases_Bar_Chart.png'))
     
     # print the plot
     print(plt2)
