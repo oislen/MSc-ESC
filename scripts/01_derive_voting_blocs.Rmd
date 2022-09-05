@@ -1,12 +1,12 @@
 ---
-title: "MSc-ESC"
+title: "Derviving Voting Blocs"
 output: 
-  html_document:
+  pdf_document:
     toc: true
     df_print: kable
 ---
 
-# Section 1 - Derviving Voting Blocs
+## Overview
 
 This section generates historical voting blocs from Eurovision voting data. The social network methods used to identify the voting blocs are cited from multiple academic papers. The voting blocs can be used as independent variables to explain contest scores. The countries will be clustered together into voting blocs using the average vote score. The connectedness of the clusters / communities will be evaluated using modularity. The modularity of a graph with respect to some division (or vertex types) measures how good the grouping is. The higher the modularity the greater the division between communities and the better grouping
 

@@ -1,14 +1,12 @@
 ---
-title: "MSc-ESC"
+title: "Data Processing"
 output: 
-  html_document:
+  pdf_document:
     toc: true
     df_print: kable
-editor_options: 
-  chunk_output_type: inline
 ---
 
-# SECTION 3 - DATA PROCESSING
+## Overview
 
 In this script the ESC data is processed and cleaned for the data modeling stage. This will incorporate the following:
 1. Redefine variables as factor or numeric

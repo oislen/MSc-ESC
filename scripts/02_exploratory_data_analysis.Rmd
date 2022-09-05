@@ -1,14 +1,12 @@
 ---
-title: "MSc-ESC"
+title: "Exploratory Analysis"
 output: 
-  html_document:
+  pdf_document:
     toc: true
     df_print: kable
-editor_options: 
-  chunk_output_type: inline
 ---
 
-# Section 2 - Exploratory Analysis 
+## Overview
 
 This section conducts an exploratory analysis of the raw data. Specifically for visualizing and deriving descriptive statistics on the data In order to understand the underlying the structures and patterns in the data. A variety of descriptive statistics will be generated for both the numeric data and the categorical data. Similarly a variety of visualizations will be generated for both the numeric data and the categorical data. Further more some visualization on the patterns of diaspora will be generated using Social Networks
 
@@ -133,24 +131,6 @@ A variety of Social Networks based on different closeness metrics given a specif
 sum(!is.na(ESCdata$METRIC_COB))
 sum(!is.na(ESCdata$METRIC_Citizens))
 networkdata <- ESCdata %>% filter(!is.na(METRIC_Citizens))
-
-# filter out records for high diaspora in the televote
-high_diaspora_df <- networkdata %>% filter(Voting_Method == "T", METRIC_COB > 0.1)
-# Construct Social Network
-G <- graph_from_data_frame(d = high_diaspora_df[, c('From_country', 'To_country')], directed = T)
-E(G)$weight <- as.numeric(high_diaspora_df[, 'Points'])
-is_weighted(graph = G)
-# plot graph of high diaspora
-plot(x = G, 
-     main = "Graph of High Diaspora & Points in Televote", 
-     layout = layout.fruchterman.reingold, 
-     edge.color = "grey", 
-     vertex.color = "orange", 
-     vertex.label.color = "black", 
-     vertex.size = 10, 
-     edge.arrow.size = .5, 
-     edge.label = E(G)$weight, 
-     edge.label.color = "black")
 ```
 
 ```{r metric-cob}

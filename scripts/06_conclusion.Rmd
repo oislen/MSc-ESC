@@ -1,14 +1,12 @@
 ---
-title: "MSc-ESC"
+title: "Conclusions"
 output: 
-  html_document:
+  pdf_document:
     toc: true
     df_print: kable
-editor_options: 
-  chunk_output_type: inline
 ---
 
-## Section 6 - Conclusions
+## Overview
 
 This script specializes in analyzing the models and drawing inferences for the research question. The research question is whether voting blocs, echo nest music features and migration patterns can explain the points and voting patterns of the 2016 ESC. This can be converted into a statistical problem using multiple linear regression whereby determining whether voting blocs, echo nest music features and migration patterns significantly explain the points and voting patterns.
 

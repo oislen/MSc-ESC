@@ -1,14 +1,12 @@
 ---
-title: "MSc-ESC"
+title: "Data Modeling"
 output: 
-  html_document:
+  pdf_document:
     toc: true
     df_print: kable
-editor_options: 
-  chunk_output_type: inline
 ---
 
-# Section 4 - Data Modeling OVERVIEW
+## Overview
 
 A stratified analysis method will be implemented
 1. Test Overall Data

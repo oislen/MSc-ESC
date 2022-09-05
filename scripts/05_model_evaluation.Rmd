@@ -1,14 +1,12 @@
 ---
-title: "MSc-ESC"
+title: "Model Evaluation"
 output: 
-  html_document:
+  pdf_document:
     toc: true
     df_print: kable
-editor_options: 
-  chunk_output_type: inline
 ---
 
-## SECTION 5 - Model Evaluation OVERVIEW
+## Overview
 
 This section evaluates the fit of the model's using the car package
 MLR requires the residuals to be ~ IID N(0, sigma^2)
