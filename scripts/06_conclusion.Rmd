@@ -1,41 +1,42 @@
-##########################################################################################################################
-## SECTION 6 - CONCLUSIONS ###############################################################################################
-##########################################################################################################################
+---
+title: "MSc-ESC"
+output: 
+  html_document:
+    toc: true
+    df_print: kable
+editor_options: 
+  chunk_output_type: inline
+---
 
-#-- Script Overview --#
+## Section 6 - Conclusions
 
-# This script specializes in analyzing the models and drawing inferences for the research question
-# The research question is whether voting blocs, echo nest music features and migration patterns
-# can explain the points and voting patterns of the 2016 ESC
-# This can be converted into a statistical problem using multiple linear regression whereby determining whether
-# voting blocs, echo nest music features and migration patterns significantly explain the points and voting patterns
-# This question will be answer by:
-# 1) Constricting t-tests
-# 2) Observing the signs of the estimated coefficients
-# 3) measuring the increase in variance explained (R-sq) with the addition of a predictor variable
+This script specializes in analyzing the models and drawing inferences for the research question. The research question is whether voting blocs, echo nest music features and migration patterns can explain the points and voting patterns of the 2016 ESC. This can be converted into a statistical problem using multiple linear regression whereby determining whether voting blocs, echo nest music features and migration patterns significantly explain the points and voting patterns.
 
-#-- Libraries --#
+This question will be answer by:
+1. Constricting t-tests
+2. Observing the signs of the estimated coefficients
+3. measuring the increase in variance explained (R-sq) with the addition of a predictor variable
 
+```{r preliminaries}
 # load relevant libraries
+library(rmarkdown)
+library(knitr)
 library(car)
 library(dplyr)
-# set the working directory
-setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
+```
 
-#-- Data --#
-
+```{r data-load}
 # load in the historic voting data for deriving the voting blocs
-processed_data <- read.csv(file = "data/arch/processed_data.csv", header = T)
+processed_data <- read.csv(file = "./data/arch/processed_data.csv", header = T)
 # split the televote data
 televote_data <- processed_data %>% filter(Voting_Method_J == 0)
 # split out the jury vote data
 jury_data <- processed_data %>% filter(Voting_Method_J == 1)
+```
 
+## Overall Model
 
-######################################################################################################################
-## Overall Model #####################################################################################################
-######################################################################################################################
-
+```{r overall-model}
 #-- Fit the Final Model --#
 
 # define the model formula for the final model
@@ -61,42 +62,41 @@ my_model_overall <- lm(my_model_overall_bct_from, data = processed_data)
 # generate final model summary
 summary(my_model_overall)
 # write the model to disk
-saveRDS(object = my_model_overall, file = 'models/arch/overall_final_model.RDS')
+saveRDS(object = my_model_overall, file = './models/arch/overall_final_model.RDS')
+```
 
-#############
-## T-tests ##
-#############
+## T-tests
 
-# Make sure to report 
-# (1) the adjusted R-sq value
-# (2) the degrees of freedom
-# (3) the f statistic for f test
-# (4) the p-value for f test
-# NOTE: include notation for levels of significance 
-# * for 0.05
-# ** for 0.01
-# *** for 0.001
+Make sure to report 
+1. the adjusted R-sq value
+2. the degrees of freedom
+3. the f statistic for f test
+4. the p-value for f test
+
+NOTE: include notation for levels of significance 
+* for 0.05
+** for 0.01
+*** for 0.001
+
+```{r overall-t-tests}
 summary(my_model_overall)
+```
 
-################################
-## Directional / Sign effects ##
-################################
+## Directional / Sign effects
 
-# Report the sign effects of each significant coefficient
-# + indicates the predictor variable has a positive effect on the dependent variable
-# - indicates the predictor variables  has a negative effect on the dependent variable
+Report the sign effects of each significant coefficient
++ indicates the predictor variable has a positive effect on the dependent variable
+- indicates the predictor variables  has a negative effect on the dependent variable
+
+```{r overall-sign-effects}
 summary(my_model_overall)
+```
 
-########################
-## Explained Variance ##
-########################
+## Explained Variance
 
-# Investigate the increase of variance explained by incorporating specific predictor variables
-# observe the increase in R-sq when a predictor variable is included / excluded from the model
-# do this for voting blocs, Echo Nest music factors and Migration patterns
+Investigate the increase of variance explained by incorporating specific predictor variables. Observe the increase in R-sq when a predictor variable is included / excluded from the model. Do this for voting blocs, Echo Nest music factors and Migration patterns
 
-#-- Voting Blocs --#
-
+```{r overall-variance-vb}
 # define the model formula
 omodel_ex.vblocs_form <- bctPoints ~ Average_Points + CAP_DIST_km + 
                                      FC_NonCitzens + ComLANGFAM_y + liveness + key_3 + METRIC_Citizens + 
@@ -106,9 +106,9 @@ omodel_ex.vblocs_form <- bctPoints ~ Average_Points + CAP_DIST_km +
 omodel_ex.vblocs <- lm(formula = omodel_ex.vblocs_form, data = processed_data)
 # generate model summary
 summary(omodel_ex.vblocs)
+```
 
-#-- Echo Nest Music Features --#
-
+```{r overall-variance-en}
 # define the model formula
 omodel_ex.music_form <- bctPoints ~ Average_Points + VBlocs1_TC_3 + CAP_DIST_km + 
                                     FC_NonCitzens + ComLANGFAM_y + METRIC_Citizens + 
@@ -118,9 +118,9 @@ omodel_ex.music_form <- bctPoints ~ Average_Points + VBlocs1_TC_3 + CAP_DIST_km 
 omodel_ex.music <- lm(omodel_ex.music_form, data = processed_data)
 # investigate the R-sq value
 summary(omodel_ex.music)
+```
 
-#-- Migration Patterns --#
-
+```{r overall-variance-migration}
 # define the model formula
 omodel_ex.mig_form <- Points ~ Average_Points + VBlocs1_TC_3 + CAP_DIST_km + 
                                ComLANGFAM_y + liveness + key_3 + 
@@ -130,11 +130,11 @@ omodel_ex.mig_form <- Points ~ Average_Points + VBlocs1_TC_3 + CAP_DIST_km +
 omodel_ex.mig <- lm(formula = omodel_ex.mig_form, data = processed_data)
 # generate the model summary
 summary(omodel_ex.mig)
+```
 
-########################################################################################################################
-## TELEVOTE MODEL ######################################################################################################
-########################################################################################################################
+## TELEVOTE MODEL
 
+```{r televote-model}
 # define the model formula
 my_model_tele_form <- Points ~ METRIC_Citizens + Average_Points + VBlocs1_TC_3 + 
                                VBlocs2_TC_1 + mode_1 + key_11 + OOA + acousticness + danceability + 
@@ -156,42 +156,41 @@ my_model_tele <- lm(my_model_tele_bct, data = televote_data)
 # generate model summary
 summary(my_model_tele)
 # write the model to disk
-saveRDS(object = my_model_tele, file = 'models/arch/televote_final_model.RDS')
+saveRDS(object = my_model_tele, file = './models/arch/televote_final_model.RDS')
+```
 
-#############
-## T-tests ##
-#############
+## T-tests
 
-# Make sure to report 
-# (1) the adjusted R-sq value
-# (2) the degrees of freedom
-# (3) the f statistic for f test
-# (4) the p-value for f test
-# NOTE: include notation for levels of significance 
-# * for 0.05
-# ** for 0.01
-# *** for 0.001
+Make sure to report 
+1. the adjusted R-sq value
+2. the degrees of freedom
+3. the f statistic for f test
+4. the p-value for f test
+
+NOTE: include notation for levels of significance 
+* for 0.05
+** for 0.01
+*** for 0.001
+
+```{r televote-t-tests}
 summary(my_model_tele)
+```
 
-################################
-## Directional / Sign effects ##
-################################
+## Directional / Sign effects 
 
-# Report the sign effects of each significant coefficient
-# + indicates the predictor variable has a positive effect on the dependent variable
-# - indicates the predictor variables  has a negative effect on the defendant variable
+Report the sign effects of each significant coefficient
++ indicates the predictor variable has a positive effect on the dependent variable
+- indicates the predictor variables  has a negative effect on the defendant variable
+
+```{r televote-sign-effects}
 summary(my_model_tele)
+```
 
-########################
-## Explained Variance ##
-########################
+## Explained Variance
 
-# Investigate the increase of variance explained by incorporating specific predictor variables
-# observe the increase in R-sq when a predictor variable is included / excluded from the model
-# do this for voting blocs, Echo Nest music factors and Migration patterns
+Investigate the increase of variance explained by incorporating specific predictor variables. Observe the increase in R-sq when a predictor variable is included / excluded from the model. Do this for voting blocs, Echo Nest music factors and Migration patterns
 
-#-- Voting Blocs --#
-
+```{r televote-variance-vb}
 # define model formula
 tmodel_ex.vblocs_form <- bctPoints ~ METRIC_Citizens + Average_Points + 
                                      mode_1 + key_11 + OOA + acousticness + danceability + 
@@ -200,9 +199,9 @@ tmodel_ex.vblocs_form <- bctPoints ~ METRIC_Citizens + Average_Points +
 tmodel_ex.vblocs <- lm(tmodel_ex.vblocs_form, data = televote_data)
 # investigate the R-sq value
 summary(tmodel_ex.vblocs)
+```
 
-#-- Echo Nest Musical Features --#
-
+```{r televote-variance-en}
 # define model formula
 tmodel_ex.music_form <- bctPoints ~ METRIC_Citizens + Average_Points + VBlocs1_TC_3 + 
                                     VBlocs2_TC_1 + OOA + VBlocs1_TC_13 + ComLANGFAM_y
@@ -210,9 +209,9 @@ tmodel_ex.music_form <- bctPoints ~ METRIC_Citizens + Average_Points + VBlocs1_T
 tmodel_ex.music <- lm(tmodel_ex.music_form, data = televote_data)
 # investigate the R-sq value
 summary(tmodel_ex.music)
+```
 
-#-- Migration Patterns --#
-
+```{r televote-variance-migration}
 # define model formula
 tmodel_ex.mig_form <- bctPoints ~  Average_Points + VBlocs1_TC_3 + 
                                    VBlocs2_TC_1 + mode_1 + key_11 + OOA + acousticness + danceability + 
@@ -221,11 +220,11 @@ tmodel_ex.mig_form <- bctPoints ~  Average_Points + VBlocs1_TC_3 +
 tmodel_ex.mig <- lm(tmodel_ex.mig_form, data = televote_data)
 # investigate the R-sq value
 summary(tmodel_ex.mig)
+```
 
-########################################################################################################################
-## JURY MODEL ##########################################################################################################
-########################################################################################################################
+## JURY MODEL
 
+```{r jury-model}
 # power transformation of 3/4
 # define model formula
 # Note: thesis shows output for non-power transformed case (i.e. Points ~ VBlocs2_TC_4 + key_3 + ... )
@@ -236,42 +235,41 @@ my_model_jury <- lm(formula = my_model_jury_form, data = jury_data)
 # generate model summary
 summary(my_model_jury)
 # write the model to disk
-saveRDS(object = my_model_jury, file = 'models/arch/jury_final_model.RDS')
+saveRDS(object = my_model_jury, file = './models/arch/jury_final_model.RDS')
+```
 
-#############
-## T-tests ##
-#############
+## T-tests
 
-# Make sure to report 
-# (1) the adjusted R-sq value
-# (2) the degrees of freedom
-# (3) the f statistic for f test
-# (4) the p-value for f test
-# NOTE: include notation for levels of significance 
-# * for 0.05
-# ** for 0.01
-# *** for 0.001
+Make sure to report 
+1. the adjusted R-sq value
+2. the degrees of freedom
+3. the f statistic for f test
+4. the p-value for f test
+
+NOTE: include notation for levels of significance 
+* for 0.05
+** for 0.01
+*** for 0.001
+
+```{r jury-t-tests}
 summary(my_model_jury)
+```
 
-################################
-## Directional / Sign effects ##
-################################
+## Directional / Sign effects
 
-# Report the sign effects of each significant coefficient
-# + indicates the predictor variable has a positive effect on the dependent variable
-# - indicates the predictor variables  has a negative effect on the dependent variable
+Report the sign effects of each significant coefficient
++ indicates the predictor variable has a positive effect on the dependent variable
+- indicates the predictor variables  has a negative effect on the dependent variable
+
+```{r jury-sign-effects}
 summary(my_model_jury)
+```
 
-########################
-## Explained Variance ##
-########################
+## Explained Variance
 
-# Investigate the increase of variance explained by incorporating specific predictor variables
-# observe the increase in R-sq when a predictor variable is included / excluded from the model
-# do this for voting blocs, Echo Nest music factors and Migration patterns
+Investigate the increase of variance explained by incorporating specific predictor variables. Observe the increase in R-sq when a predictor variable is included / excluded from the model. Do this for voting blocs, Echo Nest music factors and Migration patterns
 
-#-- Voting Blocs --#
-
+```{r jury-variance-vb}
 # define model formula
 jmodel_ex.vblocs_form <- (Points)^(3/4) ~ key_3 + TC_PerfType_Solo + 
                                           liveness + ComVBlocs1_y + ComLANGFAM_y
@@ -279,9 +277,9 @@ jmodel_ex.vblocs_form <- (Points)^(3/4) ~ key_3 + TC_PerfType_Solo +
 jmodel_ex.vblocs <- lm(formula = jmodel_ex.vblocs_form, data = jury_data)
 # investigate the R-sq value
 summary(jmodel_ex.vblocs)
+```
 
-#-- Echo Nest Musical Features --#
-
+```{r jury-en}
 # define model formula
 jmodel_ex.music_form <- (Points)^(3/4) ~ VBlocs2_TC_4 + TC_PerfType_Solo + 
                                          ComVBlocs1_y + ComLANGFAM_y
@@ -289,4 +287,5 @@ jmodel_ex.music_form <- (Points)^(3/4) ~ VBlocs2_TC_4 + TC_PerfType_Solo +
 jmodel_ex.music <- lm(formula = jmodel_ex.music_form, data = jury_data)
 # investigate the R-sq value
 summary(jmodel_ex.music)
+```
 
