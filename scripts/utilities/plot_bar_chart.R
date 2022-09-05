@@ -12,7 +12,7 @@ plot_bar_chart <- function(dataset, col_names, output_dir = 'report/plots/bar_ch
                                fill = as.factor(dataset[,col])
                  )
     ) + 
-      geom_bar(stat = "count", width = 0.7) + 
+      geom_bar(stat = "count", width = 0.7, fill = "steelblue") + 
       labs(title = paste("Bar Chart of ", col), x = col, y = "Count") +
       theme_minimal() +
       theme(axis.text.x = element_text(angle = 60, hjust = 1)) +

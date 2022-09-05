@@ -8,7 +8,7 @@ plot_missings_effect <- function(col_names, orig_data, comp_data, output_dir = '
     
     # create the plot
     plt1 <- ggplot(data = orig_data, mapping = aes(x = orig_data[, col], fill = ESCdata[, col])) + 
-      geom_bar(stat = "count", width = 0.7) + 
+      geom_bar(stat = "count", width = 0.7, fill = "steelblue") + 
       labs(title = paste("All Cases - Bar Chart of ", col), x = col, y = "Count") +
       theme_minimal() +
       theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
@@ -22,7 +22,7 @@ plot_missings_effect <- function(col_names, orig_data, comp_data, output_dir = '
     
     # create the plot
     plt2 <- ggplot(data = comp_data, mapping = aes(x = completedata[, col], fill = comp_data[, col])) + 
-      geom_bar(stat = "count", width = 0.7) + 
+      geom_bar(stat = "count", width = 0.7, fill = "steelblue") + 
       labs(title = paste("Complete Cases - Bar Chart of ", col), x = col, y = "Count") +
       theme_minimal() +
       theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
