@@ -8,7 +8,7 @@ editor_options:
   chunk_output_type: inline
 ---
 
-# SECTION 2 - EXPLORATORY ANALYSIS 
+# Section 2 - Exploratory Analysis 
 
 This section conducts an exploratory analysis of the raw data. Specifically for visualizing and deriving descriptive statistics on the data In order to understand the underlying the structures and patterns in the data. A variety of descriptive statistics will be generated for both the numeric data and the categorical data. Similarly a variety of visualizations will be generated for both the numeric data and the categorical data. Further more some visualization on the patterns of diaspora will be generated using Social Networks
 
@@ -83,7 +83,7 @@ plot_bar_chart(dataset = ESCdata, col_names = all_factors, output_dir = './repor
 plot_histogram(dataset = ESCdata, col_names = all_num, output_dir = './report/plots/histograms')
 ```
 
-## CHI-SQUARED TESTS OF ASSOCIATION
+## Chi-squared Tests of Association
 
 This section conducts chi-squared tests of association for each categorical predictor variable and the response variable
 
