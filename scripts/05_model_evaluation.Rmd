@@ -1,60 +1,69 @@
-#######################################################################################################################
-## SECTION 5 - Model Evaluation OVERVIEW ############################################################################################
-#######################################################################################################################
+---
+title: "MSc-ESC"
+output: 
+  html_document:
+    toc: true
+    df_print: kable
+editor_options: 
+  chunk_output_type: inline
+---
 
-# This section evaluates the fit of the model's using the car package
-# MLR requires the residuals to be ~ IID N(0, sigma^2)
-# the residuals will be standardized for the assessment
-# Normality Assumptions will be accessed using:
-# (i) Normality tests from the nortest package
-# (ii) Visualizations such as histograms, QQ-plots, Residual Plots and Add Variable Plots
-# Constant Variance will be accessed using:
-# (i) non-constant variance test
-# Multi-collinearity will be accessed using:
-# (i) variance inflation factors
-# Outliers will be accessed using:
-# (i) Cooks Distance
+## SECTION 5 - Model Evaluation OVERVIEW
 
-#-- Libraries --#
+This section evaluates the fit of the model's using the car package
+MLR requires the residuals to be ~ IID N(0, sigma^2)
+the residuals will be standardized for the assessment
+Normality Assumptions will be accessed using:
+i. Normality tests from the nortest package
+ii. Visualizations such as histograms, QQ-plots, Residual Plots and Add Variable Plots
+Constant Variance will be accessed using:
+i. non-constant variance test
+Multi-collinearity will be accessed using:
+i. variance inflation factors
+Outliers will be accessed using:
+i. Cooks Distance
 
+```{r preliminaries}
 # load relevant libraries
+library(rmarkdown)
+library(knitr)
 library(car)
 library(MASS)
 library(nortest)
 library(lmtest)
 library(dplyr)
-# set the working directory
-setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
+```
 
+```{r data-load}
 #-- Data --#
 
 # load in the historic voting data for deriving the voting blocs
-processed_data <- read.csv(file = "data/processed_data.csv", header = T)
+processed_data <- read.csv(file = "./data/processed_data.csv", header = T)
 # split the televote data
 televote_data <- processed_data %>% filter(Voting_Method_J == 0)
 # split out the jury vote data
 jury_data <- processed_data %>% filter(Voting_Method_J == 1)
+```
 
-######################################################################################################################
-## Overall Model #####################################################################################################
-######################################################################################################################
+## Overall Model
 
+```{r overall-model}
 # load final overall model
-my_model_overall <- readRDS("models/overall_final_model.RDS")
+my_model_overall <- readRDS("./models/overall_final_model.RDS")
 # extract out the model coefficients
 overall_model_coeff <- names(my_model_overall$coefficients)[-1]
 # recreate the model formula
 overall_final_model_form<- as.formula(paste('Points ~', paste(overall_model_coeff, collapse = ' + ')))
 # generate model summary
 summary(my_model_overall)
+```
 
-#########################################
-## Transformation of Response Variable ##
-#########################################
+## Transformation of Response Variable
 
+```{r overall-box-cox}
 # Apply box-cox transformation on the model to improve the normality assumptions 
 # box-cox transformation using car
-bct <- boxCox(object = my_model_overall)
+bct <- MASS::boxcox(object = my_model_overall)
 # find optimal box-cox power transformation power
 p <- bct$x[which.max(x = bct$y)]
 # transform points using the optimal power transformation
@@ -65,22 +74,20 @@ overall_final_model_bct_form<- as.formula(paste('bctPoints ~', paste(overall_mod
 my_model_overall <- lm(formula = overall_final_model_bct_form, data = processed_data)
 # generate model summary
 summary(my_model_overall)
+```
 
-###################################
-## Evaluate the Fit of the Model ##
-###################################
+## Evaluate the Fit of the Model
 
-#-- Extract Standardized Residuals --#
-
+```{r overall-standardise-residuals}
 # create standardize residuals
 sresid <- studres(my_model_overall) 
 # Residual vs fits plot
 plot(x = my_model_overall$fitted.values, y = sresid, main = "Standardised Residuals vs Fitted Values", xlab = "Fitted Values", ylab = "Standardised Residuals")
 # add red horizontal line through y-axis 0
 abline(h = 0, col = "red")
+```
 
-#-- Influential Observations --#
-
+```{r overall-outliers}
 # Assessing Outliers
 # Bonferonni p-value for most extreme obs
 outlierTest(my_model_overall) 
@@ -101,12 +108,14 @@ cutoff <- 4/((nrow(processed_data)-length(my_model_overall$coefficients)-2))
 plot(my_model_overall, which = 4, cook.levels = cutoff)
 # Influence Plot 
 influencePlot(my_model_overall, id.method = "identify", main = "Influence Plot", sub = "Circle size is proportial to Cook's Distance" )
+```
 
-#-- Normality Assumption --#
+Normality Test
+Ho: The data is normally distributed
+Ha: the data is not normally distributed
 
+```{r overall-normality-tests}
 # Normality Test
-# Ho: The data is normally distributed
-# Ha: the data is not normally distributed
 shapiro.test(sresid)
 ad.test(sresid)
 cvm.test(sresid)
@@ -121,41 +130,43 @@ yfit <- dnorm(xfit)
 lines(xfit, yfit)
 # QQ-plot of the data
 qqPlot(my_model_overall, ylab = "Standardised Residuals", main = "QQ-Plot of Overall Model Standardised Residuals")
+```
 
-#-- Non-Constant Residual Variance --#
+Non-Constant Error Variance Test
+Ho: constant error variance
+Ha: Non-constant error Variance
 
+```{r overall-nonconstant-variance}
 # Non-Constant Error Variance Test
-# Ho: constant error variance
-# Ha: Non-constant error Variance
 ncvTest(my_model_overall)
 bptest(my_model_overall)
 # plot studentized residuals vs. fitted values 
 spreadLevelPlot(my_model_overall, main = "Spread-Level Plot for Overall Model")
+```
 
-#-- Multi-Collinearity --# 
-
+```{r overall-vifs}
 # Variance Inflation Factors 
 vif(my_model_overall)  
 sqrt(vif(my_model_overall)) > 2
 # No signs of collinearity
+```
 
-########################################################################################################################
-## TELEVOTE MODEL ######################################################################################################
-########################################################################################################################
+## TELEVOTE MODEL
 
+```{r televote-model}
 # load final televote model
-my_model_tele <- readRDS("models/televote_final_model.RDS")
+my_model_tele <- readRDS("./models/televote_final_model.RDS")
 # extract out the model coefficients
 tele_model_coeff <- names(my_model_tele$coefficients)[-1]
 # recreate the model formula
 televote_final_model_form<- as.formula(paste('Points ~', paste(tele_model_coeff, collapse = ' + ')))
 # generate model summary
 summary(my_model_tele)
+```
 
-#########################################
-## Transformation of Response Variable ##
-#########################################
+## Transformation of Response Variable
 
+```{r televote-box-cox}
 # Apply box-cox transformation on the model to improve the normality assumptions 
 # box-cox transformation using car
 bct <- boxCox(object = my_model_tele)
@@ -169,22 +180,20 @@ televote_final_model_bct_form <- as.formula(paste('bctPoints ~', paste(tele_mode
 my_model_tele <- lm(formula = televote_final_model_bct_form, data = televote_data)
 # generate model summary
 summary(my_model_tele)
+```
 
-###################################
-## Evaluate the Fit of the Model ##
-###################################
+## Evaluate the Fit of the Model
 
-#-- Extract Standardized Residuals --#
-
+```{r televote-standardise-residuals}
 # create standardize residuals
 sresid <- studres(my_model_tele) 
 # Residual vs fits plot
 plot(x = my_model_tele$fitted.values, y = sresid, main = "Standardised Residuals vs Fitted Values", xlab = "Fitted Values", ylab = "Standardised Residuals")
 # add red horizontal line through y-axis 0
 abline(h = 0, col = "red")
+```
 
-#-- Influential Observations --#
-
+```{r televote-outliers}
 # Assessing Outliers
 # Bonferonni p-value for most extreme obs
 outlierTest(my_model_tele) 
@@ -203,12 +212,14 @@ cutoff <- 4/((nrow(processed_data) - length(my_model_tele$coefficients) - 2))
 plot(my_model_tele, which = 4, cook.levels = cutoff)
 # Influence Plot 
 influencePlot(my_model_tele, id.method = "identify", main = "Influence Plot", sub = "Circle size is proportial to Cook's Distance" )
+```
 
-#-- Normality Assumption --#
+Normality Test
+Ho: The data is normally distributed
+Ha: the data is not normally distributed
 
+```{r televote-normality-tests}
 # Normality Test
-# Ho: The data is normally distributed
-# Ha: the data is not normally distributed
 shapiro.test(sresid)
 ad.test(sresid)
 cvm.test(sresid)
@@ -223,40 +234,42 @@ yfit <- dnorm(xfit)
 lines(xfit, yfit)
 # QQ-plot of the data
 qqPlot(my_model_tele, ylab = "Standardised Residuals", main = "QQ-Plot of Televote Model Standardised Residuals")
+```
 
-#-- Non-Constant Residual Variance --#
+Non-Constant Error Variance Test
+Ho: constant error variance
+Ha: Non-constant error Variance
 
+```{r televote-nonconstant-variance}
 # Non-Constant Error Variance Test
-# Ho: constant error variance
-# Ha: Non-constant error Variance
 ncvTest(my_model_tele)
 # plot studentized residuals vs. fitted values 
 spreadLevelPlot(my_model_tele, main = "Spread-Level Plot for Televote Model")
+```
 
-#-- Multi-Collinearity --# 
-
+```{r televote-vifs}
 # Variance Inflation Factors 
 vif(my_model_tele)  
 sqrt(vif(my_model_tele)) > 2
 # No signs of collinearity
+```
 
-########################################################################################################################
-## JURY MODEL ##########################################################################################################
-########################################################################################################################
+## JURY MODEL
 
+```{r jury-model}
 # load final televote model
-my_model_jury <- readRDS("models/jury_final_model.RDS")
+my_model_jury <- readRDS("./models/jury_final_model.RDS")
 # extract out the model coefficients
 jury_model_coeff <- names(my_model_jury$coefficients)[-1]
 # recreate the model formula
 jury_final_model_form<- as.formula(paste('Points ~', paste(jury_model_coeff, collapse = ' + ')))
 # generate model summary
 summary(my_model_jury)
+```
 
-#########################################
-## Transformation of Response Variable ##
-#########################################
+## Transformation of Response Variable
 
+```{r jury-power-trans}
 # transform points using the optimal power transformation
 ptPoints <- jury_data$Points^(3/4)
 # Note: weird bug occuring for row name 177 / row index 88 (possibly due to column with near all zero values)
@@ -270,22 +283,20 @@ jury_final_model_pt_form <- as.formula(paste('ptPoints ~', paste(jury_model_coef
 my_model_jury <- lm(formula = jury_final_model_pt_form, data = jury_data)
 # generate model summary
 summary(my_model_jury)
+```
 
-###################################
-## Evaluate the Fit of the Model ##
-###################################
+## Evaluate the Fit of the Model
 
-#-- Extract Standardized Residuals --#
-
+```{r jury-standardised-residuals}
 # create standardize residuals
 sresid <- studres(my_model_jury) 
 # Residual vs fits plot
 plot(x = my_model_jury$fitted.values, y = sresid,  main = "Standardised Residuals vs Fitted Values", xlab = "Fitted Values", ylab = "Standardised Residuals")
 # add red horizontal line through y-axis 0
 abline(h = 0, col = "red")
+```
 
-#-- Influential Observations --#
-
+```{r jury-outliers}
 # Assessing Outliers
 # Bonferonni p-value for most extreme obs
 outlierTest(my_model_jury) 
@@ -304,12 +315,14 @@ cutoff <- 4/((nrow(processed_data) - length(my_model_jury$coefficients) - 2))
 plot(my_model_jury, which = 4, cook.levels = cutoff)
 # Influence Plot 
 influencePlot(my_model_jury, id.method = "identify", main = "Influence Plot", sub = "Circle size is proportial to Cook's Distance" )
+```
 
-#-- Normality Assumption --#
+Normality Test
+Ho: The data is normally distributed
+Ha: the data is not normally distributed
 
+```{r jury-normality-tests}
 # Normality Test
-# Ho: The data is normally distributed
-# Ha: the data is not normally distributed
 shapiro.test(sresid)
 ad.test(sresid)
 cvm.test(sresid)
@@ -324,19 +337,22 @@ yfit <- dnorm(xfit)
 lines(xfit, yfit)
 # QQ-plot of the data
 qqPlot(my_model_jury, ylab = "Standardised Residuals", main = "QQ-Plot of Jury Vote Model Standardised Residuals")
+```
 
-#-- Non-Constant Residual Variance --#
+Non-Constant Error Variance Test
+Ho: constant error variance
+Ha: Non-constant error Variance
 
+```{r jury-nonconstant-variance}
 # Non-Constant Error Variance Test
-# Ho: constant error variance
-# Ha: Non-constant error Variance
 ncvTest(my_model_jury)
 # plot studentized residuals vs. fitted values 
 spreadLevelPlot(my_model_jury, main = "Spread-Level Plot for Jury Vote Model")
+```
 
-#-- Multi-Collinearity --# 
-
+```{r jury-vifs}
 # Variance Inflation Factors 
 vif(my_model_jury)  
 sqrt(vif(my_model_jury)) > 2
 # No signs of collinearity
+```
