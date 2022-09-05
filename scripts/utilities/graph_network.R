@@ -1,13 +1,31 @@
 # define a function to graph a given network using tkplot
-graph_network <- function(dataset, weights){
+graph_network <- function(dataset, weights, plot_type = 'standard', main = '', output_fpath = NA){
   # Construct Social Network
   G <- graph_from_data_frame(d = dataset[, c('From_country', 'To_country')], directed = T)
   # add in the points as weights
-  E(G)$weight <- as.numeric(dataset[, weights])
+  E(G)$weight <- round(as.numeric(dataset[, weights]), 3)
   # check graph is weighted
   if (is_weighted(graph = G) == FALSE)
     stop('Graph is not weighted')
-  # interactive drag and place Social Network plot 
-  tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
+  if (plot_type == 'standard'){
+    plot(x = G, 
+         main = main,
+         layout = layout.fruchterman.reingold, 
+         vertex.color = "orange", 
+         vertex.label.color = "black", 
+         vertex.size = 0.01, 
+         vertex.label.cex = 0.3,
+         edge.color = "grey", 
+         edge.arrow.size = 0.09, 
+         edge.label.cex = 0.3,
+         edge.label = E(G)$weight, 
+         edge.label.color = "black")
+    if (!is.na(output_fpath)){
+      jpeg(output_fpath)
+    }
+  } else if (plot_type == 'tkplot') {
+    # interactive drag and place Social Network plot 
+    tkplot(G, edge.color = "grey", vertex.color = "orange", vertex.label.color = "black", vertex.size = 50, edge.arrow.size = 1, edge.label = E(G)$weight, edge.label.color = "black")
+  }
   return(0)
 }
