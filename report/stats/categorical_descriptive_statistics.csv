@@ -1,0 +1,27 @@
+"","nlevels","1st mode","1st mode %","2nd mode","2nd mode %","NA %"
+"From_country",42,"Albania",2.38,"Armenia",2.38,0
+"To_country",42,"Australia",6.85,"Ukraine",6.07,0
+"Points",10,"1",10,"2",10,0
+"Round",3,"f",50,"sf1",25,0
+"Voting_Method",2,"J",50,"T",50,0
+"Host_Nation",2,"n",97.26,"y",2.74,0
+"OOA",26,"18",7.98,"9",7.14,0
+"VBlocs1_TC",21,"1",44.88,"3",15.06,0
+"VBlocs2_TC",6,"1",42.74,"5",17.98,0
+"VBlocs1_FC",20,"1",45.24,"3",9.52,0
+"VBlocs2_FC",6,"1",35.71,"5",21.43,0
+"ComVBlocs1",2,"n",78.21,"y",21.79,0
+"ComVBlocs2",2,"n",76.19,"y",23.81,0
+"FC_LANGFAM",13,"Germanic",28.57,"Slavic",28.51,0
+"TC_LANGFAM",12,"Slavic",32.68,"Germanic",26.07,0
+"ComLANGFAM",2,"n",78.93,"y",21.07,0
+"Neighbours",2,"n",89.11,"y",10.89,0
+"TC_NumNeigh",10,"3",21.43,"5",18.15,0
+"FC_SONGLANG",5,"English",80.95,"Mixed",11.9,0
+"TC_SONGLANG",5,"English",78.04,"Mixed",16.55,0
+"ComSONGLAN",2,"1",63.69,"0",36.31,0
+"TC_PerfType",4,"Solo",90.83,"Group",7.38,0
+"TC_SingerGender",4,"Female",53.04,"Male",45.48,0
+"key",12,"5",12.5,"NA's",11.55,11.547619047619
+"mode",2,"0",49.76,"1",38.69,11.547619047619
+"time_signature",2,"4",84.76,"NA's",11.55,11.547619047619
