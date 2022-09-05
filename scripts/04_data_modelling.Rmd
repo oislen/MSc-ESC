@@ -1,43 +1,52 @@
-######################################################################################################################
-## SECTION 4 - Data Modeling OVERVIEW ################################################################################
-######################################################################################################################
+---
+title: "MSc-ESC"
+output: 
+  html_document:
+    toc: true
+    df_print: kable
+editor_options: 
+  chunk_output_type: inline
+---
 
-# A stratified analysis method will be implemented
-# (1) Test Overall Data
-# Iteratively create model step wise, 
-# (2) Split and Test Data by Voting Method
-# Can't stratify the data by each country due to a lack of data
-# Need a minimum of 10/20 observations per covariate for regression analysis
-# Split data by voting method, research televote shows more bias than the jury
-# NOTE forward and step wise fitting will be utilized using AIC to determine model of best fit
+# Section 4 - Data Modeling OVERVIEW
 
-# NOTE: the models will be evaluated using the car package
-# MLR requires the residuals to be ~ IID N(0, sigma^2)
-# the residuals will be standardized for the assessment
-# Normality Assumptions will be accessed using:
-# (i) Normality tests from the nortest package
-# (ii) Visualizations such as histograms, QQ-plots, Residual Plots and Add Variable Plots
-# Constant Variance will be accessed using:
-# (i) non-constant variance test
-# Multi-collinearity will be accessed using:
-# (i) variance inflation factors
-# Outliers will be accessed using:
-# (i) Cooks Distance
+A stratified analysis method will be implemented
+1. Test Overall Data
+Iteratively create model step wise, 
+2. Split and Test Data by Voting Method
+Can't stratify the data by each country due to a lack of data
+Need a minimum of 10/20 observations per covariate for regression analysis
+Split data by voting method, research televote shows more bias than the jury
+NOTE forward and step wise fitting will be utilized using AIC to determine model of best fit
 
-#-- Libraries --#
+NOTE: the models will be evaluated using the car package
+MLR requires the residuals to be ~ IID N(0, sigma^2)
+the residuals will be standardized for the assessment
+Normality Assumptions will be accessed using:
+(i) Normality tests from the nortest package
+(ii) Visualizations such as histograms, QQ-plots, Residual Plots and Add Variable Plots
+Constant Variance will be accessed using:
+(i) non-constant variance test
+Multi-collinearity will be accessed using:
+(i) variance inflation factors
+Outliers will be accessed using:
+(i) Cooks Distance
 
+```{r preliminaries}
 # load the relevant libraries
+library(rmarkdown)
+library(knitr)
 library(car)
 library(dplyr)
-# set the working directory
-setwd(file.path(getwd(), 'GitHub/MSc-ESC/MSc_2018'))
 # load custom functions
 source('scripts/utilities/step_lm_model.R')
+```
 
+```{r data-load}
 #-- Data --#
 
 # load in the historic voting data for deriving the voting blocs
-processed_data <- read.csv(file = "data/processed_data.csv", header = T)
+processed_data <- read.csv(file = "./data/processed_data.csv", header = T)
 # split the televote data
 televote_data <- processed_data %>% filter(Voting_Method_J == 0)
 # split out the jury vote data
@@ -49,63 +58,51 @@ competition_factors <- extract_preds_by_cats(cat = 'competition')
 performance_factors <- extract_preds_by_cats(cat = 'performance')
 # define the external factors
 external_factors <- extract_preds_by_cats(cat = 'external')
+```
 
-######################################################################################################################
-## My Model - Overall Data ###########################################################################################
-######################################################################################################################
+## Model - Overall Data
 
-# iteratively create my own mode; 
-# continuously noting the magnitude and significance of the predictors. 
-# Fit the variables in groups/blocs; 
-# performance, competition and external variables. 
-# Fit each variable block independently. 
-# Then fit the all the best variables. 
-# Incorporate interaction and squared terms. 
-# Compare my final model with the baseline mode; 
-# making notes of any differences/similarities
+iteratively create my own mode; 
+continuously noting the magnitude and significance of the predictors. 
+Fit the variables in groups/blocs; 
+performance, competition and external variables. 
+Fit each variable block independently. 
+Then fit the all the best variables. 
+Incorporate interaction and squared terms. 
+Compare my final model with the baseline mode; 
+making notes of any differences/similarities
 
-#################################
-## Fitting Competition Factors ##
-#################################
-
+```{r model-overall-competition}
 # fit step wise linear model
 overall_competition_model <- step_lm_model(dataset = processed_data, pred_cols = competition_factors)
 # extract out significant predictors
 overall_sign_competition_factors <- overall_competition_model$sign_factors
+```
 
-#########################
-## Performance Factors ##
-#########################
-
+```{r model-overall-performance}
 # fit step wise linear model
 overall_performance_model <- step_lm_model(dataset = processed_data, pred_cols = performance_factors)
 # extract out significant predictors
 overall_sign_performance_factors <- overall_performance_model$sign_factors
+```
 
-######################
-## External Factors ##
-######################
-
+```{r model-overall-external}
 # fit step wise linear model
 overall_external_model <- step_lm_model(dataset = processed_data, pred_cols = external_factors)
 # extract out significant predictors
 overall_sign_external_factors <- overall_external_model$sign_factors
+```
 
-#################
-## All Factors ##
-#################
-
+```{r model-overall-all}
 # define the significant factors
 overall_all_factors <- c(overall_sign_competition_factors, overall_sign_performance_factors, overall_sign_external_factors)
 # fit step wise linear model
 overall_all_model <- step_lm_model(dataset = processed_data, pred_cols = overall_all_factors)
 # extract out significant predictors
 overall_sign_all_factors <- overall_all_model$sign_factors
+```
 
-#################
-## Final Model ##
-#################
-
+```{r model-overall-final}
 # create a model formula
 overall_final_model_form <- as.formula(paste('Points ~', paste(overall_sign_all_factors, collapse = ' + ')))
 # create the maximum model
@@ -117,60 +114,48 @@ anova(overall_final_model)
 # check variance inflation factors
 vif(overall_final_model)
 # write the model to disk
-saveRDS(object = overall_final_model, file = 'models/overall_final_model.RDS')
+saveRDS(object = overall_final_model, file = './models/overall_final_model.RDS')
+```
 
-######################################################################################################################
-## My Model - Split by Televote ######################################################################################
-######################################################################################################################
+## Model - Split by Televote
 
-# Consider how the televoting data differs from the jury data
-# with regards to:
-# performance features
-# competition features
-# external features
+Consider how the televoting data differs from the jury data
+with regards to:
+performance features
+competition features
+external features
 
-#########################
-## Competition Factors ##
-#########################
-
+```{r model-televote-competition}
 # fit step wise linear model
 televote_competition_model <- step_lm_model(dataset = televote_data, pred_cols = competition_factors)
 # extract out significant predictors
 televote_sign_competition_factors <- televote_competition_model$sign_factors
+```
 
-##########################
-## Performance Features ##
-##########################
-
+```{r model-televote-performance}
 # fit step wise linear model
 televote_performance_model <- step_lm_model(dataset = televote_data, pred_cols = performance_factors)
 # extract out significant predictors
 televote_sign_performance_factors <- televote_performance_model$sign_factors
+```
 
-######################
-## External Factors ##
-######################
-
+```{r model-televote-external}
 # fit step wise linear model
 televote_external_model <- step_lm_model(dataset = televote_data, pred_cols = external_factors)
 # extract out significant predictors
 televote_sign_external_factors <- televote_external_model$sign_factors
+```
 
-#################
-## All Factors ##
-#################
-
+```{r model-televote-all}
 # define the significant factors
 televote_all_factors <- c(televote_sign_competition_factors, televote_sign_performance_factors, televote_sign_external_factors)
 # fit step wise linear model
 televote_all_model <- step_lm_model(dataset = televote_data, pred_cols = televote_all_factors)
 # extract out significant predictors
 televote_sign_all_factors <- televote_all_model$sign_factors
+```
 
-#################
-## Final Model ##
-#################
-
+```{r model-televote-final}
 # create a model formula
 televote_final_model_form <- as.formula(paste('Points ~', paste(televote_sign_all_factors, collapse = ' + ')))
 # create the maximum model
@@ -182,54 +167,42 @@ anova(televote_final_model)
 # check variance inflation factors
 vif(televote_final_model)
 # write the model to disk
-saveRDS(object = televote_final_model, file = 'models/televote_final_model.RDS')
+saveRDS(object = televote_final_model, file = './models/televote_final_model.RDS')
+```
 
-#######################################################################################################################
-## My Model - Split by Jury ###########################################################################################
-#######################################################################################################################
+## Model - Split by Jury 
 
-#########################
-## Competition Factors ##
-#########################
-
+```{r model-jury-competition}
 # fit step wise linear model
 jury_competition_model <- step_lm_model(dataset = jury_data, pred_cols = competition_factors)
 # extract out significant predictors
 jury_sign_competition_factors <- jury_competition_model$sign_factors
+```
 
-##########################
-## Performance Features ##
-##########################
-
+```{r model-jury-performance}
 # fit step wise linear model
 jury_performance_model <- step_lm_model(dataset = jury_data, pred_cols = performance_factors)
 # extract out significant predictors
 jury_sign_performance_factors <- jury_performance_model$sign_factors
+```
 
-######################
-## External Factors ##
-######################
-
+```{r model-jury-external}
 # fit step wise linear model
 jury_external_model <- step_lm_model(dataset = jury_data, pred_cols = external_factors)
 # extract out significant predictors
 jury_sign_external_factors <- jury_external_model$sign_factors
+```
 
-#################
-## All Factors ##
-#################
-
+```{r model-jury-all}
 # define the significant factors
 jury_all_factors <- c(jury_sign_competition_factors, jury_sign_performance_factors, jury_sign_external_factors)
 # fit step wise linear model
 jury_all_model <- step_lm_model(dataset = jury_data, pred_cols = jury_all_factors)
 # extract out significant predictors
 jury_sign_all_factors <- jury_all_model$sign_factors
+```
 
-#################
-## Final Model ##
-#################
-
+```{r model-jury-final}
 # create a model formula
 jury_final_model_form <- as.formula(paste('Points ~', paste(jury_sign_all_factors, collapse = ' + ')))
 # create the maximum model
@@ -241,4 +214,5 @@ anova(jury_final_model)
 # check variance inflation factors
 vif(jury_final_model)
 # write the model to disk
-saveRDS(object = jury_final_model, file = 'models/jury_final_model.RDS')
+saveRDS(object = jury_final_model, file = './models/jury_final_model.RDS')
+```
