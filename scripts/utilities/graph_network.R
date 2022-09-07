@@ -1,7 +1,15 @@
 # define a function to graph a given network using tkplot
-graph_network <- function(dataset, weights, plot_type = 'standard', main = '', output_fpath = NA){
+graph_network <- function(dataset, 
+                          weights, 
+                          from.country = 'From_country', 
+                          to.country = 'To_country', 
+                          plot_type = 'standard', 
+                          main = '', 
+                          layout = layout.fruchterman.reingold,
+                          output_fpath = NA
+                          ){
   # Construct Social Network
-  G <- graph_from_data_frame(d = dataset[, c('From_country', 'To_country')], directed = T)
+  G <- graph_from_data_frame(d = dataset[, c(from.country, to.country)], directed = T)
   # add in the points as weights
   E(G)$weight <- round(as.numeric(dataset[, weights]), 3)
   # check graph is weighted
@@ -10,7 +18,7 @@ graph_network <- function(dataset, weights, plot_type = 'standard', main = '', o
   if (plot_type == 'standard'){
     plot(x = G, 
          main = main,
-         layout = layout.fruchterman.reingold, 
+         layout = layout, 
          vertex.color = "orange", 
          vertex.label.color = "black", 
          vertex.size = 0.01, 
