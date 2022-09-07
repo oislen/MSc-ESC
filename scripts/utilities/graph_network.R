@@ -16,6 +16,9 @@ graph_network <- function(dataset,
   if (is_weighted(graph = G) == FALSE)
     stop('Graph is not weighted')
   if (plot_type == 'standard'){
+    if (!is.na(output_fpath)){
+      jpeg(output_fpath, width = 3000, height = 3000, quality = 350, pointsize = 60)
+    }
     plot(x = G, 
          main = main,
          layout = layout, 
@@ -27,9 +30,11 @@ graph_network <- function(dataset,
          edge.arrow.size = 0.09, 
          edge.label.cex = 0.3,
          edge.label = E(G)$weight, 
-         edge.label.color = "black")
+         edge.label.color = "black",
+         annotate.plot = TRUE
+         )
     if (!is.na(output_fpath)){
-      jpeg(output_fpath)
+      dev.off()
     }
   } else if (plot_type == 'tkplot') {
     # interactive drag and place Social Network plot 
