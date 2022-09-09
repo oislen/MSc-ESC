@@ -1,5 +1,5 @@
 # Define a function to perform Correlation Tests
-corr_tests <- function(data, col_names, na.action = "na.omit", digits = 2, sign_level = 0.05){
+corr_tests <- function(data, col_names, na.action = "na.omit", digits = 5, sign_level = 0.05){
   # set the output column names
   output_cols <- c("X", "Y", "Correlation", "P-Value", "Significant")
   # Create a data frame to hold the correlation test data
@@ -19,5 +19,6 @@ corr_tests <- function(data, col_names, na.action = "na.omit", digits = 2, sign_
     # Fill in the significance column
     cor_test_df[col, "Significant"] <- ifelse(test = round(c.t.$p.value, digits = digits) < sign_level, yes = TRUE, no = FALSE)
   }
+  row.names(cor_test_df) <- NULL
   return(cor_test_df)
 }
