@@ -29,7 +29,7 @@ chisq_assoc_test <- function(data, col_names, digits = 5, sign_level = 0.05) {
     chisqtestdf[col, "Significant"] <- ifelse(test = round(x = chisqtest_res$p.value, digits = digits) < sign_level, yes = TRUE, no = FALSE)
  
   }
-  
+  row.names(chisqtestdf) <- NULL
   return(chisqtestdf)
   
 }
