@@ -17,7 +17,7 @@ factor_descriptive_statistics <- function(dataset, col_names, digits = 2) {
     factor_desc_stats[col, "1st mode %"] <- round(summary(as.factor(dataset[, col]))[which.max(summary(as.factor(dataset[, col])))] * 100 / sum(summary(as.factor(dataset[, col]))), digits = digits)
     factor_desc_stats[col, "2nd mode"] <- names(sort(summary(as.factor(dataset[, col])), decreasing = TRUE)[2])
     factor_desc_stats[col, "2nd mode %"] <- round(sort(summary(as.factor(dataset[, col])), decreasing = TRUE)[2] * 100 / sum(summary(as.factor(dataset[, col]))), digits = digits)
-    factor_desc_stats[col, "NA %"] <- length(which(is.na(as.factor(dataset[, col])))) * 100 / sum(summary(as.factor(dataset[, col])))
+    factor_desc_stats[col, "NA %"] <- round(length(which(is.na(as.factor(dataset[, col])))) * 100 / sum(summary(as.factor(dataset[, col]))), digits)
     
   }
   return(factor_desc_stats)
