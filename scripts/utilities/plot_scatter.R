@@ -12,7 +12,7 @@ plot_scatter <- function(data, col_names, output_dir = 'report/plots/scatterplot
                  mapping = aes(x = Points, y = data[,col]
                  )
     ) + 
-      geom_point(shape = 16, colour = "blue") + 
+      geom_point(shape = 16, colour = "steelblue") + 
       labs(title = paste("Scatterplot of Points vs ",col), 
            x = "Points", 
            y = col
