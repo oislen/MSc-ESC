@@ -9,7 +9,7 @@ plot_histogram <- function(dataset, col_names, output_dir = 'report/plots/histog
     # Histogram of Average_Points
     plt = ggplot(data = dataset, 
                  mapping = aes(x = dataset[, col])) + 
-      geom_histogram(col = "black", fill = "steelblue", bins = 30) + 
+      geom_histogram(fill = "steelblue", bins = 30) + 
       labs(title = paste("Histogram of ", col), x = col, y = "Total") + 
       theme_minimal()
     
