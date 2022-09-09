@@ -3,15 +3,16 @@ title: "Exploratory Analysis"
 output: 
   pdf_document:
     toc: true
+    toc_depth: 3
     df_print: kable
 ---
 
 ## Overview
 
-This section conducts an exploratory analysis of the raw data. Specifically for visualizing and deriving descriptive statistics on the data In order to understand the underlying the structures and patterns in the data. A variety of descriptive statistics will be generated for both the numeric data and the categorical data. Similarly a variety of visualizations will be generated for both the numeric data and the categorical data. Further more some visualization on the patterns of diaspora will be generated using Social Networks
+This Rmarkdown report covers an exploratory analysis of the raw data. A variety of univariate and bivarite visualizations, and descriptive statistics are derived to better understand the underlying the structures and patterns within the raw data. Visualizations and descriptive statistics are generated for both the numeric data and the categorical variables.
 
 
-```{r preliminaries}
+```{r preliminaries, message = FALSE, echo = FALSE}
 # Load in relevant libraries
 library(rmarkdown)
 library(knitr)
@@ -30,21 +31,19 @@ source("./scripts/utilities/corr_tests.R")
 source("./scripts/utilities/pred_corr_tests.R")
 source("./scripts/utilities/graph_network.R")
 
-
 # load in the raw ESC 2016 data for the analysis
 ESCdata <- read.csv(file = "./data/ESC_2016_voting_data.csv", header = T)
 ```
 
-```{r data-prep}
+```{r data-prep, echo = FALSE}
 # define vectors for all numeric columns
 avg_point_num <- c('Average_Points')
 mig_num <- c('FC_NonCOB', 'FC_NonCitzens', 'FC_COB', 'FC_Citizens', 'FC_Population', 'METRIC_COB', 'METRIC_Citizens', 'METRIC_COBCit')
-mus_num <- c('danceability', 'loudiness', 'liveness', 'energy', 'speechiness', 'acousticness', 'instrumentalness', 'acousticness', 'valence', 'tempo', 'duration_ms')
+mus_num <- c('danceability', 'loudiness', 'liveness', 'energy', 'speechiness', 'acousticness', 'instrumentalness', 'valence', 'tempo', 'duration_ms')
 demo_num <- c('TC_NumNeigh', 'FC_CAP_LON', 'FC_CAP_LAT', 'TC_CAP_LON', 'TC_CAP_LAT', 'FC_GDP_mil', 'TC_GDP_mil', 'GDP_PROP', 'CAP_DIST_km')
 comp_num <- c('OOA')
 # consolidate all numeric columns
 all_num <- c(avg_point_num, mig_num, mus_num, demo_num, comp_num)
-
 # define vectors for all categorical columns
 voting_factors <- c('From_country', 'To_country', 'Points')
 comp_factors <- c('Round', 'Voting_Method', 'Host_Nation', 'OOA')
@@ -56,131 +55,153 @@ all_factors <- c(voting_factors, comp_factors, ext_factors, perf_factors)
 
 ## Descriptive Statistics
 
-Here relevant descriptive statistics are derived for the exploratory analysis. Two custom function are used to generate the descriptive statistics in twp separate data frames. specifically for categorical data and numeric data.
+### Categorical
 
-```{r descriptive-stats}
+```{r categorical-descriptive-stats, echo = FALSE}
 # run the categorical descriptive statistics function
 raw_data_cat_desc_stats <- factor_descriptive_statistics(dataset = ESCdata, col_names = all_factors)
 # write the categorical descriptive statistics to disk
 write.csv(x = raw_data_cat_desc_stats, file = "./report/stats/categorical_descriptive_statistics.csv")
+# print descriptive statistics
+raw_data_cat_desc_stats
+```
 
+### Numeric
+
+```{r numeric-descriptive-stats, echo = FALSE}
 # generate numeric descriptive statistics
 raw_data_num_desc_stats <- numeric_descriptive_statistics(dataset = ESCdata, col_names = all_num)
 # write the numeric descriptive statistics to disk
 write.csv(x = raw_data_num_desc_stats, file = "./report/stats/numeric_descriptive_statistics.csv")
+# print descriptive statistics
+raw_data_num_desc_stats
 ```
 
-## Individual Variable Plots
+### Chi-Squared Tests of Association
 
-This section generates a variety of data visualizations. To display the underlying structures within each variable. Bar charts are generated for each categorical variable. histograms are generated for each numeric variable.
+Chi-Squared Test Hypothesis:
 
-```{r univariate-plots}
+* Ho: x is independent of y
+* Ha: x is associated with y
+
+```{r chisq-tests, echo = FALSE}
+# perform chi-sq tests of association with Points
+chisqtestdf <- chisq_assoc_test(data = ESCdata, col_names = all_factors)
+# write the data frame to a csv file
+write.csv(x = chisqtestdf, file = "./report/stats/chi_sq_tests_response.csv", row.names = F)
+# show chi-sq test results
+chisqtestdf
+```
+
+### Correlation Tests
+
+Correlation Test Hypothesis:
+
+* Ho: x is not correlated with y
+* Ha: x is correlated with y
+
+**Response Tests**
+
+```{r correlation-resp-tests, echo = FALSE}
+# execute the correlation tests against the response
+resp_cor_tests_df <- corr_tests(data = ESCdata, col_names = all_num)
+# Write the correlation results to  a .csv file
+write.csv(x = resp_cor_tests_df, file = "./report/stats/cor_tests_response.csv", row.names = F)
+# show correlation response results
+resp_cor_tests_df
+```
+
+**Predictor Tests**
+
+```{r correlation-pred-tests, echo = FALSE}
+# run correlation tests for all predictors
+pred_cor_tests_df <- pred_corr_tests(ESCdata[all_num])
+# output results as a .csv file
+write.csv(x = pred_cor_tests_df, file = "./report/Stats/cor_tests_predictors.csv", row.names = F)
+# Determine which variables are highly correlated
+pred_cor_tests_df_sub <- pred_cor_tests_df[pred_cor_tests_df$Correlation > 0.4,]
+row.names(pred_cor_tests_df_sub) <- NULL
+pred_cor_tests_df_sub
+```
+
+## Visualizations
+
+### Univariate Plots
+
+```{r univariate-plots, message = FALSE, warning = FALSE, echo = FALSE, results = 'hide'}
 # call bar chart plotting function
 plot_bar_chart(dataset = ESCdata, col_names = all_factors, output_dir = './report/plots/bar_charts')
 # call histogram plotting function
 plot_histogram(dataset = ESCdata, col_names = all_num, output_dir = './report/plots/histograms')
 ```
 
-## Chi-squared Tests of Association
+### Bivariate
 
-This section conducts chi-squared tests of association for each categorical predictor variable and the response variable
-
-Hypothesis:
-Ho: x is independent of y
-Ha: x is associated with y
-
-```{r chisq-tests}
-# perform chi-sq tests of association with Points
-chisqtestdf <- chisq_assoc_test(data = ESCdata, col_names = all_factors)
-# write the data frame to a csv file
-write.csv(x = chisqtestdf, file = "./report/stats/chi_sq_tests_response.csv", row.names = F)
-```
-
-## Correlation Scatter Plots and Correlation Tests
-
-This section generates some scatter plots and performs correlation tests.
-
-Correlation Test Hypothesis
-Ho: x is not correlated with y
-Ha: x is correlated with y
-
-```{r correlations}
+```{r bivariate-plots, message = FALSE, warning = FALSE, echo = FALSE, results = 'hide'}
 # plot scatter plot
 plot_scatter(data = ESCdata, col_names = all_num, output_dir = './report/plots/scatterplots')
-
-# execute the correlation tests against the response
-resp_cor_tests_df <- corr_tests(data = ESCdata, col_names = all_num)
-# Write the correlation results to  a .csv file
-write.csv(x = resp_cor_tests_df, file = "./report/stats/cor_tests_response.csv", row.names = F)
-
-# run correlation tests for all predictors
-pred_cor_tests_df <- pred_corr_tests(ESCdata[all_num])
-# output results as a .csv file
-write.csv(x = pred_cor_tests_df, file = "./report/Stats/cor_tests_predictors.csv", row.names = F)
-
-# Determine which variables are highly correlated
-pred_cor_tests_df[pred_cor_tests_df$Correlation > 0.8,]
 ```
 
-## Social Networks
+### Networks
 
-A variety of Social Networks based on different closeness metrics given a specified Voting_Method. Here I shall explore the effect of the televote and the Jury Vote. For example see below a high diaspora graph
-
-```{r social-networks}
+```{r social-networks, echo = FALSE}
 # NOTE: that there is more data missing for METIC_Citizens than METRIC_COB
-sum(!is.na(ESCdata$METRIC_COB))
-sum(!is.na(ESCdata$METRIC_Citizens))
 networkdata <- ESCdata %>% filter(!is.na(METRIC_Citizens))
 ```
 
-```{r metric-cob}
-# generate a summary of metric cob
-summary(networkdata$METRIC_COB)
+```{r metric-cob, echo = FALSE, results = 'hide'}
 # (1) Voting_Method = Televote
-graph_network(dataset = filter(networkdata, Voting_Method == "T" & METRIC_COB > 0.1), weights = 'Points')
+graph_network(dataset = filter(networkdata, Voting_Method == "T" & METRIC_COB > 0.1), weights = 'Points', main = 'Televote Metric COB', output_fpath = './report/plots/networks/televote-metric-cob.jpg')
 # (2) Voting_Method = Jury
-graph_network(dataset = filter(networkdata, Voting_Method == "J" & METRIC_COB > 0.1), weights = 'Points')
+graph_network(dataset = filter(networkdata, Voting_Method == "J" & METRIC_COB > 0.1), weights = 'Points', main = 'Jury Metric COB', output_fpath = './report/plots/networks/jury-metric-cob.jpg')
 ```
 
-```{r metric-citizens}
-# generate a summary of metric citizens
-summary(networkdata$METRIC_Citizens)
+![Televote Metric COB](../report/plots/networks/televote-metric-cob.jpg)\newline
+![Jury Metric COB](../report/plots/networks/jury-metric-cob.jpg)\newline
+
+```{r metric-citizens, echo = FALSE, results = 'hide'}
 # (1) Voting_Method = Televote
-graph_network(dataset = filter(networkdata, Voting_Method == "T" & METRIC_Citizens > 0.1), weights = 'Points')
+graph_network(dataset = filter(networkdata, Voting_Method == "T" & METRIC_Citizens > 0.1), weights = 'Points', main = 'Televote Metric Citizens', output_fpath = './report/plots/networks/televote-metric-citizens.jpg')
 # (2) Voting_Method = Jury
-# Construct Social Network
-graph_network(dataset = filter(networkdata, Voting_Method == "J" & METRIC_Citizens > 0.1), weights = 'Points')
+graph_network(dataset = filter(networkdata, Voting_Method == "J" & METRIC_Citizens > 0.1), weights = 'Points', main = 'Jury Metric Citizens', output_fpath = './report/plots/networks/jury-metric-citizens.jpg')
 ```
 
-```{r metric-cobcit}
-# generate a summary of metric cobcit
-summary(networkdata$METRIC_COBCit)
-# (1) Voting_Method = Televote
-graph_network(dataset = filter(networkdata, Voting_Method == "T" & METRIC_COBCit > 0.15), weights = 'Points')
-# (2) Voting_Method = Jury
-graph_network(dataset = filter(networkdata, Voting_Method == "J" & METRIC_COBCit > 0.15), weights = 'Points')
+![Televote Metric Citizens](../report/plots/networks/televote-metric-citizens.jpg)\newline
+![Jury Metric Citizens](../report/plots/networks/jury-metric-citizens.jpg)\newline
 
-# Further subdivide the data into semi-finals and final
+```{r metric-cobcit, echo = FALSE, results = 'hide'}
+# (1) Voting_Method = Televote
+graph_network(dataset = filter(networkdata, Voting_Method == "T" & METRIC_COBCit > 0.15), weights = 'Points', main = 'Televote Metric COBCit', output_fpath = './report/plots/networks/televote-metric-cobcit.jpg')
+# (2) Voting_Method = Jury
+graph_network(dataset = filter(networkdata, Voting_Method == "J" & METRIC_COBCit > 0.15), weights = 'Points', main = 'Jury Metric COBCit', output_fpath = './report/plots/networks/jury-metric-cobcit.jpg')
+
 # (1) Voting_Method = Televote & Round = sf1
-graph_network(dataset = filter(networkdata, Voting_Method == "T" & METRIC_COBCit > 0.25 & Round == "sf1"), weights = 'Points')
+graph_network(dataset = filter(networkdata, Voting_Method == "T" & METRIC_COBCit > 0.25 & Round == "sf1"), weights = 'Points', main = 'Televote Metric COBCit SF1', output_fpath = './report/plots/networks/televote-metric-cobcit-sf1.jpg')
 # (2) Voting_Method = Jury
-graph_network(dataset = filter(networkdata, Voting_Method == "J" & METRIC_COBCit > 0.25 & Round == "sf1"), weights = 'Points')
+graph_network(dataset = filter(networkdata, Voting_Method == "J" & METRIC_COBCit > 0.25 & Round == "sf1"), weights = 'Points', main = 'Jury Metric COBCit SF1', output_fpath = './report/plots/networks/jury-metric-cobcit-sf1.jpg')
 ```
 
-```{r cap-dist}
-# generate a summary of capital distance in km
-summary(networkdata$CAP_DIST_km)
+![Televote Metric COBCit](../report/plots/networks/televote-metric-cobcit.jpg)\newline
+![Jury Metric COBCit](../report/plots/networks/jury-metric-cobcit.jpg)\newline
+![Televote Metric COBCit SF1](../report/plots/networks/televote-metric-cobcit-sf1.jpg)\newline
+![Jury Metric COBCit SF1](../report/plots/networks/jury-metric-cobcit-sf1.jpg)\newline
+
+```{r cap-dist, echo = FALSE, results = 'hide'}
 # (1) Voting_Method = Televote
-graph_network(dataset = filter(networkdata, Voting_Method == "T" & CAP_DIST_km < 500), weights = 'Points')
+graph_network(dataset = filter(networkdata, Voting_Method == "T" & CAP_DIST_km < 500), weights = 'Points', main = 'Televote Cap Dist', output_fpath = './report/plots/networks/televote-cap-dist.jpg')
 # (2) Voting_Method = Jury
-graph_network(dataset = filter(networkdata, Voting_Method == "J" & CAP_DIST_km < 500), weights = 'Points')
+graph_network(dataset = filter(networkdata, Voting_Method == "J" & CAP_DIST_km < 500), weights = 'Points', main = 'Jury Cap Dist', output_fpath = './report/plots/networks/jury-cap-dist.jpg')
 ```
 
-```{r average-points}
-# generate a summary of average point value
-summary(networkdata$Average_Points)
+![Televote Capital Distance](../report/plots/networks/televote-cap-dist.jpg)\newline
+![Jury Capital Distance](../report/plots/networks/jury-cap-dist.jpg)\newline
+
+```{r average-points, echo = FALSE, results = 'hide'}
 # (1) Voting_Method = Televote
-graph_network(dataset = filter(networkdata, Voting_Method == "T" & Average_Points > 8), weights = 'Average_Points')
+graph_network(dataset = filter(networkdata, Voting_Method == "T" & Average_Points > 8), weights = 'Average_Points', main = 'Televote Average Points', output_fpath = './report/plots/networks/televote-average-points.jpg')
 # (2) Voting_Method = Jury
-graph_network(dataset = filter(networkdata, Voting_Method == "J" & Average_Points > 8), weights = 'Average_Points')
+graph_network(dataset = filter(networkdata, Voting_Method == "J" & Average_Points > 8), weights = 'Average_Points', main = 'Jury Average Points', output_fpath = './report/plots/networks/jury-average-points.jpg')
 ```
+
+![Televote Average Points](../report/plots/networks/televote-average-points.jpg)\newline
+![Jury Average Points](../report/plots/networks/jury-average-points.jpg)\newline
