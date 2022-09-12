@@ -3,30 +3,29 @@ title: "Data Processing"
 output: 
   pdf_document:
     toc: true
+    toc_depth: 3
     df_print: kable
 ---
 
 ## Overview
 
-In this script the ESC data is processed and cleaned for the data modeling stage. This will incorporate the following:
+This Rmarkdown report processes and cleans the Eurovision Song Contest (ESC) data for modeling. 
+
+This includes:
+
 1. Redefine variables as factor or numeric
 2. Dividing the variables into the three predefined groups; 
-    i. Performance
-    ii. External 
-    iii. Competition
+    * Performance
+    * External 
+    * Competition
 3. Normalize the Numeric Data to have mean 0 and standard deviation 1
 4. Dummy Encoding all Categorical Factor levels.
 5. Data Reduction
-    i. Redundant Variables
-    ii. Variables of Linear Combinations
-    iii. Categorical Variables via Chi-Squared Tests of Association
+    * Redundant Variables
+    * Variables of Linear Combinations
+    * Categorical Variables via Chi-Squared Tests of Association
 
-It is also possible to:
-1. Derive Interaction Terms
-2. Derive Polynomial Terms
-However, it may be easier and more efficient to define these individually during the model building stage.
-
-```{r preliminaries, message=FALSE}
+```{r preliminaries, message = FALSE, echo = FALSE}
 # load required libraries
 library(rmarkdown)
 library(knitr)
@@ -47,7 +46,7 @@ source("./scripts/utilities/data_reduction_chisq.R")
 source("./scripts/utilities/data_reduction_corr.R")
 ```
 
-```{r data-load}
+```{r data-load, echo = FALSE}
 # load in the raw ESC 2016 data for the analysis
 ESCdata <- read.csv(file = "./data/ESC_2016_voting_data.csv", header = T)
 # order the data by To_country, From_country, Round and OOA
@@ -60,32 +59,26 @@ ESCdata <- ESCdata %>% select(-c(id))
 
 Some of the numeric music features need to be redefined as nominal variables, the variables are key, mode and time signature.
 
-```{r redefine-factor-variables}
+```{r redefine-factor-variables, echo = FALSE}
 # define the columns to be converted to factor variables
 to_factor_cols <- c('key', 'mode', 'time_signature', 'VBlocs1_FC', 'VBlocs2_FC', 'VBlocs1_TC', 'VBlocs2_TC')
 # call the column to factor function 
 ESCdata <- column_to_factor(dataset = ESCdata, col_names = to_factor_cols)
+# print post types
+initial_data_types <- as.data.frame(sapply(ESCdata, class))
+colnames(initial_data_types) <- c("Data Type")
+initial_data_types
 ```
 
 ## Remove Missing Observations
 
-There is a substantial amount of data being lost in this section. This is by far the biggest limitation in the research, and definitely a possible area of improvement for future research. Could use an alternative source such as the world bank, however these do not store the data based on country of birth / citizenship.
-
-http://www.worldbank.org/en/topic/migrationremittancesdiasporaissues/brief/migration-remittances-data
-
-```{r remove-missing-observations}
+```{r remove-missing-observations-stats, echo = FALSE}
 # NA values per column
 na_count_per_column <- sapply(ESCdata, function(y) sum(length(which(is.na(y)))) / nrow(ESCdata))
 # write to a csv file
 write.csv(na_count_per_column, './report/stats/NA_prop_per_columns.csv')
-# there are 1022 rows with missing data values
-nrow(ESCdata) - nrow(ESCdata %>% na.omit)
-# This accounts for just over 60% of the data
-(nrow(ESCdata) - nrow(ESCdata %>% na.omit)) / nrow(ESCdata) * 100
 # filter our rows with missing data values
 completedata <- ESCdata %>% na.omit
-# have 658 complete observations
-nrow(completedata)
 
 # extract out unique from countries in order
 from_countries <- unique(ESCdata$From_countr) %>% sort()
@@ -93,7 +86,13 @@ from_countries <- unique(ESCdata$From_countr) %>% sort()
 TC_FC_missing_obseration_df <- TC_FC_missing_observations(from_countries = from_countries, orig_data = ESCdata, comp_data = completedata)
 # write the TC_FC_missing_observations_df to a csv file
 write.csv(x = TC_FC_missing_obseration_df, file = "./report/stats/TC_FC_missing_obseration_df.csv")
+```
 
+There is a total of `r nrow(ESCdata) - nrow(ESCdata %>% na.omit)` rows missing from the data. This corresponds to approximately `r round((nrow(ESCdata) - nrow(ESCdata %>% na.omit)) / nrow(ESCdata) * 100, 2)`% of the data. Removing all of these rows with missing values leaves a total of `r nrow(completedata)` rows remaining. This is a substantial loss of data, a notable limitation to the research, and an area of improvement for future research iterations. An alternative solution could be to use different sources such as the world bank for the migration / diaspora based data. However at time of research, these data repositories did not store migration / diaspora information by country of birth / citizenship.
+
+http://www.worldbank.org/en/topic/migrationremittancesdiasporaissues/brief/migration-remittances-data
+
+```{r remove-missing-observations-plots, echo = FALSE, warning = FALSE, message = FALSE, results = 'hide'}
 # The Effect on To_country, From_country, Points
 voting_factors <- c('To_country', 'From_country', 'Points')
 # call the plot missing function
@@ -102,83 +101,91 @@ plot_missings_effect(col_name = voting_factors, orig_data = ESCdata, comp_data =
 
 ## Generate Factor Blocs
 
-```{r voting-factors}
+```{r voting-factors, echo = FALSE}
 # extract all the voting factors
 voting_factors <- completedata %>% subset(select = voting_factors)
-# There 3 variables in the voting factors bloc
-ncol(voting_factors)
 ```
 
-```{r competition-factors}
+```{r competition-factors, echo = FALSE}
 # define the competition factor column names
-comp_factors_names = c('Average_Points', 'Round', 'Voting_Method', 'Host_Nation', 'OOA')
+comp_factors_names <- c('Average_Points', 'Round', 'Voting_Method', 'Host_Nation', 'OOA')
 # extract the competition factor column names
 competition_factors <- completedata %>% subset(select = comp_factors_names)
-# There are 5 variables in the competition factors bloc
-ncol(competition_factors)
 ```
 
-```{r external-factors}
+```{r external-factors, echo = FALSE}
 # define the external factor column names
-ext_factors_names = c('VBlocs1_FC', 'VBlocs2_FC', 'VBlocs1_TC', 'VBlocs2_TC', 'ComVBlocs1', 'ComVBlocs2', 
+ext_factors_names <- c('VBlocs1_FC', 'VBlocs2_FC', 'VBlocs1_TC', 'VBlocs2_TC', 'ComVBlocs1', 'ComVBlocs2', 
                       'FC_LANGFAM', 'TC_LANGFAM', 'ComLANGFAM', 'Neighbours', 'TC_NumNeigh', 'FC_NonCOB',
                       'FC_NonCitzens', 'FC_COB', 'FC_Citizens', 'FC_Population', 'METRIC_COB', 'METRIC_Citizens',
                       'METRIC_COBCit', 'FC_GDP_mil', 'TC_GDP_mil', 'GDP_PROP', 'FC_CAP_LAT', 'FC_CAP_LON', 
                       'TC_CAP_LAT', 'TC_CAP_LON', 'CAP_DIST_km')
 # extract the external factor column names
 external_factors <- completedata %>% subset(select = ext_factors_names)
-# There are 27 variables in the external factors bloc
-ncol(external_factors)
 ```
 
-```{r performance-factors}
+```{r performance-factors, echo = FALSE}
 # define the performance factor column names
-perf_factors_names = c('TC_PerfType', 'TC_SingerGender', 'FC_SONGLANG', 'TC_SONGLANG', 'ComSONGLAN', 
+perf_factors_names <- c('TC_PerfType', 'TC_SingerGender', 'FC_SONGLANG', 'TC_SONGLANG', 'ComSONGLAN', 
                        'danceability', 'energy', 'key', 'loudiness', 'mode', 'speechiness', 'acousticness',
                        'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms', 'time_signature')
 # extract the performance factor column names
 performance_factors <- completedata %>% subset(select = perf_factors_names)
-# There are 18 variables in the performance factors bloc
-ncol(performance_factors)
 ```
+
+In total, there are:
+
+* `r ncol(voting_factors)` Voting Factors
+* `r ncol(competition_factors)` Competition Factors
+* `r ncol(external_factors)` External Factors
+* `r ncol(performance_factors)` Performance Factors
 
 ## Extract Numeric & Categorical Features
 
-Objective is to extract the numeric & categorical features for each variable bloc. Two functions are defined to extract the numeric variables and the categorical variables separately
-
-```{r competition-features}
+```{r competition-features, echo = FALSE}
 # (i) Numeric Variables
 competition_factors_numeric <- extract_numeric_data(dataset = competition_factors)
 # (ii) Categorical competition Variables
 competition_factors_categorical <- extract_factor_data(dataset = competition_factors)
 ```
 
-```{r external-features}
+```{r external-features, echo = FALSE}
 # (i) Numeric Variables
 external_factors_numeric <- extract_numeric_data(dataset = external_factors)
 # (ii) Categorical Variables
 external_factors_categorical <- extract_factor_data(dataset = external_factors)
 ```
 
-```{r performance-features}
+```{r performance-features, echo = FALSE}
 # (i) Numeric Variables
 performance_factors_numeric <- extract_numeric_data(dataset = performance_factors)
 # (ii) Categorical Variables
 performance_factors_categorical <- extract_factor_data(dataset = performance_factors)
 ```
 
-```{r voting-features}
+```{r voting-features, echo = FALSE}
 # (i) Numeric Variables
 voting_factors_numeric <- extract_numeric_data(dataset = voting_factors)
 #  (ii) Categorical Variables
 voting_factors_categorical <- extract_factor_data(dataset = voting_factors)
 ```
 
+In total, there are:
+
+* `r ncol(competition_factors_numeric)` Numeric Voting Factors
+* `r ncol(competition_factors_categorical)` Categorical Voting Factors
+* `r ncol(external_factors_numeric)` Numeric Competition Factors
+* `r ncol(external_factors_categorical)` Categorical Competition Factors
+* `r ncol(performance_factors_numeric)` Numeric External Factors
+* `r ncol(performance_factors_categorical)` Categorical External Factors
+* `r ncol(voting_factors_numeric)` Numeric Performance Factors
+* `r ncol(voting_factors_categorical)` Categorical Performance Factors
+
 ## Dummy Encoding Categorical Variables
 
-This section dummy encodes the categorical variables for each variable bloc. A dummy encoding function is defined and applied it to each categorical bloc. It is not necessary to dummy encode the voting factors To_country and From_country as we will not be incorporated as model predictor variables
+All categorical variables for each variable bloc are dummy encoded. It is not necessary to dummy encode the voting factors To_country and From_country as we will not be incorporated as model predictor variables
 
-```{r dummy-encoding}
+```{r dummy-encoding, echo = FALSE}
 # Dummy encode competition factors
 competition_factors_categorical <- categorical_dummy_encoding(dataset = competition_factors_categorical)
 # Dummy encode external factors
@@ -191,34 +198,46 @@ performance_factors_categorical <- categorical_dummy_encoding(dataset = performa
 
 This section normalizes or range standardizes the numeric variables in each block. There is also a special case for OOA in the competition Bloc. OOA will need to be standardized in relation to each round. This shall be done after the numeric variables from each bloc have been standardized
 
-```{r standardise-competition}
+```{r standardise-competition, echo = FALSE}
 # (1) Competition Factors
 competition_factors_numeric <- normalise_data(dataset = competition_factors_numeric)
 # Check that each column has mean 0
-round(apply(X = competition_factors_numeric, MARGIN = 2, FUN = mean), digits = 6)
+competition_factors_numeric_mean <- round(apply(X = competition_factors_numeric, MARGIN = 2, FUN = mean), digits = 6)
 # Check that each column has standard deviation 1
-round(apply(X = competition_factors_numeric, MARGIN = 2, FUN = sd), digits = 6)
+competition_factors_numeric_sd <- round(apply(X = competition_factors_numeric, MARGIN = 2, FUN = sd), digits = 6)
+# column bind stats
+competition_factors_numeric_stats <- as.data.frame(cbind(competition_factors_numeric_mean, competition_factors_numeric_sd))
+colnames(competition_factors_numeric_stats) <- c("mean", "sdev")
+competition_factors_numeric_stats
 ```
 
-```{r standardise-external}
+```{r standardise-external, echo = FALSE}
 # (2) External Factors
 external_factors_numeric <- normalise_data(dataset = external_factors_numeric)
 # Check that each column has mean 0
-round(apply(X = external_factors_numeric, MARGIN = 2, FUN = mean), digits = 6)
+external_factors_numeric_mean <- round(apply(X = external_factors_numeric, MARGIN = 2, FUN = mean), digits = 6)
 # Check that each column has standard deviation 1
-round(apply(X = external_factors_numeric, MARGIN = 2, FUN = sd), digits = 6)
+competition_factors_numeric_sd <- round(apply(X = external_factors_numeric, MARGIN = 2, FUN = sd), digits = 6)
+# column bind stats
+external_factors_numeric_stats <- as.data.frame(cbind(external_factors_numeric_mean, competition_factors_numeric_sd))
+colnames(external_factors_numeric_stats) <- c("mean", "sdev")
+external_factors_numeric_stats
 ```
 
-```{r standardise-performance}
+```{r standardise-performance, echo = FALSE}
 # (3) Performance Factors
 performance_factors_numeric <- normalise_data(dataset = performance_factors_numeric)
 # Check that each column has mean 0
-round(apply(X = performance_factors_numeric, MARGIN = 2, FUN = mean), digits = 6)
+performance_factors_numeric_mean <- round(apply(X = performance_factors_numeric, MARGIN = 2, FUN = mean), digits = 6)
 # Check that each column has standard deviation 1
-round(apply(X = performance_factors_numeric, MARGIN = 2, FUN = sd), digits = 6)
+performance_factors_numeric_sd <- round(apply(X = performance_factors_numeric, MARGIN = 2, FUN = sd), digits = 6)
+# column bind stats
+performance_factors_numeric_stats <- as.data.frame(cbind(performance_factors_numeric_mean, performance_factors_numeric_sd))
+colnames(performance_factors_numeric_stats) <- c("mean", "sdev")
+performance_factors_numeric_stats
 ```
 
-```{r standardise-ooa}
+```{r standardise-ooa, echo = FALSE}
 #-- OOA --#
 
 # Extract the relevant features
@@ -252,7 +271,7 @@ This section performs data reduction whereby Categorical / Numeric variables are
 2. They form part of a linear combination with other variables
 3. They are strongly associated / correlated with other variables
 
-```{r drop-redundant-external}
+```{r drop-redundant-external, echo = FALSE}
 # There are 13 categorical variables that have only 0 observations
 zero_ext_fact_cats <- apply(X = external_factors_categorical, MARGIN = 2, FUN = sum) == 0
 # extract out the columns with all zero values
@@ -260,25 +279,31 @@ zero_ext_fact_cats_cols <- names(which(zero_ext_fact_cats))
 # find the columns which do not have all zero values
 non_zero_ext_fact_cols <- colnames(external_factors_categorical)[!(colnames(external_factors_categorical) %in% zero_ext_fact_cats_cols)]
 # determine how many columns have zero values
-length(zero_ext_fact_cats_cols)
+n_zero_ext_fact_cats_cols <- length(zero_ext_fact_cats_cols)
 # extract the external categorical features
 external_factors_categorical <- external_factors_categorical %>% subset(select = non_zero_ext_fact_cols)
 ```
 
-```{r drop-redundant-competition}
+```{r drop-redundant-competition, echo = FALSE}
 # There are no competition categorical variables with only 0 observations
-sum(apply(X = competition_factors_categorical, MARGIN = 2, FUN = sum) == 0)
+n_competition_factors_categorical <- sum(apply(X = competition_factors_categorical, MARGIN = 2, FUN = sum) == 0)
 
 ```
 
-```{r drop-redundant-performance}
+```{r drop-redundant-performance, echo = FALSE}
 # There are 0 performance categorical variables with only 0 observations
-sum(apply(X = performance_factors_categorical,  MARGIN = 2, FUN = sum) == 0)
+n_performance_factors_categorical <- sum(apply(X = performance_factors_categorical,  MARGIN = 2, FUN = sum) == 0)
 ```
+
+In total, there are:
+
+* `r n_zero_ext_fact_cats_cols` Redundant External Categorical Factors
+* `r n_competition_factors_categorical` Redundant Competition Factors
+* `r n_performance_factors_categorical` Redundant Performance Factors
 
 If two variables are feature a lot of 0s or 1s then there will be a strong association between the two variables as they share a lot of common observations. In such cases, one of the variables can be removed as they both measure the same entity. This lowers the chance of collinearity and reduces the number of dimensions
 
-```{r drop-chisq-external}
+```{r drop-chisq-external, echo = FALSE}
 # extract out the relevant voting blocks for each county
 FC_VBlocs1_facts <- external_factors_categorical %>% select(starts_with('VBlocs1_FC')) %>% colnames()
 FC_VBlocs2_facts <- external_factors_categorical %>% select(starts_with('VBlocs2_FC')) %>% colnames()
@@ -305,7 +330,7 @@ keep_ext_cols <- external_factors_categorical_cols[!(external_factors_categorica
 external_factors_categorical <- external_factors_categorical %>% subset(select = keep_ext_cols)
 ```
 
-```{r drop-chisq-performance}
+```{r drop-chisq-performance, echo = FALSE}
 # extract out the relevant from country and to country song language
 FC_SONGLANG_facts <- performance_factors_categorical %>% select(starts_with('FC_SONGLANG')) %>% colnames()
 TC_SONGLANG_facts <- performance_factors_categorical %>% select(starts_with('TC_SONGLANG')) %>% colnames()
@@ -327,7 +352,7 @@ performance_factors_categorical <- performance_factors_categorical %>% subset(se
 
 If two numeric variables are very highly correlated and represent the same entity then it is unnecessary to include them in the data modeling stage. This is particular the case for the migration data. The correlation test function implement is the same as the one that was used during the exploratory analysis section.
 
-```{r drop-corr-migration}
+```{r drop-corr-migration, echo = FALSE}
 # Perform the correlation tests
 mig_nums = c('FC_NonCOB', 'FC_NonCitzens', 'FC_COB', 'FC_Citizens', 'FC_Population', 'METRIC_COB','METRIC_Citizens', 'METRIC_COBCit')
 # extract out the column names for significant columns
@@ -342,7 +367,7 @@ external_factors_numeric <- external_factors_numeric %>% subset(select = keep_ex
 
 ## Data Output
 
-```{r data-output}
+```{r data-output, echo = FALSE}
 # combine the various factor blocks together
 processed_voting_factors <- cbind(voting_factors_categorical, voting_factors_numeric)
 processed_competition_factors <- cbind(competition_factors_categorical, competition_factors_numeric)
