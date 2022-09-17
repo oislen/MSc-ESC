@@ -3,27 +3,31 @@ title: "Conclusions"
 output: 
   pdf_document:
     toc: true
+    toc_depth: 3
     df_print: kable
 ---
 
 ## Overview
 
-This script specializes in analyzing the models and drawing inferences for the research question. The research question is whether voting blocs, echo nest music features and migration patterns can explain the points and voting patterns of the 2016 ESC. This can be converted into a statistical problem using multiple linear regression whereby determining whether voting blocs, echo nest music features and migration patterns significantly explain the points and voting patterns.
+This rmarkdown report analyzes the models and draws inferences for the research question. The research question is whether voting blocs, echo nest music features and migration patterns can explain the points and voting patterns of the 2016 ESC. This can be converted into a statistical problem using multiple linear regression whereby determining whether voting blocs, echo nest music features and migration patterns significantly explain the points and voting patterns.
 
 This question will be answer by:
+
 1. Constricting t-tests
 2. Observing the signs of the estimated coefficients
 3. measuring the increase in variance explained (R-sq) with the addition of a predictor variable
 
-```{r preliminaries}
+```{r preliminaries, message = FALSE, echo = FALSE}
 # load relevant libraries
 library(rmarkdown)
 library(knitr)
 library(car)
 library(dplyr)
+# set inline rounding digits
+inline_digits = 5
 ```
 
-```{r data-load}
+```{r data-load, echo = FALSE}
 # load in the historic voting data for deriving the voting blocs
 processed_data <- read.csv(file = "./data/arch/processed_data.csv", header = T)
 # split the televote data
@@ -32,9 +36,11 @@ televote_data <- processed_data %>% filter(Voting_Method_J == 0)
 jury_data <- processed_data %>% filter(Voting_Method_J == 1)
 ```
 
+\newpage
+
 ## Overall Model
 
-```{r overall-model}
+```{r overall-model, echo = FALSE}
 #-- Fit the Final Model --#
 
 # define the model formula for the final model
@@ -45,7 +51,7 @@ my_model_overall_form <- Points ~ Average_Points + VBlocs1_TC_3 + CAP_DIST_km +
 # fit the final overall model
 my_model_overall <- lm(formula = my_model_overall_form, data = processed_data)
 # perform box-cox transformation
-bct <- boxCox(object = my_model_overall)
+bct <- boxCox(object = my_model_overall, plotit = FALSE)
 # return the optimal power transformation
 p <- bct$x[which.max(x = bct$y)]
 # transform the response variable
@@ -57,44 +63,50 @@ my_model_overall_bct_from <- bctPoints ~ Average_Points + VBlocs1_TC_3 + CAP_DIS
                                           ComVBlocs1_y + VBlocs1_TC_1 + key_5 + OOA + speechiness
 # refit the model with the power transformation
 my_model_overall <- lm(my_model_overall_bct_from, data = processed_data)
-# generate final model summary
-summary(my_model_overall)
+# generate model summary
+my_model_overall_summary <- summary(my_model_overall)
+my_model_overall_summary
 # write the model to disk
 saveRDS(object = my_model_overall, file = './models/arch/overall_final_model.RDS')
 ```
 
-## T-tests
+### T-tests
 
-Make sure to report 
+Make sure to report:
+
 1. the adjusted R-sq value
 2. the degrees of freedom
 3. the f statistic for f test
 4. the p-value for f test
 
-NOTE: include notation for levels of significance 
-* for 0.05
-** for 0.01
-*** for 0.001
+Note the notation for levels of significance 
 
-```{r overall-t-tests}
-summary(my_model_overall)
+* \* for 0.05
+* ** for 0.01
+* *** for 0.001
+
+```{r overall-t-tests, echo = FALSE}
+as.data.frame(my_model_overall_summary$coefficients)
 ```
 
-## Directional / Sign effects
+### Directional / Sign effects
 
-Report the sign effects of each significant coefficient
-+ indicates the predictor variable has a positive effect on the dependent variable
-- indicates the predictor variables  has a negative effect on the dependent variable
+Report the sign effects of each significant coefficient:
 
-```{r overall-sign-effects}
-summary(my_model_overall)
+* \+ indicates the predictor variable has a positive effect on the dependent variable
+* \- indicates the predictor variables  has a negative effect on the dependent variable
+
+```{r overall-sign-effects, echo = FALSE}
+overall_coefficients <- as.data.frame(my_model_overall$coefficients)
+colnames(overall_coefficients) <- c('coefficients')
+overall_coefficients
 ```
 
-## Explained Variance
+### Explained Variance
 
 Investigate the increase of variance explained by incorporating specific predictor variables. Observe the increase in R-sq when a predictor variable is included / excluded from the model. Do this for voting blocs, Echo Nest music factors and Migration patterns
 
-```{r overall-variance-vb}
+```{r overall-variance-vb, echo = FALSE}
 # define the model formula
 omodel_ex.vblocs_form <- bctPoints ~ Average_Points + CAP_DIST_km + 
                                      FC_NonCitzens + ComLANGFAM_y + liveness + key_3 + METRIC_Citizens + 
@@ -103,10 +115,10 @@ omodel_ex.vblocs_form <- bctPoints ~ Average_Points + CAP_DIST_km +
 # fit the linear model
 omodel_ex.vblocs <- lm(formula = omodel_ex.vblocs_form, data = processed_data)
 # generate model summary
-summary(omodel_ex.vblocs)
+omodel_ex.vblocs_summary <- summary(omodel_ex.vblocs)
 ```
 
-```{r overall-variance-en}
+```{r overall-variance-en, echo = FALSE}
 # define the model formula
 omodel_ex.music_form <- bctPoints ~ Average_Points + VBlocs1_TC_3 + CAP_DIST_km + 
                                     FC_NonCitzens + ComLANGFAM_y + METRIC_Citizens + 
@@ -115,10 +127,10 @@ omodel_ex.music_form <- bctPoints ~ Average_Points + VBlocs1_TC_3 + CAP_DIST_km 
 # fit the linear model
 omodel_ex.music <- lm(omodel_ex.music_form, data = processed_data)
 # investigate the R-sq value
-summary(omodel_ex.music)
+omodel_ex.music_summary <- summary(omodel_ex.music)
 ```
 
-```{r overall-variance-migration}
+```{r overall-variance-migration, echo = FALSE}
 # define the model formula
 omodel_ex.mig_form <- Points ~ Average_Points + VBlocs1_TC_3 + CAP_DIST_km + 
                                ComLANGFAM_y + liveness + key_3 + 
@@ -127,12 +139,18 @@ omodel_ex.mig_form <- Points ~ Average_Points + VBlocs1_TC_3 + CAP_DIST_km +
 # fit the linear model
 omodel_ex.mig <- lm(formula = omodel_ex.mig_form, data = processed_data)
 # generate the model summary
-summary(omodel_ex.mig)
+omodel_ex.mig_summary <- summary(omodel_ex.mig)
 ```
 
-## TELEVOTE MODEL
+* The removal of the voting block features from the overall model decreases the R-sq value from `r round(my_model_overall_summary$r.squared, inline_digits)` to `r round(omodel_ex.vblocs_summary$r.squared, inline_digits)`.
+* The removal of the echo nest features from the overall model decreases the R-sq value from `r round(my_model_overall_summary$r.squared, inline_digits)` to `r round(omodel_ex.music_summary$r.squared, inline_digits)`.
+* The removal of the migration features from the overall model decreases the R-sq value from `r round(my_model_overall_summary$r.squared, inline_digits)` to `r round(omodel_ex.mig_summary$r.squared, inline_digits)`.
 
-```{r televote-model}
+\newpage
+
+## Televote Model
+
+```{r televote-model, echo = FALSE}
 # define the model formula
 my_model_tele_form <- Points ~ METRIC_Citizens + Average_Points + VBlocs1_TC_3 + 
                                VBlocs2_TC_1 + mode_1 + key_11 + OOA + acousticness + danceability + 
@@ -140,7 +158,7 @@ my_model_tele_form <- Points ~ METRIC_Citizens + Average_Points + VBlocs1_TC_3 +
 # fit the linear model
 my_model_tele <- lm(formula = my_model_tele_form, data = televote_data)
 # perform box-cox transformation
-bct <- boxCox(object = my_model_tele)
+bct <- boxCox(object = my_model_tele, plotit = FALSE)
 # return the optimal power transformation
 p <- bct$x[which.max(x = bct$y)]
 # transform the response variable
@@ -152,43 +170,49 @@ my_model_tele_bct <- bctPoints ~ METRIC_Citizens + Average_Points + VBlocs1_TC_3
 # refit the model with the power transformation
 my_model_tele <- lm(my_model_tele_bct, data = televote_data)
 # generate model summary
-summary(my_model_tele)
+my_model_tele_summary <- summary(my_model_tele)
+my_model_tele_summary
 # write the model to disk
 saveRDS(object = my_model_tele, file = './models/arch/televote_final_model.RDS')
 ```
 
-## T-tests
+### T-tests
 
-Make sure to report 
+Make sure to report:
+
 1. the adjusted R-sq value
 2. the degrees of freedom
 3. the f statistic for f test
 4. the p-value for f test
 
-NOTE: include notation for levels of significance 
-* for 0.05
-** for 0.01
-*** for 0.001
+Note the notation for levels of significance 
 
-```{r televote-t-tests}
-summary(my_model_tele)
+* \* for 0.05
+* ** for 0.01
+* *** for 0.001
+
+```{r televote-t-tests, echo = FALSE}
+as.data.frame(my_model_tele_summary$coefficients)
 ```
 
-## Directional / Sign effects 
+### Directional / Sign effects
 
-Report the sign effects of each significant coefficient
-+ indicates the predictor variable has a positive effect on the dependent variable
-- indicates the predictor variables  has a negative effect on the defendant variable
+Report the sign effects of each significant coefficient:
 
-```{r televote-sign-effects}
-summary(my_model_tele)
+* \+ indicates the predictor variable has a positive effect on the dependent variable
+* \- indicates the predictor variables  has a negative effect on the dependent variable
+
+```{r televote-sign-effects, echo = FALSE}
+tele_coefficients <- as.data.frame(my_model_tele$coefficients)
+colnames(tele_coefficients) <- c('coefficients')
+tele_coefficients
 ```
 
-## Explained Variance
+### Explained Variance
 
 Investigate the increase of variance explained by incorporating specific predictor variables. Observe the increase in R-sq when a predictor variable is included / excluded from the model. Do this for voting blocs, Echo Nest music factors and Migration patterns
 
-```{r televote-variance-vb}
+```{r televote-variance-vb, echo = FALSE}
 # define model formula
 tmodel_ex.vblocs_form <- bctPoints ~ METRIC_Citizens + Average_Points + 
                                      mode_1 + key_11 + OOA + acousticness + danceability + 
@@ -196,20 +220,20 @@ tmodel_ex.vblocs_form <- bctPoints ~ METRIC_Citizens + Average_Points +
 # fit linear model
 tmodel_ex.vblocs <- lm(tmodel_ex.vblocs_form, data = televote_data)
 # investigate the R-sq value
-summary(tmodel_ex.vblocs)
+tmodel_ex.vblocs_summary <- summary(tmodel_ex.vblocs)
 ```
 
-```{r televote-variance-en}
+```{r televote-variance-en, echo = FALSE}
 # define model formula
 tmodel_ex.music_form <- bctPoints ~ METRIC_Citizens + Average_Points + VBlocs1_TC_3 + 
                                     VBlocs2_TC_1 + OOA + VBlocs1_TC_13 + ComLANGFAM_y
 # fit linear model
 tmodel_ex.music <- lm(tmodel_ex.music_form, data = televote_data)
 # investigate the R-sq value
-summary(tmodel_ex.music)
+tmodel_ex.music_summary <- summary(tmodel_ex.music)
 ```
 
-```{r televote-variance-migration}
+```{r televote-variance-migration, echo = FALSE}
 # define model formula
 tmodel_ex.mig_form <- bctPoints ~  Average_Points + VBlocs1_TC_3 + 
                                    VBlocs2_TC_1 + mode_1 + key_11 + OOA + acousticness + danceability + 
@@ -217,12 +241,18 @@ tmodel_ex.mig_form <- bctPoints ~  Average_Points + VBlocs1_TC_3 +
 # fit linear model
 tmodel_ex.mig <- lm(tmodel_ex.mig_form, data = televote_data)
 # investigate the R-sq value
-summary(tmodel_ex.mig)
+tmodel_ex.mig_summary <- summary(tmodel_ex.mig)
 ```
 
-## JURY MODEL
+* The removal of the voting block features from the televote model decreases the R-sq value from `r round(my_model_tele_summary$r.squared, inline_digits)` to `r round(tmodel_ex.vblocs_summary$r.squared, inline_digits)`.
+* The removal of the echo nest features from the televote model decreases the R-sq value from `r round(my_model_tele_summary$r.squared, inline_digits)` to `r round(tmodel_ex.music_summary$r.squared, inline_digits)`.
+* The removal of the migration features from the televote model decreases the R-sq value from `r round(my_model_tele_summary$r.squared, inline_digits)` to `r round(tmodel_ex.mig_summary$r.squared, inline_digits)`.
 
-```{r jury-model}
+\newpage
+
+## Jury Model
+
+```{r jury-model, echo = FALSE}
 # power transformation of 3/4
 # define model formula
 # Note: thesis shows output for non-power transformed case (i.e. Points ~ VBlocs2_TC_4 + key_3 + ... )
@@ -231,59 +261,68 @@ my_model_jury_form <- (Points)^(3/4) ~ VBlocs2_TC_4 + key_3 + TC_PerfType_Solo +
 # fit linear model
 my_model_jury <- lm(formula = my_model_jury_form, data = jury_data)
 # generate model summary
-summary(my_model_jury)
+my_model_jury_summary <- summary(my_model_jury)
+my_model_jury_summary
 # write the model to disk
 saveRDS(object = my_model_jury, file = './models/arch/jury_final_model.RDS')
 ```
 
-## T-tests
+### T-tests
 
-Make sure to report 
+Make sure to report:
+
 1. the adjusted R-sq value
 2. the degrees of freedom
 3. the f statistic for f test
 4. the p-value for f test
 
-NOTE: include notation for levels of significance 
-* for 0.05
-** for 0.01
-*** for 0.001
+Note the notation for levels of significance 
 
-```{r jury-t-tests}
-summary(my_model_jury)
+* \* for 0.05
+* ** for 0.01
+* *** for 0.001
+
+```{r jury-t-tests, echo = FALSE}
+as.data.frame(my_model_jury_summary$coefficients)
 ```
 
-## Directional / Sign effects
 
-Report the sign effects of each significant coefficient
-+ indicates the predictor variable has a positive effect on the dependent variable
-- indicates the predictor variables  has a negative effect on the dependent variable
+### Directional / Sign effects
 
-```{r jury-sign-effects}
-summary(my_model_jury)
+Report the sign effects of each significant coefficient:
+
+* \+ indicates the predictor variable has a positive effect on the dependent variable
+* \- indicates the predictor variables  has a negative effect on the dependent variable
+
+```{r jury-sign-effects, echo = FALSE}
+jury_coefficients <- as.data.frame(my_model_jury$coefficients)
+colnames(jury_coefficients) <- c('coefficients')
+jury_coefficients
 ```
 
-## Explained Variance
+### Explained Variance
 
 Investigate the increase of variance explained by incorporating specific predictor variables. Observe the increase in R-sq when a predictor variable is included / excluded from the model. Do this for voting blocs, Echo Nest music factors and Migration patterns
 
-```{r jury-variance-vb}
+```{r jury-variance-vb, echo = FALSE}
 # define model formula
 jmodel_ex.vblocs_form <- (Points)^(3/4) ~ key_3 + TC_PerfType_Solo + 
                                           liveness + ComVBlocs1_y + ComLANGFAM_y
 # fit linear model
 jmodel_ex.vblocs <- lm(formula = jmodel_ex.vblocs_form, data = jury_data)
 # investigate the R-sq value
-summary(jmodel_ex.vblocs)
+jmodel_ex.vblocs_summary <- summary(jmodel_ex.vblocs)
 ```
 
-```{r jury-en}
+```{r jury-en, echo = FALSE}
 # define model formula
 jmodel_ex.music_form <- (Points)^(3/4) ~ VBlocs2_TC_4 + TC_PerfType_Solo + 
                                          ComVBlocs1_y + ComLANGFAM_y
 # fit linear model
 jmodel_ex.music <- lm(formula = jmodel_ex.music_form, data = jury_data)
 # investigate the R-sq value
-summary(jmodel_ex.music)
+jmodel_ex.music_summary <- summary(jmodel_ex.music)
 ```
 
+* The removal of the voting block features from the televote model decreases the R-sq value from `r round(my_model_jury_summary$r.squared, inline_digits)` to `r round(jmodel_ex.vblocs_summary$r.squared, inline_digits)`.
+* The removal of the echo nest features from the televote model decreases the R-sq value from `r round(my_model_jury_summary$r.squared, inline_digits)` to `r round(jmodel_ex.vblocs_summary$r.squared, inline_digits)`.
