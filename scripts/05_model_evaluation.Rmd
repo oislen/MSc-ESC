@@ -3,25 +3,25 @@ title: "Model Evaluation"
 output: 
   pdf_document:
     toc: true
+    toc_depth: 3
     df_print: kable
 ---
 
 ## Overview
 
-This section evaluates the fit of the model's using the car package
-MLR requires the residuals to be ~ IID N(0, sigma^2)
-the residuals will be standardized for the assessment
-Normality Assumptions will be accessed using:
-i. Normality tests from the nortest package
-ii. Visualizations such as histograms, QQ-plots, Residual Plots and Add Variable Plots
-Constant Variance will be accessed using:
-i. non-constant variance test
-Multi-collinearity will be accessed using:
-i. variance inflation factors
-Outliers will be accessed using:
-i. Cooks Distance
+This section evaluates the fit of the model's using the car package. Multiple linear regression (MLR) requires the model residuals to be ~ IID N(0, sigma^2). The model residuals will be standardized for the assessment.
 
-```{r preliminaries}
+1. Normality Assumptions will be accessed using:
+    * Normality tests from the nortest package
+    * Visualizations such as histograms, QQ-plots, Residual Plots and Add Variable Plots
+2. Constant Variance will be accessed using:
+    * non-constant variance test
+3. Multi-collinearity will be accessed using:
+    * variance inflation factors
+4. Outliers will be accessed using:
+    * Cooks Distance
+
+```{r preliminaries, message = FALSE, echo = FALSE, warning = FALSE}
 # load relevant libraries
 library(rmarkdown)
 library(knitr)
@@ -30,9 +30,15 @@ library(MASS)
 library(nortest)
 library(lmtest)
 library(dplyr)
+# load custom functions
+source('scripts/utilities/bonferroni_outlier_test.R')
+source('scripts/utilities/sresid_outliers.R')
+source('scripts/utilities/normality_tests.R')
+source('scripts/utilities/ncv_test.R')
+source('scripts/utilities/model_vifs.R')
 ```
 
-```{r data-load}
+```{r data-load, echo = FALSE, warning = FALSE}
 #-- Data --#
 
 # load in the historic voting data for deriving the voting blocs
@@ -43,9 +49,11 @@ televote_data <- processed_data %>% filter(Voting_Method_J == 0)
 jury_data <- processed_data %>% filter(Voting_Method_J == 1)
 ```
 
+\newpage
+
 ## Overall Model
 
-```{r overall-model}
+```{r overall-model, echo = FALSE, warning = FALSE}
 # load final overall model
 my_model_overall <- readRDS("./models/overall_final_model.RDS")
 # extract out the model coefficients
@@ -56,9 +64,9 @@ overall_final_model_form<- as.formula(paste('Points ~', paste(overall_model_coef
 summary(my_model_overall)
 ```
 
-## Transformation of Response Variable
+### Transformation of Response Variable
 
-```{r overall-box-cox}
+```{r overall-box-cox, echo = FALSE, warning = FALSE}
 # Apply box-cox transformation on the model to improve the normality assumptions 
 # box-cox transformation using car
 bct <- MASS::boxcox(object = my_model_overall)
@@ -74,9 +82,9 @@ my_model_overall <- lm(formula = overall_final_model_bct_form, data = processed_
 summary(my_model_overall)
 ```
 
-## Evaluate the Fit of the Model
+### Evaluate the Fit of the Model
 
-```{r overall-standardise-residuals}
+```{r overall-standardise-residuals, echo = FALSE, warning = FALSE}
 # create standardize residuals
 sresid <- studres(my_model_overall) 
 # Residual vs fits plot
@@ -85,73 +93,79 @@ plot(x = my_model_overall$fitted.values, y = sresid, main = "Standardised Residu
 abline(h = 0, col = "red")
 ```
 
-```{r overall-outliers}
+```{r overall-outliers, echo = FALSE, warning = FALSE}
 # Assessing Outliers
 # Bonferonni p-value for most extreme obs
-outlierTest(my_model_overall) 
-# final outlier residuals
-which(sresid < -2)
-# qq-plot for studentized residuals
-qqPlot(my_model_overall, main = "QQ Plot")  
+bonferroni_outlier_test(my_model_overall)
+# print example outliers
+head(sresid_outliers(sresid, cutoff = -2))
 # leverage plots
 leveragePlots(my_model_overall) 
 # Added variable Plots
 avPlots(my_model_overall)
-# Residual Plots
-residualPlots(my_model_overall)
 # Cook's D plot
 # identify D values > 4/(n-k-1) 
 cutoff <- 4/((nrow(processed_data)-length(my_model_overall$coefficients)-2)) 
 # Crooks Distance plot
 plot(my_model_overall, which = 4, cook.levels = cutoff)
+```
+
+```{r overall-outliers-plots, echo = FALSE, warning = FALSE, results = 'hide'}
+# Residual Plots
+residualPlots(my_model_overall)
 # Influence Plot 
 influencePlot(my_model_overall, id.method = "identify", main = "Influence Plot", sub = "Circle size is proportial to Cook's Distance" )
 ```
 
 Normality Test
-Ho: The data is normally distributed
-Ha: the data is not normally distributed
 
-```{r overall-normality-tests}
+* Ho: The data is normally distributed
+* Ha: the data is not normally distributed
+
+
+```{r overall-normality-tests, echo = FALSE, warning = FALSE}
 # Normality Test
-shapiro.test(sresid)
-ad.test(sresid)
-cvm.test(sresid)
-lillie.test(sresid)
-pearson.test(sresid)
-sf.test(sresid)
+normality_tests(sresid)
 # the data is not normally distributed
 # Histogram of residuals
 hist(sresid, freq = FALSE, main = "Distribution of Standardised Residuals", ylim = c(0,0.4),  xlim = c(-4, 3))
 xfit <- seq(min(sresid, na.rm = TRUE), max(sresid, na.rm = TRUE), length = 40) 
 yfit <- dnorm(xfit) 
 lines(xfit, yfit)
+```
+
+```{r overall-normality-tests-qqplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # QQ-plot of the data
 qqPlot(my_model_overall, ylab = "Standardised Residuals", main = "QQ-Plot of Overall Model Standardised Residuals")
 ```
 
 Non-Constant Error Variance Test
-Ho: constant error variance
-Ha: Non-constant error Variance
 
-```{r overall-nonconstant-variance}
+* Ho: constant error variance
+* Ha: Non-constant error Variance
+
+
+```{r overall-nonconstant-variance, echo = FALSE, warning = FALSE}
 # Non-Constant Error Variance Test
-ncvTest(my_model_overall)
-bptest(my_model_overall)
+ncv_test(my_model_overall)
+```
+
+```{r overall-nonconstant-variance-spreadlevelplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # plot studentized residuals vs. fitted values 
 spreadLevelPlot(my_model_overall, main = "Spread-Level Plot for Overall Model")
 ```
 
-```{r overall-vifs}
+```{r overall-vifs, echo = FALSE, warning = FALSE}
 # Variance Inflation Factors 
-vif(my_model_overall)  
-sqrt(vif(my_model_overall)) > 2
+model_vifs(my_model_overall)
 # No signs of collinearity
 ```
 
-## TELEVOTE MODEL
+\newpage
 
-```{r televote-model}
+## Televote Model
+
+```{r televote-model, echo = FALSE, warning = FALSE}
 # load final televote model
 my_model_tele <- readRDS("./models/televote_final_model.RDS")
 # extract out the model coefficients
@@ -162,9 +176,9 @@ televote_final_model_form<- as.formula(paste('Points ~', paste(tele_model_coeff,
 summary(my_model_tele)
 ```
 
-## Transformation of Response Variable
+### Transformation of Response Variable
 
-```{r televote-box-cox}
+```{r televote-box-cox, echo = FALSE, warning = FALSE}
 # Apply box-cox transformation on the model to improve the normality assumptions 
 # box-cox transformation using car
 bct <- boxCox(object = my_model_tele)
@@ -180,9 +194,9 @@ my_model_tele <- lm(formula = televote_final_model_bct_form, data = televote_dat
 summary(my_model_tele)
 ```
 
-## Evaluate the Fit of the Model
+### Evaluate the Fit of the Model
 
-```{r televote-standardise-residuals}
+```{r televote-standardise-residuals, echo = FALSE, warning = FALSE}
 # create standardize residuals
 sresid <- studres(my_model_tele) 
 # Residual vs fits plot
@@ -191,70 +205,77 @@ plot(x = my_model_tele$fitted.values, y = sresid, main = "Standardised Residuals
 abline(h = 0, col = "red")
 ```
 
-```{r televote-outliers}
+```{r televote-outliers, echo = FALSE, warning = FALSE}
 # Assessing Outliers
 # Bonferonni p-value for most extreme obs
-outlierTest(my_model_tele) 
-#qq plot for studentized residuals
-qqPlot(my_model_tele, main = "QQ Plot")  
+bonferroni_outlier_test(my_model_tele)
+# print example outliers
+head(sresid_outliers(sresid, cutoff = -2))
 # leverage plots
 leveragePlots(my_model_tele) 
 # Added variable Plots
 avPlots(my_model_tele)
-# Residual Plots
-residualPlots(my_model_tele)
 # Cook's D plot
 # identify D values > 4/(n-k-1) 
 cutoff <- 4/((nrow(processed_data) - length(my_model_tele$coefficients) - 2)) 
 # Crooks Distance plot
 plot(my_model_tele, which = 4, cook.levels = cutoff)
+```
+
+```{r televote-outliers-plots, echo = FALSE, warning = FALSE, results = 'hide'}
+# Residual Plots
+residualPlots(my_model_tele)
 # Influence Plot 
 influencePlot(my_model_tele, id.method = "identify", main = "Influence Plot", sub = "Circle size is proportial to Cook's Distance" )
 ```
 
 Normality Test
-Ho: The data is normally distributed
-Ha: the data is not normally distributed
 
-```{r televote-normality-tests}
+* Ho: The data is normally distributed
+* Ha: the data is not normally distributed
+
+```{r televote-normality-tests, echo = FALSE, warning = FALSE}
 # Normality Test
-shapiro.test(sresid)
-ad.test(sresid)
-cvm.test(sresid)
-lillie.test(sresid)
-pearson.test(sresid)
-sf.test(sresid)
+normality_tests(sresid)
 # the data is not normally distributed
 # Histogram of residuals
 hist(sresid, freq = FALSE, main = "Distribution of Studentised Residuals")
 xfit <- seq(min(sresid, na.rm = TRUE), max(sresid, na.rm = TRUE), length = 40) 
 yfit <- dnorm(xfit) 
 lines(xfit, yfit)
+```
+
+```{r televote-normality-tests-qqplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # QQ-plot of the data
 qqPlot(my_model_tele, ylab = "Standardised Residuals", main = "QQ-Plot of Televote Model Standardised Residuals")
 ```
 
 Non-Constant Error Variance Test
-Ho: constant error variance
-Ha: Non-constant error Variance
 
-```{r televote-nonconstant-variance}
+* Ho: constant error variance
+* Ha: Non-constant error Variance
+
+```{r televote-nonconstant-variance, echo = FALSE, warning = FALSE}
 # Non-Constant Error Variance Test
-ncvTest(my_model_tele)
+ncv_test(my_model_tele)
+```
+
+```{r televote-nonconstant-variance-spreadlevelplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # plot studentized residuals vs. fitted values 
 spreadLevelPlot(my_model_tele, main = "Spread-Level Plot for Televote Model")
 ```
 
-```{r televote-vifs}
+```{r televote-vifs, echo = FALSE, warning = FALSE}
 # Variance Inflation Factors 
-vif(my_model_tele)  
-sqrt(vif(my_model_tele)) > 2
+model_vifs(my_model_tele)
 # No signs of collinearity
 ```
 
-## JURY MODEL
+\newpage
 
-```{r jury-model}
+## Jury Model
+
+```{r jury-model, echo = FALSE, warning = FALSE}
 # load final televote model
 my_model_jury <- readRDS("./models/jury_final_model.RDS")
 # extract out the model coefficients
@@ -265,9 +286,9 @@ jury_final_model_form<- as.formula(paste('Points ~', paste(jury_model_coeff, col
 summary(my_model_jury)
 ```
 
-## Transformation of Response Variable
+### Transformation of Response Variable
 
-```{r jury-power-trans}
+```{r jury-power-trans, echo = FALSE, warning = FALSE}
 # transform points using the optimal power transformation
 ptPoints <- jury_data$Points^(3/4)
 # Note: weird bug occuring for row name 177 / row index 88 (possibly due to column with near all zero values)
@@ -283,9 +304,9 @@ my_model_jury <- lm(formula = jury_final_model_pt_form, data = jury_data)
 summary(my_model_jury)
 ```
 
-## Evaluate the Fit of the Model
+### Evaluate the Fit of the Model
 
-```{r jury-standardised-residuals}
+```{r jury-standardised-residuals, echo = FALSE, warning = FALSE}
 # create standardize residuals
 sresid <- studres(my_model_jury) 
 # Residual vs fits plot
@@ -294,63 +315,68 @@ plot(x = my_model_jury$fitted.values, y = sresid,  main = "Standardised Residual
 abline(h = 0, col = "red")
 ```
 
-```{r jury-outliers}
+```{r jury-outliers, echo = FALSE, warning = FALSE}
 # Assessing Outliers
 # Bonferonni p-value for most extreme obs
-outlierTest(my_model_jury) 
-# qq plot for studentized residuals
-qqPlot(my_model_jury, main = "QQ Plot of Studentised Residuals for Jury Vote Model", ylab = "Studentised Residuals")  
+bonferroni_outlier_test(my_model_jury)
+# print example outliers
+head(sresid_outliers(sresid, cutoff = -2))
 # leverage plots
 leveragePlots(my_model_jury) 
 # Added variable Plots
 avPlots(my_model_jury)
-# Residual Plots
-residualPlots(my_model_jury)
 # Cook's D plot
 # identify D values > 4/(n-k-1) 
 cutoff <- 4/((nrow(processed_data) - length(my_model_jury$coefficients) - 2)) 
 # Crooks Distance plot 
 plot(my_model_jury, which = 4, cook.levels = cutoff)
+```
+
+```{r jury-outliers-plots, echo = FALSE, warning = FALSE, results = 'hide'}
+# Residual Plots
+residualPlots(my_model_jury)
 # Influence Plot 
 influencePlot(my_model_jury, id.method = "identify", main = "Influence Plot", sub = "Circle size is proportial to Cook's Distance" )
 ```
 
 Normality Test
-Ho: The data is normally distributed
-Ha: the data is not normally distributed
 
-```{r jury-normality-tests}
+* Ho: The data is normally distributed
+* Ha: the data is not normally distributed
+
+```{r jury-normality-tests, echo = FALSE, warning = FALSE}
 # Normality Test
-shapiro.test(sresid)
-ad.test(sresid)
-cvm.test(sresid)
-lillie.test(sresid)
-pearson.test(sresid)
-sf.test(sresid)
+normality_tests(sresid)
 # the data is not normally distributed
 # Histogram of residuals
 hist(sresid, freq = FALSE, main = "Distribution of Studentised Residuals", ylim = c(0, 0.4))
 xfit <- seq(min(sresid, na.rm = TRUE), max(sresid, na.rm = TRUE), length = 40) 
 yfit <- dnorm(xfit) 
 lines(xfit, yfit)
+```
+
+```{r jury-normality-tests-qqplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # QQ-plot of the data
 qqPlot(my_model_jury, ylab = "Standardised Residuals", main = "QQ-Plot of Jury Vote Model Standardised Residuals")
 ```
 
 Non-Constant Error Variance Test
-Ho: constant error variance
-Ha: Non-constant error Variance
 
-```{r jury-nonconstant-variance}
+* Ho: constant error variance
+* Ha: Non-constant error Variance
+
+```{r jury-nonconstant-variance, echo = FALSE, warning = FALSE}
 # Non-Constant Error Variance Test
-ncvTest(my_model_jury)
+ncv_test(my_model_jury)
+```
+
+```{r jury-nonconstant-variance-spreadlevelplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # plot studentized residuals vs. fitted values 
 spreadLevelPlot(my_model_jury, main = "Spread-Level Plot for Jury Vote Model")
 ```
 
-```{r jury-vifs}
+```{r jury-vifs, echo = FALSE, warning = FALSE}
 # Variance Inflation Factors 
-vif(my_model_jury)  
-sqrt(vif(my_model_jury)) > 2
+model_vifs(my_model_jury)
 # No signs of collinearity
 ```
