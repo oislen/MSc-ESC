@@ -40,7 +40,7 @@ jury_data <- processed_data %>% filter(Voting_Method_J == 1)
 
 ## Overall Model
 
-```{r overall-model, echo = FALSE}
+```{r overall-model, echo = FALSE, fig.show = 'hide'}
 #-- Fit the Final Model --#
 
 # define the model formula for the final model
@@ -51,7 +51,7 @@ my_model_overall_form <- Points ~ Average_Points + VBlocs1_TC_3 + CAP_DIST_km +
 # fit the final overall model
 my_model_overall <- lm(formula = my_model_overall_form, data = processed_data)
 # perform box-cox transformation
-bct <- boxCox(object = my_model_overall, plotit = FALSE)
+bct <- boxCox(object = my_model_overall, plotit = TRUE)
 # return the optimal power transformation
 p <- bct$x[which.max(x = bct$y)]
 # transform the response variable
@@ -150,7 +150,7 @@ omodel_ex.mig_summary <- summary(omodel_ex.mig)
 
 ## Televote Model
 
-```{r televote-model, echo = FALSE}
+```{r televote-model, echo = FALSE, fig.show = 'hide'}
 # define the model formula
 my_model_tele_form <- Points ~ METRIC_Citizens + Average_Points + VBlocs1_TC_3 + 
                                VBlocs2_TC_1 + mode_1 + key_11 + OOA + acousticness + danceability + 
@@ -158,7 +158,7 @@ my_model_tele_form <- Points ~ METRIC_Citizens + Average_Points + VBlocs1_TC_3 +
 # fit the linear model
 my_model_tele <- lm(formula = my_model_tele_form, data = televote_data)
 # perform box-cox transformation
-bct <- boxCox(object = my_model_tele, plotit = FALSE)
+bct <- boxCox(object = my_model_tele, plotit = TRUE)
 # return the optimal power transformation
 p <- bct$x[which.max(x = bct$y)]
 # transform the response variable
