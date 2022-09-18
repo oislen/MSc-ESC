@@ -30,6 +30,7 @@ library(MASS)
 library(nortest)
 library(lmtest)
 library(dplyr)
+library(tibble)
 # load custom functions
 source('scripts/utilities/bonferroni_outlier_test.R')
 source('scripts/utilities/sresid_outliers.R')
@@ -39,15 +40,20 @@ source('scripts/utilities/model_vifs.R')
 source('scripts/utilities/boxcox_transplot.R')
 source('scripts/utilities/plot_residuals_vs_fits.R')
 source('scripts/utilities/plot_cooks.R')
+source('scripts/utilities/plot_influence.R')
+source('scripts/utilities/plot_residualdist.R')
+source('scripts/utilities/plot_qq.R')
+source('scripts/utilities/plot_spreadlevel.R')
 ```
 
 ```{r data-load, echo = FALSE, warning = FALSE}
 # load in the historic voting data for deriving the voting blocs
 processed_data <- read.csv(file = "./data/processed_data.csv", header = T)
+rownames(processed_data) <- seq(1, dim(processed_data)[1])
 # split the televote data
-televote_data <- processed_data %>% filter(Voting_Method_J == 0)
+televote_data <- processed_data %>% rownames_to_column('idx') %>% filter(Voting_Method_J == 0) %>% column_to_rownames('idx')
 # split out the jury vote data
-jury_data <- processed_data %>% filter(Voting_Method_J == 1)
+jury_data <- processed_data %>% rownames_to_column('idx') %>% filter(Voting_Method_J == 1) %>% column_to_rownames('idx')
 ```
 
 \newpage
@@ -89,23 +95,23 @@ summary(my_model_overall)
 
 ```{r overall-standardise-residuals, echo = FALSE, warning = FALSE, results = 'hide'}
 # generate standardised residuals
-sresid <- studres(my_model_overall)
+overall_sresid <- studres(my_model_overall)
 # plot residuals vs fits model
 plot_residuals_vs_fits(model = my_model_overall, main = "Overall Model - Standardised Residuals vs Fitted Values", output_fpath = './report/plots/residual/model_overall_residuals_vs_fits.jpg')
 ```
 
 ![Overall Model Standardised Residuals vs Fits](../report/plots/residual/model_overall_residuals_vs_fits.jpg)\newline
 
-```{r overall-outliers, echo = FALSE, warning = FALSE}
+```{r overall-outliers, echo = FALSE, warning = FALSE, results = 'hide'}
 # Assessing Outliers
 # Bonferonni p-value for most extreme obs
 bonferroni_outlier_test(my_model_overall)
 # print example outliers
-head(sresid_outliers(sresid, cutoff = -2))
+head(sresid_outliers(overall_sresid, cutoff = -2))
 # leverage plots
-leveragePlots(my_model_overall, ask = FALSE) 
+leveragePlots(my_model_overall, ask = FALSE, layout = c(1, 1)) 
 # Added variable Plots
-avPlots(my_model_overall, ask = FALSE)
+avPlots(my_model_overall, ask = FALSE, layout = c(1, 1))
 # Cook's D plot
 plot_cooks(model = my_model_overall, data = processed_data, output_fpath = './report/plots/residual/model_overall_cooks.jpg')
 ```
@@ -114,10 +120,12 @@ plot_cooks(model = my_model_overall, data = processed_data, output_fpath = './re
 
 ```{r overall-outliers-plots, echo = FALSE, warning = FALSE, results = 'hide'}
 # Residual Plots
-residualPlots(my_model_overall)
+residualPlots(my_model_overall, ask = FALSE, layout = c(1, 1))
 # Influence Plot 
-influencePlot(my_model_overall, id.method = "identify", main = "Influence Plot", sub = "Circle size is proportial to Cook's Distance" )
+plot_influence(model = my_model_overall, main = "Overall Model - Influence Plot", output_fpath = './report/plots/residual/model_overall_influence.jpg')
 ```
+
+![Overall Model Residual Influence](../report/plots/residual/model_overall_influence.jpg)\newline
 
 Normality Test
 
@@ -125,21 +133,21 @@ Normality Test
 * Ha: the data is not normally distributed
 
 
-```{r overall-normality-tests, echo = FALSE, warning = FALSE}
+```{r overall-normality-tests, echo = FALSE, warning = FALSE, results = 'hide'}
 # Normality Test
-normality_tests(sresid)
-# the data is not normally distributed
-# Histogram of residuals
-hist(sresid, freq = FALSE, main = "Distribution of Standardised Residuals", ylim = c(0,0.4),  xlim = c(-4, 3))
-xfit <- seq(min(sresid, na.rm = TRUE), max(sresid, na.rm = TRUE), length = 40) 
-yfit <- dnorm(xfit) 
-lines(xfit, yfit)
+normality_tests(overall_sresid)
+# plot distribution of residuals
+plot_residualdist(overall_sresid, main = "Overall Model - Distribution of Standardised Residuals", output_fpath = './report/plots/residual/model_overall_residual_distribution.jpg')
 ```
+
+![Overall Model Residual Distribution](../report/plots/residual/model_overall_residual_distribution.jpg)\newline
 
 ```{r overall-normality-tests-qqplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # QQ-plot of the data
-qqPlot(my_model_overall, ylab = "Standardised Residuals", main = "QQ-Plot of Overall Model Standardised Residuals")
+plot_qq(my_model_overall, main = "QQ-Plot of Overall Model Standardised Residuals", output_fpath = './report/plots/residual/model_overall_qq.jpg')
 ```
+
+![Overall Model Residual QQ](../report/plots/residual/model_overall_qq.jpg)\newline
 
 Non-Constant Error Variance Test
 
@@ -154,8 +162,10 @@ ncv_test(my_model_overall)
 
 ```{r overall-nonconstant-variance-spreadlevelplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # plot studentized residuals vs. fitted values 
-spreadLevelPlot(my_model_overall, main = "Spread-Level Plot for Overall Model")
+plot_spreadlevel(my_model_overall, main = "Spread-Level Plot for Overall Model", output_fpath = './report/plots/residual/model_overall_spreadlevel.jpg')
 ```
+
+![Overall Model Residual Spreadlevel](../report/plots/residual/model_overall_spreadlevel.jpg)\newline
 
 ```{r overall-vifs, echo = FALSE, warning = FALSE}
 # Variance Inflation Factors 
@@ -202,57 +212,60 @@ summary(my_model_tele)
 
 ```{r televote-standardise-residuals, echo = FALSE, warning = FALSE, results = 'hide'}
 # generate standardised residuals
-sresid <- studres(my_model_tele)
+tele_sresid <- studres(my_model_tele)
 # plot residuals vs fits model
 plot_residuals_vs_fits(model = my_model_tele, main = "Televote Model - Standardised Residuals vs Fitted Values", output_fpath = './report/plots/residual/model_tele_residuals_vs_fits.jpg')
 ```
 
 ![Televote Model Standardised Residuals vs Fits](../report/plots/residual/model_tele_residuals_vs_fits.jpg)\newline
 
-```{r televote-outliers, echo = FALSE, warning = FALSE}
+```{r televote-outliers, echo = FALSE, warning = FALSE, results = 'hide'}
 # Assessing Outliers
 # Bonferonni p-value for most extreme obs
 bonferroni_outlier_test(my_model_tele)
 # print example outliers
-head(sresid_outliers(sresid, cutoff = -2))
+head(sresid_outliers(tele_sresid, cutoff = -2))
 # leverage plots
-leveragePlots(my_model_tele, ask = FALSE) 
+leveragePlots(my_model_tele, ask = FALSE, layout = c(1, 1)) 
 # Added variable Plots
-avPlots(my_model_tele, ask = FALSE)
+avPlots(my_model_tele, ask = FALSE, layout = c(1, 1))
 # Cook's D plot
-plot_cooks(model = my_model_tele, data = processed_data, output_fpath = './report/plots/residual/model_tele_cooks.jpg')
+plot_cooks(model = my_model_tele, data = televote_data, output_fpath = './report/plots/residual/model_tele_cooks.jpg')
 ```
 ![Telebote Model Cooks Distance](../report/plots/residual/model_tele_cooks.jpg)\newline
 
 
 ```{r televote-outliers-plots, echo = FALSE, warning = FALSE, results = 'hide'}
 # Residual Plots
-residualPlots(my_model_tele)
+residualPlots(my_model_tele, ask = FALSE, layout = c(1, 1))
 # Influence Plot 
-influencePlot(my_model_tele, id.method = "identify", main = "Influence Plot", sub = "Circle size is proportial to Cook's Distance" )
+plot_influence(model = my_model_tele, main = "Televote Model - Influence Plot", output_fpath = './report/plots/residual/model_televote_influence.jpg')
 ```
+
+![Televote Model Residual Influence](../report/plots/residual/model_televote_influence.jpg)\newline
 
 Normality Test
 
 * Ho: The data is normally distributed
 * Ha: the data is not normally distributed
 
-```{r televote-normality-tests, echo = FALSE, warning = FALSE}
+```{r televote-normality-tests, echo = FALSE, warning = FALSE, results = 'hide'}
 # Normality Test
-normality_tests(sresid)
-# the data is not normally distributed
-# Histogram of residuals
-hist(sresid, freq = FALSE, main = "Distribution of Studentised Residuals")
-xfit <- seq(min(sresid, na.rm = TRUE), max(sresid, na.rm = TRUE), length = 40) 
-yfit <- dnorm(xfit) 
-lines(xfit, yfit)
+normality_tests(tele_sresid)
+# plot distribution of residuals
+plot_residualdist(tele_sresid, main = "Televote Model - Distribution of Standardised Residuals", output_fpath = './report/plots/residual/model_televote_residual_distribution.jpg')
 ```
+
+![Televote Model Residual Distribution](../report/plots/residual/model_televote_residual_distribution.jpg)\newline
 
 ```{r televote-normality-tests-qqplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # QQ-plot of the data
-qqPlot(my_model_tele, ylab = "Standardised Residuals", main = "QQ-Plot of Televote Model Standardised Residuals")
+plot_qq(my_model_tele, main = "QQ-Plot of Televote Model Standardised Residuals", output_fpath = './report/plots/residual/model_televote_qq.jpg')
 ```
 
+![Televote Model Residual QQ](../report/plots/residual/model_televote_qq.jpg)\newline
+
+Non-
 Non-Constant Error Variance Test
 
 * Ho: constant error variance
@@ -265,8 +278,10 @@ ncv_test(my_model_tele)
 
 ```{r televote-nonconstant-variance-spreadlevelplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # plot studentized residuals vs. fitted values 
-spreadLevelPlot(my_model_tele, main = "Spread-Level Plot for Televote Model")
+plot_spreadlevel(my_model_tele, main = "Spread-Level Plot for Televote Model", output_fpath = './report/plots/residual/model_televote_spreadlevel.jpg')
 ```
+
+![Televote Model Residual Spreadlevel](../report/plots/residual/model_televote_spreadlevel.jpg)\newline
 
 ```{r televote-vifs, echo = FALSE, warning = FALSE}
 # Variance Inflation Factors 
@@ -309,58 +324,60 @@ summary(my_model_jury)
 
 ### Evaluate the Fit of the Model
 
-```{r jury-standardised-residuals, echo = FALSE, warning = FALSE}
+```{r jury-standardised-residuals, echo = FALSE, warning = FALSE, results = 'hide'}
 # generate standardised residuals
-sresid <- studres(my_model_jury)
+jury_sresid <- studres(my_model_jury)
 # plot residuals vs fits model
 plot_residuals_vs_fits(model = my_model_jury, main = "Jury Model - Standardised Residuals vs Fitted Values", output_fpath = './report/plots/residual/model_jury_residuals_vs_fits.jpg')
 ```
 
 ![Jury Model Standardised Residuals vs Fits](../report/plots/residual/model_jury_residuals_vs_fits.jpg)\newline
 
-```{r jury-outliers, echo = FALSE, warning = FALSE}
+```{r jury-outliers, echo = FALSE, warning = FALSE, results = 'hide'}
 # Assessing Outliers
 # Bonferonni p-value for most extreme obs
 bonferroni_outlier_test(my_model_jury)
 # print example outliers
-head(sresid_outliers(sresid, cutoff = -2))
+head(sresid_outliers(jury_sresid, cutoff = -2))
 # leverage plots
-leveragePlots(my_model_jury, ask = FALSE) 
+leveragePlots(my_model_jury, ask = FALSE, layout = c(1, 1)) 
 # Added variable Plots
-avPlots(my_model_jury, ask = FALSE)
+avPlots(my_model_jury, ask = FALSE, layout = c(1, 1))
 # Cook's D plot
-plot_cooks(model = my_model_jury, data = processed_data, output_fpath = './report/plots/residual/model_jury_cooks.jpg')
+plot_cooks(model = my_model_jury, data = jury_data, output_fpath = './report/plots/residual/model_jury_cooks.jpg')
 ```
 
 ![Jury Model Cooks Distance](../report/plots/residual/model_jury_cooks.jpg)\newline
 
 ```{r jury-outliers-plots, echo = FALSE, warning = FALSE, results = 'hide'}
 # Residual Plots
-residualPlots(my_model_jury)
+residualPlots(my_model_jury, ask = FALSE, layout = c(1, 1))
 # Influence Plot 
-influencePlot(my_model_jury, id.method = "identify", main = "Influence Plot", sub = "Circle size is proportial to Cook's Distance" )
+plot_influence(model = my_model_jury, main = "Jury Model - Influence Plot", output_fpath = './report/plots/residual/model_jury_influence.jpg')
 ```
+
+![Jury Model Residual Influence](../report/plots/residual/model_jury_influence.jpg)\newline
 
 Normality Test
 
 * Ho: The data is normally distributed
 * Ha: the data is not normally distributed
 
-```{r jury-normality-tests, echo = FALSE, warning = FALSE}
+```{r jury-normality-tests, echo = FALSE, warning = FALSE, results = 'hide'}
 # Normality Test
-normality_tests(sresid)
-# the data is not normally distributed
-# Histogram of residuals
-hist(sresid, freq = FALSE, main = "Distribution of Studentised Residuals", ylim = c(0, 0.4))
-xfit <- seq(min(sresid, na.rm = TRUE), max(sresid, na.rm = TRUE), length = 40) 
-yfit <- dnorm(xfit) 
-lines(xfit, yfit)
+normality_tests(jury_sresid)
+# Influence Plot 
+plot_residualdist(jury_sresid, main = "Jury Model - Distribution of Standardised Residuals", output_fpath = './report/plots/residual/model_jury_residual_distribution.jpg')
 ```
+
+![Jury Model Residual Distribution](../report/plots/residual/model_jury_residual_distribution.jpg)\newline
 
 ```{r jury-normality-tests-qqplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # QQ-plot of the data
-qqPlot(my_model_jury, ylab = "Standardised Residuals", main = "QQ-Plot of Jury Vote Model Standardised Residuals")
+plot_qq(my_model_jury, main = "QQ-Plot of Jury Vote Model Standardised Residuals", output_fpath = './report/plots/residual/model_jury_qq.jpg')
 ```
+
+![Jury Model Residual QQ](../report/plots/residual/model_jury_qq.jpg)\newline
 
 Non-Constant Error Variance Test
 
@@ -374,8 +391,10 @@ ncv_test(my_model_jury)
 
 ```{r jury-nonconstant-variance-spreadlevelplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # plot studentized residuals vs. fitted values 
-spreadLevelPlot(my_model_jury, main = "Spread-Level Plot for Jury Vote Model")
+plot_spreadlevel(my_model_jury, main = "Spread-Level Plot for Jury Model", output_fpath = './report/plots/residual/model_jury_spreadlevel.jpg')
 ```
+
+![Jury Model Residual Spreadlevel](../report/plots/residual/model_jury_spreadlevel.jpg)\newline
 
 ```{r jury-vifs, echo = FALSE, warning = FALSE}
 # Variance Inflation Factors 
