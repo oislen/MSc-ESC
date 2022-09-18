@@ -36,11 +36,12 @@ source('scripts/utilities/sresid_outliers.R')
 source('scripts/utilities/normality_tests.R')
 source('scripts/utilities/ncv_test.R')
 source('scripts/utilities/model_vifs.R')
+source('scripts/utilities/boxcox_transplot.R')
+source('scripts/utilities/plot_residuals_vs_fits.R')
+source('scripts/utilities/plot_cooks.R')
 ```
 
 ```{r data-load, echo = FALSE, warning = FALSE}
-#-- Data --#
-
 # load in the historic voting data for deriving the voting blocs
 processed_data <- read.csv(file = "./data/processed_data.csv", header = T)
 # split the televote data
@@ -69,7 +70,7 @@ summary(my_model_overall)
 ```{r overall-box-cox, echo = FALSE, warning = FALSE}
 # Apply box-cox transformation on the model to improve the normality assumptions 
 # box-cox transformation using car
-bct <- MASS::boxcox(object = my_model_overall)
+bct <- boxcox_transplot(my_model_overall, output_fpath = './report/plots/boxcox/model_overall_boxcox.jpg')
 # find optimal box-cox power transformation power
 p <- bct$x[which.max(x = bct$y)]
 # transform points using the optimal power transformation
@@ -82,16 +83,18 @@ my_model_overall <- lm(formula = overall_final_model_bct_form, data = processed_
 summary(my_model_overall)
 ```
 
+![Overall Model BoxCox Transformation](../report/plots/boxcox/model_overall_boxcox.jpg)\newline
+
 ### Evaluate the Fit of the Model
 
-```{r overall-standardise-residuals, echo = FALSE, warning = FALSE}
-# create standardize residuals
-sresid <- studres(my_model_overall) 
-# Residual vs fits plot
-plot(x = my_model_overall$fitted.values, y = sresid, main = "Standardised Residuals vs Fitted Values", xlab = "Fitted Values", ylab = "Standardised Residuals")
-# add red horizontal line through y-axis 0
-abline(h = 0, col = "red")
+```{r overall-standardise-residuals, echo = FALSE, warning = FALSE, results = 'hide'}
+# generate standardised residuals
+sresid <- studres(my_model_overall)
+# plot residuals vs fits model
+plot_residuals_vs_fits(model = my_model_overall, main = "Overall Model - Standardised Residuals vs Fitted Values", output_fpath = './report/plots/residual/model_overall_residuals_vs_fits.jpg')
 ```
+
+![Overall Model Standardised Residuals vs Fits](../report/plots/residual/model_overall_residuals_vs_fits.jpg)\newline
 
 ```{r overall-outliers, echo = FALSE, warning = FALSE}
 # Assessing Outliers
@@ -100,15 +103,14 @@ bonferroni_outlier_test(my_model_overall)
 # print example outliers
 head(sresid_outliers(sresid, cutoff = -2))
 # leverage plots
-leveragePlots(my_model_overall) 
+leveragePlots(my_model_overall, ask = FALSE) 
 # Added variable Plots
-avPlots(my_model_overall)
+avPlots(my_model_overall, ask = FALSE)
 # Cook's D plot
-# identify D values > 4/(n-k-1) 
-cutoff <- 4/((nrow(processed_data)-length(my_model_overall$coefficients)-2)) 
-# Crooks Distance plot
-plot(my_model_overall, which = 4, cook.levels = cutoff)
+plot_cooks(model = my_model_overall, data = processed_data, output_fpath = './report/plots/residual/model_overall_cooks.jpg')
 ```
+
+![Overall Model Cooks Distance](../report/plots/residual/model_overall_cooks.jpg)\newline
 
 ```{r overall-outliers-plots, echo = FALSE, warning = FALSE, results = 'hide'}
 # Residual Plots
@@ -181,7 +183,7 @@ summary(my_model_tele)
 ```{r televote-box-cox, echo = FALSE, warning = FALSE}
 # Apply box-cox transformation on the model to improve the normality assumptions 
 # box-cox transformation using car
-bct <- boxCox(object = my_model_tele)
+bct <- boxcox_transplot(my_model_tele, output_fpath = './report/plots/boxcox/model_tele_boxcox.jpg')
 # find optimal box-cox power transformation power
 p <- bct$x[which.max(x = bct$y)]
 # transform points using the optimal power transformation
@@ -194,16 +196,18 @@ my_model_tele <- lm(formula = televote_final_model_bct_form, data = televote_dat
 summary(my_model_tele)
 ```
 
+![Televote Model BoxCox Transformation](../report/plots/boxcox/model_tele_boxcox.jpg)\newline
+
 ### Evaluate the Fit of the Model
 
-```{r televote-standardise-residuals, echo = FALSE, warning = FALSE}
-# create standardize residuals
-sresid <- studres(my_model_tele) 
-# Residual vs fits plot
-plot(x = my_model_tele$fitted.values, y = sresid, main = "Standardised Residuals vs Fitted Values", xlab = "Fitted Values", ylab = "Standardised Residuals")
-# add red horizontal line through y-axis 0
-abline(h = 0, col = "red")
+```{r televote-standardise-residuals, echo = FALSE, warning = FALSE, results = 'hide'}
+# generate standardised residuals
+sresid <- studres(my_model_tele)
+# plot residuals vs fits model
+plot_residuals_vs_fits(model = my_model_tele, main = "Televote Model - Standardised Residuals vs Fitted Values", output_fpath = './report/plots/residual/model_tele_residuals_vs_fits.jpg')
 ```
+
+![Televote Model Standardised Residuals vs Fits](../report/plots/residual/model_tele_residuals_vs_fits.jpg)\newline
 
 ```{r televote-outliers, echo = FALSE, warning = FALSE}
 # Assessing Outliers
@@ -212,15 +216,14 @@ bonferroni_outlier_test(my_model_tele)
 # print example outliers
 head(sresid_outliers(sresid, cutoff = -2))
 # leverage plots
-leveragePlots(my_model_tele) 
+leveragePlots(my_model_tele, ask = FALSE) 
 # Added variable Plots
-avPlots(my_model_tele)
+avPlots(my_model_tele, ask = FALSE)
 # Cook's D plot
-# identify D values > 4/(n-k-1) 
-cutoff <- 4/((nrow(processed_data) - length(my_model_tele$coefficients) - 2)) 
-# Crooks Distance plot
-plot(my_model_tele, which = 4, cook.levels = cutoff)
+plot_cooks(model = my_model_tele, data = processed_data, output_fpath = './report/plots/residual/model_tele_cooks.jpg')
 ```
+![Telebote Model Cooks Distance](../report/plots/residual/model_tele_cooks.jpg)\newline
+
 
 ```{r televote-outliers-plots, echo = FALSE, warning = FALSE, results = 'hide'}
 # Residual Plots
@@ -307,13 +310,13 @@ summary(my_model_jury)
 ### Evaluate the Fit of the Model
 
 ```{r jury-standardised-residuals, echo = FALSE, warning = FALSE}
-# create standardize residuals
-sresid <- studres(my_model_jury) 
-# Residual vs fits plot
-plot(x = my_model_jury$fitted.values, y = sresid,  main = "Standardised Residuals vs Fitted Values", xlab = "Fitted Values", ylab = "Standardised Residuals")
-# add red horizontal line through y-axis 0
-abline(h = 0, col = "red")
+# generate standardised residuals
+sresid <- studres(my_model_jury)
+# plot residuals vs fits model
+plot_residuals_vs_fits(model = my_model_jury, main = "Jury Model - Standardised Residuals vs Fitted Values", output_fpath = './report/plots/residual/model_jury_residuals_vs_fits.jpg')
 ```
+
+![Jury Model Standardised Residuals vs Fits](../report/plots/residual/model_jury_residuals_vs_fits.jpg)\newline
 
 ```{r jury-outliers, echo = FALSE, warning = FALSE}
 # Assessing Outliers
@@ -322,15 +325,14 @@ bonferroni_outlier_test(my_model_jury)
 # print example outliers
 head(sresid_outliers(sresid, cutoff = -2))
 # leverage plots
-leveragePlots(my_model_jury) 
+leveragePlots(my_model_jury, ask = FALSE) 
 # Added variable Plots
-avPlots(my_model_jury)
+avPlots(my_model_jury, ask = FALSE)
 # Cook's D plot
-# identify D values > 4/(n-k-1) 
-cutoff <- 4/((nrow(processed_data) - length(my_model_jury$coefficients) - 2)) 
-# Crooks Distance plot 
-plot(my_model_jury, which = 4, cook.levels = cutoff)
+plot_cooks(model = my_model_jury, data = processed_data, output_fpath = './report/plots/residual/model_jury_cooks.jpg')
 ```
+
+![Jury Model Cooks Distance](../report/plots/residual/model_jury_cooks.jpg)\newline
 
 ```{r jury-outliers-plots, echo = FALSE, warning = FALSE, results = 'hide'}
 # Residual Plots
