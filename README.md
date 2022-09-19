@@ -2,12 +2,11 @@
 
 This repository contains the code, data, and models for the 2018 TU Dublin MSc Disseration on the Eurovision Song Contest.
  
- 1. [MSc-ESC](https://github.com/oislen/MSc-ESC/tree/master)
-    1. [data](https://github.com/oislen/MSc-ESC/tree/master/data)
-	2. [models](https://github.com/oislen/MSc-ESC/tree/master/models)
-	3. [report](https://github.com/oislen/MSc-ESC/tree/master/report)
-	4. [scripts](https://github.com/oislen/MSc-ESC/tree/master/scripts)
- 
+1. [data](https://github.com/oislen/MSc-ESC/tree/master/data)
+2. [models](https://github.com/oislen/MSc-ESC/tree/master/models)
+3. [report](https://github.com/oislen/MSc-ESC/tree/master/report)
+4. [scripts](https://github.com/oislen/MSc-ESC/tree/master/scripts)
+
 The final submitted dissertation can be found here on the Technology University Dublin arrow website:
 
 * [An Investigation into Factors Which Explain the Scores and Voting Patterns of the Eurovision Song Contest](https://arrow.tudublin.ie/scschcomdis/155/)
