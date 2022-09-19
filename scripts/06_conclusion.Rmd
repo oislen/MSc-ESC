@@ -23,6 +23,8 @@ library(rmarkdown)
 library(knitr)
 library(car)
 library(dplyr)
+# load custom functions
+source('scripts/utilities/boxcox_transplot.R')
 # set inline rounding digits
 inline_digits = 5
 ```
@@ -51,7 +53,7 @@ my_model_overall_form <- Points ~ Average_Points + VBlocs1_TC_3 + CAP_DIST_km +
 # fit the final overall model
 my_model_overall <- lm(formula = my_model_overall_form, data = processed_data)
 # perform box-cox transformation
-bct <- boxCox(object = my_model_overall, plotit = TRUE)
+bct <- boxcox_transplot(my_model_overall)
 # return the optimal power transformation
 p <- bct$x[which.max(x = bct$y)]
 # transform the response variable
@@ -158,7 +160,7 @@ my_model_tele_form <- Points ~ METRIC_Citizens + Average_Points + VBlocs1_TC_3 +
 # fit the linear model
 my_model_tele <- lm(formula = my_model_tele_form, data = televote_data)
 # perform box-cox transformation
-bct <- boxCox(object = my_model_tele, plotit = TRUE)
+bct <- boxcox_transplot(my_model_tele)
 # return the optimal power transformation
 p <- bct$x[which.max(x = bct$y)]
 # transform the response variable
