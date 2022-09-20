@@ -9,7 +9,7 @@ output:
 
 \newpage
 
-## Overview
+# Overview
 
 This section evaluates the fit of the model's using the car package. Multiple linear regression (MLR) requires the model residuals to be ~ IID N(0, sigma^2). The model residuals will be standardized for the assessment.
 
@@ -60,7 +60,7 @@ jury_data <- processed_data %>% rownames_to_column('idx') %>% filter(Voting_Meth
 
 \newpage
 
-## Overall Model
+# Overall Model
 
 ```{r overall-model, echo = FALSE, warning = FALSE}
 # load final overall model
@@ -72,6 +72,10 @@ overall_final_model_form<- as.formula(paste('Points ~', paste(overall_model_coef
 # generate model summary
 summary(my_model_overall)
 ```
+
+\newpage
+
+## Response Variable Transformation
 
 ### Box-Cox Power Transformation
 
@@ -104,6 +108,10 @@ plot_residuals_vs_fits(model = my_model_overall, main = "Overall Model - Standar
 
 ![Overall Model Standardised Residuals vs Fits](../report/plots/residual/model_overall_residuals_vs_fits.jpg)\newline
 
+\newpage
+
+## Model Outliers
+
 ### Bonferroni Outlier Test
 
 ```{r overall-bonferroni-tests, echo = FALSE}
@@ -112,7 +120,7 @@ plot_residuals_vs_fits(model = my_model_overall, main = "Overall Model - Standar
 bonferroni_outlier_test(my_model_overall)
 ```
 
-### Outlier Standardised Residuals
+### Outlier Residuals
 
 ```{r overall-residuals-outliers, echo = FALSE}
 # print example outliers
@@ -133,7 +141,7 @@ leveragePlots(my_model_overall, ask = FALSE, layout = c(1, 1))
 avPlots(my_model_overall, ask = FALSE, layout = c(1, 1))
 ```
 
-### Cooks Distance
+### Cooks Distance Plot
 
 ```{r overall-cooks-distance, echo = FALSE, results = 'hide'}
 # Cook's D plot
@@ -151,14 +159,18 @@ residualPlots(my_model_overall, ask = FALSE, layout = c(1, 1))
 
 ### Influence Plot
 
-```{r overall-influence-plot, echo = FALSE, results = 'hide'}
+```{r overall-influence-plot, echo = FALSE, warning = FALSE, results = 'hide'}
 # Influence Plot 
 plot_influence(model = my_model_overall, main = "Overall Model - Influence Plot", output_fpath = './report/plots/residual/model_overall_influence.jpg')
 ```
 
 ![Overall Model Residual Influence](../report/plots/residual/model_overall_influence.jpg)\newline
 
-### Resdiaul Normality Tests
+\newpage
+
+## Normality Assumption
+
+### Normality Tests
 
 Normality Test
 
@@ -188,6 +200,10 @@ plot_qq(my_model_overall, main = "QQ-Plot of Overall Model Standardised Residual
 ```
 
 ![Overall Model Residual QQ](../report/plots/residual/model_overall_qq.jpg)\newline
+
+\newpage
+
+## Constant Variance Assumption
 
 ### Non-Constant Variance Test
 
@@ -221,7 +237,7 @@ model_vifs(my_model_overall)
 
 \newpage
 
-## Televote Model
+# Televote Model
 
 ```{r televote-model, echo = FALSE, warning = FALSE}
 # load final televote model
@@ -233,6 +249,10 @@ televote_final_model_form<- as.formula(paste('Points ~', paste(tele_model_coeff,
 # generate model summary
 summary(my_model_tele)
 ```
+
+\newpage
+
+## Response Variable Transformation
 
 ### Box-Cox Power Transformation
 
@@ -256,7 +276,7 @@ tele_sresid <- studres(my_model_tele)
 
 ![Televote Model BoxCox Transformation](../report/plots/boxcox/model_tele_boxcox.jpg)\newline
 
-### Resdiaul vs Fitted Values
+### Resdiauls vs Fitted Values
 
 ```{r televote-residuals-vs-fits, echo = FALSE, warning = FALSE, results = 'hide'}
 # plot residuals vs fits model
@@ -264,6 +284,10 @@ plot_residuals_vs_fits(model = my_model_tele, main = "Televote Model - Standardi
 ```
 
 ![Televote Model Standardised Residuals vs Fits](../report/plots/residual/model_tele_residuals_vs_fits.jpg)\newline
+
+\newpage
+
+## Model Outliers
 
 ### Bonferroni Outlier Test
 
@@ -311,12 +335,16 @@ residualPlots(my_model_tele, ask = FALSE, layout = c(1, 1))
 
 ### Influence Plot
 
-```{r televote-influence-plot, echo = FALSE, results = 'hide'}
+```{r televote-influence-plot, echo = FALSE, warning = FALSE, results = 'hide'}
 # Influence Plot 
 plot_influence(model = my_model_tele, main = "Televote Model - Influence Plot", output_fpath = './report/plots/residual/model_televote_influence.jpg')
 ```
 
 ![Televote Model Residual Influence](../report/plots/residual/model_televote_influence.jpg)\newline
+
+\newpage
+
+## Normality Assumption
 
 ### Normality Tests
 
@@ -330,7 +358,7 @@ Normality Test
 normality_tests(tele_sresid)
 ```
 
-### Residual Distribution
+### Residual Histogram
 
 ```{r televote-residual-histogram, echo = FALSE, results = 'hide'}
 # plot distribution of residuals
@@ -347,6 +375,10 @@ plot_qq(my_model_tele, main = "QQ-Plot of Televote Model Standardised Residuals"
 ```
 
 ![Televote Model Residual QQ](../report/plots/residual/model_televote_qq.jpg)\newline
+
+\newpage
+
+## Constant Variance Assumption
 
 ### Non-Constant Variance Test
 
@@ -379,7 +411,7 @@ model_vifs(my_model_tele)
 
 \newpage
 
-## Jury Model
+# Jury Model
 
 ```{r jury-model, echo = FALSE, warning = FALSE}
 # load final televote model
@@ -391,6 +423,10 @@ jury_final_model_form<- as.formula(paste('Points ~', paste(jury_model_coeff, col
 # generate model summary
 summary(my_model_jury)
 ```
+
+\newpage
+
+## Response Variable Transformation
 
 ### Power Transformation
 
@@ -421,6 +457,10 @@ plot_residuals_vs_fits(model = my_model_jury, main = "Jury Model - Standardised 
 
 ![Jury Model Standardised Residuals vs Fits](../report/plots/residual/model_jury_residuals_vs_fits.jpg)\newline
 
+\newpage
+
+## Model Outliers
+
 ### Bonferroni Outlier Test
 
 ```{r jury-bonferroni-outlier-test, echo = FALSE, warning = FALSE}
@@ -443,7 +483,7 @@ head(sresid_outliers(jury_sresid, cutoff = -2))
 leveragePlots(my_model_jury, ask = FALSE, layout = c(1, 1)) 
 ```
 
-### Added VAriable Plots
+### Added Variable Plots
 
 ```{r jury-added-variable-plots, echo = FALSE, results = 'hide'}
 # Added variable Plots
@@ -468,12 +508,16 @@ residualPlots(my_model_jury, ask = FALSE, layout = c(1, 1))
 
 ### Influence Plot
 
-```{r jury-influence-plot, echo = FALSE, results = 'hide'}
+```{r jury-influence-plot, echo = FALSE, warning = FALSE, results = 'hide'}
 # Influence Plot 
 plot_influence(model = my_model_jury, main = "Jury Model - Influence Plot", output_fpath = './report/plots/residual/model_jury_influence.jpg')
 ```
 
 ![Jury Model Residual Influence](../report/plots/residual/model_jury_influence.jpg)\newline
+
+\newpage
+
+## Normality Assumption
 
 ### Normality Tests
 
@@ -487,7 +531,7 @@ Normality Test
 normality_tests(jury_sresid)
 ```
 
-### Residual Plots
+### Residual Histogran
 
 ```{r jury-residual-histogram, echo = FALSE, results = 'hide'}
 # Influence Plot 
@@ -504,6 +548,10 @@ plot_qq(my_model_jury, main = "QQ-Plot of Jury Vote Model Standardised Residuals
 ```
 
 ![Jury Model Residual QQ](../report/plots/residual/model_jury_qq.jpg)\newline
+
+\newpage
+
+## Constant Variance Assumption
 
 ### Non-Constant Variance Test
 
