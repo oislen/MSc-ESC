@@ -34,23 +34,23 @@ library(lmtest)
 library(dplyr)
 library(tibble)
 # load custom functions
-source('scripts/utilities/bonferroni_outlier_test.R')
-source('scripts/utilities/sresid_outliers.R')
-source('scripts/utilities/normality_tests.R')
-source('scripts/utilities/ncv_test.R')
-source('scripts/utilities/model_vifs.R')
-source('scripts/utilities/boxcox_transplot.R')
-source('scripts/utilities/plot_residuals_vs_fits.R')
-source('scripts/utilities/plot_cooks.R')
-source('scripts/utilities/plot_influence.R')
-source('scripts/utilities/plot_residualdist.R')
-source('scripts/utilities/plot_qq.R')
-source('scripts/utilities/plot_spreadlevel.R')
+source('../scripts/utilities/bonferroni_outlier_test.R')
+source('../scripts/utilities/sresid_outliers.R')
+source('../scripts/utilities/normality_tests.R')
+source('../scripts/utilities/ncv_test.R')
+source('../scripts/utilities/model_vifs.R')
+source('../scripts/utilities/boxcox_transplot.R')
+source('../scripts/utilities/plot_residuals_vs_fits.R')
+source('../scripts/utilities/plot_cooks.R')
+source('../scripts/utilities/plot_influence.R')
+source('../scripts/utilities/plot_residualdist.R')
+source('../scripts/utilities/plot_qq.R')
+source('../scripts/utilities/plot_spreadlevel.R')
 ```
 
 ```{r data-load, echo = FALSE, warning = FALSE}
 # load in the historic voting data for deriving the voting blocs
-processed_data <- read.csv(file = "./data/processed_data.csv", header = T)
+processed_data <- read.csv(file = "../data/processed_data.csv", header = T)
 rownames(processed_data) <- seq(1, dim(processed_data)[1])
 # split the televote data
 televote_data <- processed_data %>% rownames_to_column('idx') %>% filter(Voting_Method_J == 0) %>% column_to_rownames('idx')
@@ -64,7 +64,7 @@ jury_data <- processed_data %>% rownames_to_column('idx') %>% filter(Voting_Meth
 
 ```{r overall-model, echo = FALSE, warning = FALSE}
 # load final overall model
-my_model_overall <- readRDS("./models/overall_final_model.RDS")
+my_model_overall <- readRDS("../models/overall_final_model.RDS")
 # extract out the model coefficients
 overall_model_coeff <- names(my_model_overall$coefficients)[-1]
 # recreate the model formula
@@ -82,7 +82,7 @@ summary(my_model_overall)
 ```{r overall-box-cox, echo = FALSE, warning = FALSE}
 # Apply box-cox transformation on the model to improve the normality assumptions 
 # box-cox transformation using car
-bct <- boxcox_transplot(my_model_overall, output_fpath = './report/plots/boxcox/model_overall_boxcox.jpg')
+bct <- boxcox_transplot(my_model_overall, output_fpath = '../report/plots/boxcox/model_overall_boxcox.jpg')
 # find optimal box-cox power transformation power
 p <- bct$x[which.max(x = bct$y)]
 # transform points using the optimal power transformation
@@ -103,7 +103,7 @@ overall_sresid <- studres(my_model_overall)
 
 ```{r overall-residuals-vs-fits, echo = FALSE, results = 'hide'}
 # plot residuals vs fits model
-plot_residuals_vs_fits(model = my_model_overall, main = "Overall Model - Standardised Residuals vs Fitted Values", output_fpath = './report/plots/residual/model_overall_residuals_vs_fits.jpg')
+plot_residuals_vs_fits(model = my_model_overall, main = "Overall Model - Standardised Residuals vs Fitted Values", output_fpath = '../report/plots/residual/model_overall_residuals_vs_fits.jpg')
 ```
 
 ![Overall Model Standardised Residuals vs Fits](../report/plots/residual/model_overall_residuals_vs_fits.jpg)\newline
@@ -145,7 +145,7 @@ avPlots(my_model_overall, ask = FALSE, layout = c(1, 1))
 
 ```{r overall-cooks-distance, echo = FALSE, results = 'hide'}
 # Cook's D plot
-plot_cooks(model = my_model_overall, data = processed_data, output_fpath = './report/plots/residual/model_overall_cooks.jpg')
+plot_cooks(model = my_model_overall, data = processed_data, output_fpath = '../report/plots/residual/model_overall_cooks.jpg')
 ```
 
 ![Overall Model Cooks Distance](../report/plots/residual/model_overall_cooks.jpg)\newline
@@ -161,7 +161,7 @@ residualPlots(my_model_overall, ask = FALSE, layout = c(1, 1))
 
 ```{r overall-influence-plot, echo = FALSE, warning = FALSE, results = 'hide'}
 # Influence Plot 
-plot_influence(model = my_model_overall, main = "Overall Model - Influence Plot", output_fpath = './report/plots/residual/model_overall_influence.jpg')
+plot_influence(model = my_model_overall, main = "Overall Model - Influence Plot", output_fpath = '../report/plots/residual/model_overall_influence.jpg')
 ```
 
 ![Overall Model Residual Influence](../report/plots/residual/model_overall_influence.jpg)\newline
@@ -187,7 +187,7 @@ normality_tests(overall_sresid)
 
 ```{r overall-residual-histogram, echo = FALSE, results = 'hide'}
 # plot distribution of residuals
-plot_residualdist(overall_sresid, main = "Overall Model - Distribution of Standardised Residuals", output_fpath = './report/plots/residual/model_overall_residual_distribution.jpg')
+plot_residualdist(overall_sresid, main = "Overall Model - Distribution of Standardised Residuals", output_fpath = '../report/plots/residual/model_overall_residual_distribution.jpg')
 ```
 
 ![Overall Model Residual Distribution](../report/plots/residual/model_overall_residual_distribution.jpg)\newline
@@ -196,7 +196,7 @@ plot_residualdist(overall_sresid, main = "Overall Model - Distribution of Standa
 
 ```{r overall-residual-qqplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # QQ-plot of the data
-plot_qq(my_model_overall, main = "QQ-Plot of Overall Model Standardised Residuals", output_fpath = './report/plots/residual/model_overall_qq.jpg')
+plot_qq(my_model_overall, main = "QQ-Plot of Overall Model Standardised Residuals", output_fpath = '../report/plots/residual/model_overall_qq.jpg')
 ```
 
 ![Overall Model Residual QQ](../report/plots/residual/model_overall_qq.jpg)\newline
@@ -222,7 +222,7 @@ ncv_test(my_model_overall)
 
 ```{r overall-nonconstant-variance-spreadlevelplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # plot studentized residuals vs. fitted values 
-plot_spreadlevel(my_model_overall, main = "Spread-Level Plot for Overall Model", output_fpath = './report/plots/residual/model_overall_spreadlevel.jpg')
+plot_spreadlevel(my_model_overall, main = "Spread-Level Plot for Overall Model", output_fpath = '../report/plots/residual/model_overall_spreadlevel.jpg')
 ```
 
 ![Overall Model Residual Spreadlevel](../report/plots/residual/model_overall_spreadlevel.jpg)\newline
@@ -241,7 +241,7 @@ model_vifs(my_model_overall)
 
 ```{r televote-model, echo = FALSE, warning = FALSE}
 # load final televote model
-my_model_tele <- readRDS("./models/televote_final_model.RDS")
+my_model_tele <- readRDS("../models/televote_final_model.RDS")
 # extract out the model coefficients
 tele_model_coeff <- names(my_model_tele$coefficients)[-1]
 # recreate the model formula
@@ -259,7 +259,7 @@ summary(my_model_tele)
 ```{r televote-box-cox, echo = FALSE, warning = FALSE}
 # Apply box-cox transformation on the model to improve the normality assumptions 
 # box-cox transformation using car
-bct <- boxcox_transplot(my_model_tele, output_fpath = './report/plots/boxcox/model_tele_boxcox.jpg')
+bct <- boxcox_transplot(my_model_tele, output_fpath = '../report/plots/boxcox/model_tele_boxcox.jpg')
 # find optimal box-cox power transformation power
 p <- bct$x[which.max(x = bct$y)]
 # transform points using the optimal power transformation
@@ -280,7 +280,7 @@ tele_sresid <- studres(my_model_tele)
 
 ```{r televote-residuals-vs-fits, echo = FALSE, warning = FALSE, results = 'hide'}
 # plot residuals vs fits model
-plot_residuals_vs_fits(model = my_model_tele, main = "Televote Model - Standardised Residuals vs Fitted Values", output_fpath = './report/plots/residual/model_tele_residuals_vs_fits.jpg')
+plot_residuals_vs_fits(model = my_model_tele, main = "Televote Model - Standardised Residuals vs Fitted Values", output_fpath = '../report/plots/residual/model_tele_residuals_vs_fits.jpg')
 ```
 
 ![Televote Model Standardised Residuals vs Fits](../report/plots/residual/model_tele_residuals_vs_fits.jpg)\newline
@@ -322,7 +322,7 @@ avPlots(my_model_tele, ask = FALSE, layout = c(1, 1))
 
 ```{r televote-cooks-distance-plot, echo = FALSE, results = 'hide'}
 # Cook's D plot
-plot_cooks(model = my_model_tele, data = televote_data, output_fpath = './report/plots/residual/model_tele_cooks.jpg')
+plot_cooks(model = my_model_tele, data = televote_data, output_fpath = '../report/plots/residual/model_tele_cooks.jpg')
 ```
 ![Telebote Model Cooks Distance](../report/plots/residual/model_tele_cooks.jpg)\newline
 
@@ -337,7 +337,7 @@ residualPlots(my_model_tele, ask = FALSE, layout = c(1, 1))
 
 ```{r televote-influence-plot, echo = FALSE, warning = FALSE, results = 'hide'}
 # Influence Plot 
-plot_influence(model = my_model_tele, main = "Televote Model - Influence Plot", output_fpath = './report/plots/residual/model_televote_influence.jpg')
+plot_influence(model = my_model_tele, main = "Televote Model - Influence Plot", output_fpath = '../report/plots/residual/model_televote_influence.jpg')
 ```
 
 ![Televote Model Residual Influence](../report/plots/residual/model_televote_influence.jpg)\newline
@@ -362,7 +362,7 @@ normality_tests(tele_sresid)
 
 ```{r televote-residual-histogram, echo = FALSE, results = 'hide'}
 # plot distribution of residuals
-plot_residualdist(tele_sresid, main = "Televote Model - Distribution of Standardised Residuals", output_fpath = './report/plots/residual/model_televote_residual_distribution.jpg')
+plot_residualdist(tele_sresid, main = "Televote Model - Distribution of Standardised Residuals", output_fpath = '../report/plots/residual/model_televote_residual_distribution.jpg')
 ```
 
 ![Televote Model Residual Distribution](../report/plots/residual/model_televote_residual_distribution.jpg)\newline
@@ -371,7 +371,7 @@ plot_residualdist(tele_sresid, main = "Televote Model - Distribution of Standard
 
 ```{r televote-qqplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # QQ-plot of the data
-plot_qq(my_model_tele, main = "QQ-Plot of Televote Model Standardised Residuals", output_fpath = './report/plots/residual/model_televote_qq.jpg')
+plot_qq(my_model_tele, main = "QQ-Plot of Televote Model Standardised Residuals", output_fpath = '../report/plots/residual/model_televote_qq.jpg')
 ```
 
 ![Televote Model Residual QQ](../report/plots/residual/model_televote_qq.jpg)\newline
@@ -396,7 +396,7 @@ ncv_test(my_model_tele)
 
 ```{r televote-spreadlevelplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # plot studentized residuals vs. fitted values 
-plot_spreadlevel(my_model_tele, main = "Spread-Level Plot for Televote Model", output_fpath = './report/plots/residual/model_televote_spreadlevel.jpg')
+plot_spreadlevel(my_model_tele, main = "Spread-Level Plot for Televote Model", output_fpath = '../report/plots/residual/model_televote_spreadlevel.jpg')
 ```
 
 ![Televote Model Residual Spreadlevel](../report/plots/residual/model_televote_spreadlevel.jpg)\newline
@@ -415,7 +415,7 @@ model_vifs(my_model_tele)
 
 ```{r jury-model, echo = FALSE, warning = FALSE}
 # load final televote model
-my_model_jury <- readRDS("./models/jury_final_model.RDS")
+my_model_jury <- readRDS("../models/jury_final_model.RDS")
 # extract out the model coefficients
 jury_model_coeff <- names(my_model_jury$coefficients)[-1]
 # recreate the model formula
@@ -452,7 +452,7 @@ jury_sresid <- studres(my_model_jury)
 
 ```{r jury-residuals-vs-fits, echo = FALSE, warning = FALSE, results = 'hide'}
 # plot residuals vs fits model
-plot_residuals_vs_fits(model = my_model_jury, main = "Jury Model - Standardised Residuals vs Fitted Values", output_fpath = './report/plots/residual/model_jury_residuals_vs_fits.jpg')
+plot_residuals_vs_fits(model = my_model_jury, main = "Jury Model - Standardised Residuals vs Fitted Values", output_fpath = '../report/plots/residual/model_jury_residuals_vs_fits.jpg')
 ```
 
 ![Jury Model Standardised Residuals vs Fits](../report/plots/residual/model_jury_residuals_vs_fits.jpg)\newline
@@ -494,7 +494,7 @@ avPlots(my_model_jury, ask = FALSE, layout = c(1, 1))
 
 ```{r jury-cooks-distance-plot, echo = FALSE, results = 'hide'}
 # Cook's D plot
-plot_cooks(model = my_model_jury, data = jury_data, output_fpath = './report/plots/residual/model_jury_cooks.jpg')
+plot_cooks(model = my_model_jury, data = jury_data, output_fpath = '../report/plots/residual/model_jury_cooks.jpg')
 ```
 
 ![Jury Model Cooks Distance](../report/plots/residual/model_jury_cooks.jpg)\newline
@@ -510,7 +510,7 @@ residualPlots(my_model_jury, ask = FALSE, layout = c(1, 1))
 
 ```{r jury-influence-plot, echo = FALSE, warning = FALSE, results = 'hide'}
 # Influence Plot 
-plot_influence(model = my_model_jury, main = "Jury Model - Influence Plot", output_fpath = './report/plots/residual/model_jury_influence.jpg')
+plot_influence(model = my_model_jury, main = "Jury Model - Influence Plot", output_fpath = '../report/plots/residual/model_jury_influence.jpg')
 ```
 
 ![Jury Model Residual Influence](../report/plots/residual/model_jury_influence.jpg)\newline
@@ -535,7 +535,7 @@ normality_tests(jury_sresid)
 
 ```{r jury-residual-histogram, echo = FALSE, results = 'hide'}
 # Influence Plot 
-plot_residualdist(jury_sresid, main = "Jury Model - Distribution of Standardised Residuals", output_fpath = './report/plots/residual/model_jury_residual_distribution.jpg')
+plot_residualdist(jury_sresid, main = "Jury Model - Distribution of Standardised Residuals", output_fpath = '../report/plots/residual/model_jury_residual_distribution.jpg')
 ```
 
 ![Jury Model Residual Distribution](../report/plots/residual/model_jury_residual_distribution.jpg)\newline
@@ -544,7 +544,7 @@ plot_residualdist(jury_sresid, main = "Jury Model - Distribution of Standardised
 
 ```{r jury-qqplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # QQ-plot of the data
-plot_qq(my_model_jury, main = "QQ-Plot of Jury Vote Model Standardised Residuals", output_fpath = './report/plots/residual/model_jury_qq.jpg')
+plot_qq(my_model_jury, main = "QQ-Plot of Jury Vote Model Standardised Residuals", output_fpath = '../report/plots/residual/model_jury_qq.jpg')
 ```
 
 ![Jury Model Residual QQ](../report/plots/residual/model_jury_qq.jpg)\newline
@@ -569,7 +569,7 @@ ncv_test(my_model_jury)
 
 ```{r jury-spreadlevelplot, echo = FALSE, warning = FALSE, results = 'hide'}
 # plot studentized residuals vs. fitted values 
-plot_spreadlevel(my_model_jury, main = "Spread-Level Plot for Jury Model", output_fpath = './report/plots/residual/model_jury_spreadlevel.jpg')
+plot_spreadlevel(my_model_jury, main = "Spread-Level Plot for Jury Model", output_fpath = '../report/plots/residual/model_jury_spreadlevel.jpg')
 ```
 
 ![Jury Model Residual Spreadlevel](../report/plots/residual/model_jury_spreadlevel.jpg)\newline

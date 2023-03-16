@@ -1,6 +1,6 @@
 # load custom functions
-source('Scripts/utilities/extract_preds_by_cats.R')
-source('Scripts/utilities/extract_sign_preds.R')
+source('../scripts/utilities/extract_preds_by_cats.R')
+source('../scripts/utilities/extract_sign_preds.R')
 # define a function to fit a step-wise linear model
 step_lm_model <- function(dataset, pred_cols, direction = 'both', steps = 100, trace = 0){
   # create an empty list to hold results

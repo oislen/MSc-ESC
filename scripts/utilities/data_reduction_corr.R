@@ -1,7 +1,7 @@
 # load relevant libraries
 library('dplyr')
 # load custom correlation test function
-source("Scripts/utilities/correlation_tests.R")
+source("../scripts/utilities/correlation_tests.R")
 # define function to apply chi-sq tests to given data and columns
 data_reduction_corr <- function(dataset, col_names){
   # Subset the data to be tested

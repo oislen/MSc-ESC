@@ -46,14 +46,14 @@ library(knitr)
 library(car)
 library(dplyr)
 # load custom functions
-source('scripts/utilities/step_lm_model.R')
+source('../scripts/utilities/step_lm_model.R')
 ```
 
 ```{r data-load, echo = FALSE}
 #-- Data --#
 
 # load in the historic voting data for deriving the voting blocs
-processed_data <- read.csv(file = "./data/processed_data.csv", header = T)
+processed_data <- read.csv(file = "../data/processed_data.csv", header = T)
 # split the televote data
 televote_data <- processed_data %>% filter(Voting_Method_J == 0)
 # split out the jury vote data
@@ -112,7 +112,7 @@ summary(overall_final_model)
 # check variance inflation factors
 as.data.frame(vif(overall_final_model))
 # write the model to disk
-saveRDS(object = overall_final_model, file = './models/overall_final_model.RDS')
+saveRDS(object = overall_final_model, file = '../models/overall_final_model.RDS')
 ```
 
 \newpage
@@ -159,7 +159,7 @@ summary(televote_final_model)
 # check variance inflation factors
 as.data.frame(vif(televote_final_model))
 # write the model to disk
-saveRDS(object = televote_final_model, file = './models/televote_final_model.RDS')
+saveRDS(object = televote_final_model, file = '../models/televote_final_model.RDS')
 ```
 
 \newpage
@@ -206,5 +206,5 @@ summary(jury_final_model)
 # check variance inflation factors
 as.data.frame(vif(jury_final_model))
 # write the model to disk
-saveRDS(object = jury_final_model, file = './models/jury_final_model.RDS')
+saveRDS(object = jury_final_model, file = '../models/jury_final_model.RDS')
 ```

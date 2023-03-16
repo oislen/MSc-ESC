@@ -1,7 +1,7 @@
 # load relevant libraries
 library('dplyr')
 # load custom chi-sq test function
-source("Scripts/utilities/chisq_tests.R")
+source("../scripts/utilities/chisq_tests.R")
 # define function to apply chi-sq tests to given data and columns
 data_reduction_chisq <- function(dataset, col_names){
   # Subset the data to be tested

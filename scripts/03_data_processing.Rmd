@@ -32,23 +32,23 @@ library(knitr)
 library(ggplot2)
 library(dplyr)
 # load in custom utility functions
-source("./scripts/utilities/column_to_factor.R")
-source("./scripts/utilities/TC_FC_missing_observations.R")
-source("./scripts/utilities/plot_missings_effect.R")
-source("./scripts/utilities/extract_numeric_data.R")
-source("./scripts/utilities/extract_factor_data.R")
-source("./scripts/utilities/categorical_dummy_encoding.R")
-source("./scripts/utilities/range_standardise_data.R")
-source("./scripts/utilities/normalise_data.R")
-source("./scripts/utilities/range_normalisation.R")
-source("./scripts/utilities/data_normalisation.R")
-source("./scripts/utilities/data_reduction_chisq.R")
-source("./scripts/utilities/data_reduction_corr.R")
+source("../scripts/utilities/column_to_factor.R")
+source("../scripts/utilities/TC_FC_missing_observations.R")
+source("../scripts/utilities/plot_missings_effect.R")
+source("../scripts/utilities/extract_numeric_data.R")
+source("../scripts/utilities/extract_factor_data.R")
+source("../scripts/utilities/categorical_dummy_encoding.R")
+source("../scripts/utilities/range_standardise_data.R")
+source("../scripts/utilities/normalise_data.R")
+source("../scripts/utilities/range_normalisation.R")
+source("../scripts/utilities/data_normalisation.R")
+source("../scripts/utilities/data_reduction_chisq.R")
+source("../scripts/utilities/data_reduction_corr.R")
 ```
 
 ```{r data-load, echo = FALSE}
 # load in the raw ESC 2016 data for the analysis
-ESCdata <- read.csv(file = "./data/ESC_2016_voting_data.csv", header = T)
+ESCdata <- read.csv(file = "../data/ESC_2016_voting_data.csv", header = T)
 # order the data by To_country, From_country, Round and OOA
 ESCdata <- ESCdata %>% arrange(To_country, From_country, Round, OOA)
 # drop the id variable
@@ -76,7 +76,7 @@ initial_data_types
 # NA values per column
 na_count_per_column <- sapply(ESCdata, function(y) sum(length(which(is.na(y)))) / nrow(ESCdata))
 # write to a csv file
-write.csv(na_count_per_column, './report/stats/NA_prop_per_columns.csv')
+write.csv(na_count_per_column, '../report/stats/NA_prop_per_columns.csv')
 # filter our rows with missing data values
 completedata <- ESCdata %>% na.omit
 
@@ -85,7 +85,7 @@ from_countries <- unique(ESCdata$From_countr) %>% sort()
 # generate count stats for the from countries before and after missings are removed
 TC_FC_missing_obseration_df <- TC_FC_missing_observations(from_countries = from_countries, orig_data = ESCdata, comp_data = completedata)
 # write the TC_FC_missing_observations_df to a csv file
-write.csv(x = TC_FC_missing_obseration_df, file = "./report/stats/TC_FC_missing_obseration_df.csv")
+write.csv(x = TC_FC_missing_obseration_df, file = "../report/stats/TC_FC_missing_obseration_df.csv")
 ```
 
 There is a total of `r nrow(ESCdata) - nrow(ESCdata %>% na.omit)` rows missing from the data. This corresponds to approximately `r round((nrow(ESCdata) - nrow(ESCdata %>% na.omit)) / nrow(ESCdata) * 100, 2)`% of the data. Removing all of these rows with missing values leaves a total of `r nrow(completedata)` rows remaining. This is a substantial loss of data, a notable limitation to the research, and an area of improvement for future research iterations. An alternative solution could be to use different sources such as the world bank for the migration / diaspora based data. However at time of research, these data repositories did not store migration / diaspora information by country of birth / citizenship.
@@ -96,7 +96,7 @@ http://www.worldbank.org/en/topic/migrationremittancesdiasporaissues/brief/migra
 # The Effect on To_country, From_country, Points
 voting_factors <- c('To_country', 'From_country', 'Points')
 # call the plot missing function
-plot_missings_effect(col_name = voting_factors, orig_data = ESCdata, comp_data = completedata, output_dir = './report/plots/missings/')
+plot_missings_effect(col_name = voting_factors, orig_data = ESCdata, comp_data = completedata, output_dir = '../report/plots/missings/')
 ```
 
 ## Generate Factor Blocs
@@ -376,5 +376,5 @@ processed_performance_factors <- cbind(performance_factors_categorical, performa
 # combine and create the final processed data set
 processed_data <- cbind(processed_voting_factors, processed_competition_factors, processed_external_factors, processed_performance_factors)
 # write the processed data to a csv file
-write.csv(processed_data, './data/processed_data.csv', row.names = F)
+write.csv(processed_data, '../data/processed_data.csv', row.names = F)
 ```

@@ -18,8 +18,8 @@ library(knitr)
 library(igraph)
 library(dplyr)
 # load in custom utility functions
-source("./scripts/utilities/graph_network.R")
-source("./scripts/utilities/plot_dendrogram_chart.R")
+source("../scripts/utilities/graph_network.R")
+source("../scripts/utilities/plot_dendrogram_chart.R")
 ```
 
 ## Data Profiling / Preparation
@@ -28,7 +28,7 @@ The historical voting data records the number of points given from one country t
 
 ```{r data-profiling, echo = FALSE}
 # load in the historic voting data for deriving the voting blocs
-past_voting_data <- read.csv(file = "./data/ESC_hist_voting_data.csv", header = T)
+past_voting_data <- read.csv(file = "../data/ESC_hist_voting_data.csv", header = T)
 # get the head of the data
 head(past_voting_data)
 ```
@@ -49,7 +49,7 @@ pvd <- past_voting_data %>%
 head(pvd)
 
 # write the average voting data to a csv file
-write.csv(x = pvd, file = "./data/average_points.csv", row.names = F)
+write.csv(x = pvd, file = "../data/average_points.csv", row.names = F)
 ```
 
 ### Average Points Graph
@@ -72,7 +72,7 @@ graph_network(dataset = pvdf,
               from.country = 'From.country', 
               to.country = "To.country", 
               weights = 'Average.Points',
-              output_fpath = './report/plots/networks/average-points-graph.jpg'
+              output_fpath = '../report/plots/networks/average-points-graph.jpg'
               )
 ```
 
@@ -98,7 +98,7 @@ Edge betweenness clustering works by iteratively removing edges with the highest
 # construct a dendrogram (hierarchical clustering method)
 plot_dendrogram_chart(community = com1, 
                       main = "Dendrogram of Edge Betweenness Clustering",
-                      output_fpath = './report/plots/dendrograms/edge-betweenness-dendrogram.jpg')
+                      output_fpath = '../report/plots/dendrograms/edge-betweenness-dendrogram.jpg')
 ```
 
 ![Edge Betweenness Dendrogram](../report/plots/dendrograms/edge-betweenness-dendrogram.jpg)\newline
@@ -119,7 +119,7 @@ Short random walks clustering works by performing short random walks between nod
 # construct a dendrogram (hierarchical clustering method)
 plot_dendrogram_chart(community = com2, 
                       main = "Dendrogram of Short Random Walks Clustering",
-                      output_fpath = './report/plots/dendrograms/short-random-walks-dendrogram.jpg')
+                      output_fpath = '../report/plots/dendrograms/short-random-walks-dendrogram.jpg')
 ```
 
 ![Short Random Walks Dendrogram](../report/plots/dendrograms/short-random-walks-dendrogram.jpg)\newline
@@ -137,5 +137,5 @@ colnames(voting_bloc_data) <- c("Country", "VBlocs1_EB", "VBlocs2_SRW")
 # results
 voting_bloc_data
 # Writing Voting Bloc Data to csv file
-write.csv(x = voting_bloc_data, file = "./data/voting_bloc_data.csv", row.names = F)
+write.csv(x = voting_bloc_data, file = "../data/voting_bloc_data.csv", row.names = F)
 ```
