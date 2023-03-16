@@ -2,9 +2,9 @@
 call conda env list
 
 :: create and activate new R environment
-call conda env remove --name MSc-ESC
+call conda env remove --name MSc-ESC --yes
 call conda env list
-call conda create -n MSc-ESC r-base
+call conda create -n MSc-ESC r-base --yes
 call conda activate MSc-ESC
 call conda list
 
