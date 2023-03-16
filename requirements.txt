@@ -1,8 +1,8 @@
-rmarkdown
-knitr
-igraph
-tidyverse
-car
-MASS
-nortest
-lmtest
+r-rmarkdown
+r-knitr
+r-igraph
+r-tidyverse
+r-car
+r-MASS
+r-nortest
+r-lmtest
