@@ -1,3 +1,11 @@
+#' Correlation Tests
+#' 
+#' @description Performs correlation tests against all column pair combinations in a given dataframe
+#' 
+#' @param data A dataframe with columns to perform correlation tests with
+#' 
+#' @return Returns a dataframe containing the correlation test results
+#' 
 correlation_tests <- function (dataset) {
   # Create a data frame to hold the correlation test data
   cor_test_df <- as.data.frame(matrix(ncol = 4))

@@ -1,6 +1,13 @@
-# we need to dummy encode the categorical variables
 library(dummy)
-# define function to perform dummy encoding
+
+#' Categorical Dummy encoding
+#' 
+#' @description Generates dummy encoding for categorical variables within a dataframe
+#' 
+#' @param dataset A dataframe with categorical variables to dummy encode
+#' 
+#' @return Returns the dummy encode categorical variables as a dataframe
+#' 
 categorical_dummy_encoding <- function(dataset){
   # first subset categorical variables
   cvariables <- categories(x = dataset)
@@ -13,7 +20,7 @@ categorical_dummy_encoding <- function(dataset){
   for (i in 1:length(dcvariables)) {
     dcvariables[,i] <- as.integer(dcvariables[,i])
   }
-  # convery dummy encoded variables to a data frame
+  # convert dummy encoded variables to a data frame
   dcvariables <- as.data.frame(x = dcvariables)
   # subset continuous variables
   # use set operations

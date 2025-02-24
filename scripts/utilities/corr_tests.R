@@ -1,5 +1,17 @@
-# Define a function to perform Correlation Tests
-corr_tests <- function(data, col_names, na.action = "na.omit", digits = 5, sign_level = 0.05){
+#' Correlation Tests
+#' 
+#' @description Performs correlation tests for given columns in a dataframe against a specified target
+#' 
+#' @param data A dataframe with columns to perform correlation tests with
+#' @param col_names A vector of column names to test for correlation
+#' @param tar_col_name A string for the target column to use in the correlation tests, default is 'Points'
+#' @param na.action A string indicating the action to take when dealing with na values, default is 'na.omit'
+#' @param digit An integer indicating the number of digits to round the correlation test output to, default is 5
+#' @param sign_level A float indicating the significance level to set in the correlation tests, default is 0.05
+#' 
+#' @return Returns a dataframe containing the correlation test results
+#' 
+corr_tests <- function(data, col_names, tar_col_name = "Points", na.action = "na.omit", digits = 5, sign_level = 0.05){
   # set the output column names
   output_cols <- c("X", "Y", "Correlation", "P-Value", "Significant")
   # Create a data frame to hold the correlation test data
@@ -11,7 +23,7 @@ corr_tests <- function(data, col_names, na.action = "na.omit", digits = 5, sign_
     # Fill in the X Variable Name
     cor_test_df[col, "X"] <- col
     # Fill in the Y Variable Name
-    cor_test_df[col, "Y"] <- "Points"
+    cor_test_df[col, "Y"] <- tar_col_name
     # Fill in the correlation
     cor_test_df[col, "Correlation"] <- round(c.t.$estimate, digits = digits)
     # Fill in the p-value
