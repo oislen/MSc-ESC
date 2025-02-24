@@ -47,6 +47,7 @@ library(car)
 library(dplyr)
 # load custom functions
 source('utilities/step_lm_model.R')
+source('cons.R')
 ```
 
 ```{r data-load, echo = FALSE}
@@ -111,8 +112,10 @@ overall_final_model <- lm(overall_final_model_form, data = processed_data)
 summary(overall_final_model)
 # check variance inflation factors
 as.data.frame(vif(overall_final_model))
-# write the model to disk
-saveRDS(object = overall_final_model, file = '../models/overall_final_model.RDS')
+if (gen_output_model_files) {
+  # write the model to disk
+  saveRDS(object = overall_final_model, file = '../models/overall_final_model.RDS')
+}
 ```
 
 \newpage
@@ -158,8 +161,10 @@ televote_final_model <- lm(televote_final_model_form, data = televote_data)
 summary(televote_final_model)
 # check variance inflation factors
 as.data.frame(vif(televote_final_model))
-# write the model to disk
-saveRDS(object = televote_final_model, file = '../models/televote_final_model.RDS')
+if (gen_output_model_files) {
+  # write the model to disk
+  saveRDS(object = televote_final_model, file = '../models/televote_final_model.RDS')
+}
 ```
 
 \newpage
@@ -205,6 +210,8 @@ jury_final_model <- lm(jury_final_model_form, data = jury_data)
 summary(jury_final_model)
 # check variance inflation factors
 as.data.frame(vif(jury_final_model))
-# write the model to disk
-saveRDS(object = jury_final_model, file = '../models/jury_final_model.RDS')
+if (gen_output_model_files) {
+  # write the model to disk
+  saveRDS(object = jury_final_model, file = '../models/jury_final_model.RDS')
+}
 ```
