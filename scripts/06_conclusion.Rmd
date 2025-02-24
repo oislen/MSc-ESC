@@ -24,7 +24,7 @@ library(knitr)
 library(car)
 library(dplyr)
 # load custom functions
-source('../scripts/utilities/boxcox_transplot.R')
+source('utilities/boxcox_transplot.R')
 # set inline rounding digits
 inline_digits = 5
 ```
