@@ -6,3 +6,4 @@ r-car
 r-MASS
 r-nortest
 r-lmtest
+r-renv
