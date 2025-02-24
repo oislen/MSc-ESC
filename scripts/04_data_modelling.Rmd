@@ -46,7 +46,7 @@ library(knitr)
 library(car)
 library(dplyr)
 # load custom functions
-source('../scripts/utilities/step_lm_model.R')
+source('utilities/step_lm_model.R')
 ```
 
 ```{r data-load, echo = FALSE}
