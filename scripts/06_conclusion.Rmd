@@ -69,10 +69,9 @@ my_model_overall <- lm(my_model_overall_bct_from, data = processed_data)
 # generate model summary
 my_model_overall_summary <- summary(my_model_overall)
 my_model_overall_summary
-if (gen_output_model_files) {
-  # write the model to disk
-  saveRDS(object = my_model_overall, file = '../models/arch/overall_final_model.RDS')
-}
+# write the model to disk
+saveRDS(object = my_model_overall, file = fpath_model_arch_overall_final)
+
 ```
 
 ### T-tests
@@ -178,10 +177,8 @@ my_model_tele <- lm(my_model_tele_bct, data = televote_data)
 my_model_tele_summary <- summary(my_model_tele)
 my_model_tele_summary
 
-if (gen_output_model_files) {
-  # write the model to disk
-  saveRDS(object = my_model_tele, file = '../models/arch/televote_final_model.RDS')
-}
+# write the model to disk
+saveRDS(object = my_model_tele, file = fpath_model_arch_televote_final)
 ```
 
 ### T-tests
@@ -272,10 +269,8 @@ my_model_jury <- lm(formula = my_model_jury_form, data = jury_data)
 my_model_jury_summary <- summary(my_model_jury)
 my_model_jury_summary
 
-if (gen_output_model_files) {
-  # write the model to disk
-  saveRDS(object = my_model_jury, file = '../models/arch/jury_final_model.RDS')
-}
+# write the model to disk
+saveRDS(object = my_model_jury, file = fpath_model_arch_jury_final)
 ```
 
 ### T-tests

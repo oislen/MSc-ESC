@@ -32,7 +32,7 @@ source("utilities/pred_corr_tests.R")
 source("utilities/graph_network.R")
 
 # load in the raw ESC 2016 data for the analysis
-ESCdata <- read.csv(file = "../data/ESC_2016_voting_data.csv", header = T)
+ESCdata <- read.csv(file = "../data/ESC_2016_voting_data.csv", header = TRUE)
 ```
 
 ```{r data-prep, echo = FALSE}
@@ -61,7 +61,7 @@ all_factors <- c(voting_factors, comp_factors, ext_factors, perf_factors)
 # run the categorical descriptive statistics function
 raw_data_cat_desc_stats <- factor_descriptive_statistics(dataset = ESCdata, col_names = all_factors)
 # write the categorical descriptive statistics to disk
-write.csv(x = raw_data_cat_desc_stats, file = "../report/stats/categorical_descriptive_statistics.csv")
+write.csv(x = raw_data_cat_desc_stats, file = fpath_stats_descriptive_categorical)
 # print descriptive statistics
 raw_data_cat_desc_stats
 ```
@@ -72,7 +72,7 @@ raw_data_cat_desc_stats
 # generate numeric descriptive statistics
 raw_data_num_desc_stats <- numeric_descriptive_statistics(dataset = ESCdata, col_names = all_num)
 # write the numeric descriptive statistics to disk
-write.csv(x = raw_data_num_desc_stats, file = "../report/stats/numeric_descriptive_statistics.csv")
+write.csv(x = raw_data_num_desc_stats, file = fpath_stats_descriptive_numeric)
 # print descriptive statistics
 raw_data_num_desc_stats
 ```
@@ -88,7 +88,7 @@ Chi-Squared Test Hypothesis:
 # perform chi-sq tests of association with Points
 chisqtestdf <- chisq_assoc_test(data = ESCdata, col_names = all_factors)
 # write the data frame to a csv file
-write.csv(x = chisqtestdf, file = "../report/stats/chi_sq_tests_response.csv", row.names = F)
+write.csv(x = chisqtestdf, file = fpath_stats_chisq_response, row.names = FALSE)
 # show chi-sq test results
 chisqtestdf
 ```
@@ -106,7 +106,7 @@ Correlation Test Hypothesis:
 # execute the correlation tests against the response
 resp_cor_tests_df <- corr_tests(data = ESCdata, col_names = all_num)
 # Write the correlation results to  a .csv file
-write.csv(x = resp_cor_tests_df, file = "../report/stats/cor_tests_response.csv", row.names = F)
+write.csv(x = resp_cor_tests_df, file = fpath_stats_cor_response, row.names = FALSE)
 # show correlation response results
 resp_cor_tests_df
 ```
@@ -117,7 +117,7 @@ resp_cor_tests_df
 # run correlation tests for all predictors
 pred_cor_tests_df <- pred_corr_tests(ESCdata[all_num])
 # output results as a .csv file
-write.csv(x = pred_cor_tests_df, file = "../report/Stats/cor_tests_predictors.csv", row.names = F)
+write.csv(x = pred_cor_tests_df, file = fpath_stats_cor_predictors, row.names = FALSE)
 # Determine which variables are highly correlated
 pred_cor_tests_df_sub <- pred_cor_tests_df[pred_cor_tests_df$Correlation > 0.4,]
 row.names(pred_cor_tests_df_sub) <- NULL
