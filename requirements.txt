@@ -7,3 +7,4 @@ r-MASS
 r-nortest
 r-lmtest
 r-renv
+r-moments
