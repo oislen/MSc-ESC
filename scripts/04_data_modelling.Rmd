@@ -112,8 +112,10 @@ overall_final_model <- lm(overall_final_model_form, data = processed_data)
 summary(overall_final_model)
 # check variance inflation factors
 as.data.frame(vif(overall_final_model))
-# write the model to disk
-saveRDS(object = overall_final_model, file = fpath_model_overall_final)
+if (gen_output_model_files) {
+  # write the model to disk
+  saveRDS(object = overall_final_model, file = fpath_model_overall_final)
+}
 ```
 
 \newpage
@@ -159,8 +161,10 @@ televote_final_model <- lm(televote_final_model_form, data = televote_data)
 summary(televote_final_model)
 # check variance inflation factors
 as.data.frame(vif(televote_final_model))
-# write the model to disk
-saveRDS(object = televote_final_model, file = fpath_model_televote_final)
+if (gen_output_model_files) {
+  # write the model to disk
+  saveRDS(object = televote_final_model, file = fpath_model_televote_final)
+}
 ```
 
 \newpage
@@ -206,6 +210,8 @@ jury_final_model <- lm(jury_final_model_form, data = jury_data)
 summary(jury_final_model)
 # check variance inflation factors
 as.data.frame(vif(jury_final_model))
-# write the model to disk
-saveRDS(object = jury_final_model, file = fpath_model_jury_final)
+if (gen_output_model_files) {
+  # write the model to disk
+  saveRDS(object = jury_final_model, file = fpath_model_jury_final)
+}
 ```

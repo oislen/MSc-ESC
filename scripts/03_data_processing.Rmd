@@ -76,8 +76,10 @@ initial_data_types
 ```{r remove-missing-observations-stats, echo = FALSE}
 # NA values per column
 na_count_per_column <- sapply(ESCdata, function(y) sum(length(which(is.na(y)))) / nrow(ESCdata))
-# write to a csv file
-write.csv(na_count_per_column, fpath_stats_na_prop_per_columns)
+if (gen_output_report_stat_files) {
+  # write to a csv file
+  write.csv(na_count_per_column, fpath_stats_na_prop_per_columns)
+}
 # filter our rows with missing data values
 completedata <- ESCdata %>% na.omit
 
@@ -86,7 +88,7 @@ from_countries <- unique(ESCdata$From_countr) %>% sort()
 # generate count stats for the from countries before and after missing values are removed
 TC_FC_missing_obseration_df <- TC_FC_missing_observations(from_countries = from_countries, orig_data = ESCdata, comp_data = completedata)
 
-if (gen_output_report_files) {
+if (gen_output_report_stat_files) {
   # write the TC_FC_missing_observations_df to a csv file
   write.csv(x = TC_FC_missing_obseration_df, file = fpath_stats_missing_oberations)
 }
@@ -385,6 +387,8 @@ processed_external_factors <- cbind(external_factors_categorical, external_facto
 processed_performance_factors <- cbind(performance_factors_categorical, performance_factors_numeric)
 # combine and create the final processed data set
 processed_data <- cbind(processed_voting_factors, processed_competition_factors, processed_external_factors, processed_performance_factors)
-# write the processed data to a csv file
-write.csv(processed_data, fpath_data_processed, row.names = FALSE)
+if (gen_output_report_stat_files) {
+  # write the processed data to a csv file
+  write.csv(processed_data, fpath_data_processed, row.names = FALSE)
+}
 ```

@@ -1,17 +1,62 @@
-gen_output_report_files <- FALSE
+gen_output_report_stat_files <- FALSE
+gen_output_report_plot_files <- FALSE
 gen_output_model_files <- FALSE
+gen_output_model_arch_files <- FALSE
 gen_output_data_files <-FALSE
 
-# stats
-fpath_stats_cor_predictors <- NA
-fpath_stats_cor_response <- NA
-fpath_stats_chisq_response <- NA
-fpath_stats_descriptive_numeric <- NA
-fpath_stats_descriptive_categorical <- NA
-fpath_stats_na_prop_per_columns <- NA
-fpath_stats_missing_oberations <- NA
+#-- Data --#
+
+# set file paths for data
+fpath_data_voting_bloc <- "../data/voting_bloc_data.csv"
+fpath_data_average_points <- "../data/average_points.csv"
+fpath_data_processed <- '../data/processed_data.csv'
+
+#-- Stats --#
+
+fpath_stats_cor_predictors <- "../report/Stats/cor_tests_predictors.csv"
+fpath_stats_cor_response <- "../report/stats/cor_tests_response.csv"
+fpath_stats_chisq_response <-"../report/stats/chi_sq_tests_response.csv"
+fpath_stats_descriptive_numeric <- "../report/stats/numeric_descriptive_statistics.csv"
+fpath_stats_descriptive_categorical <- "../report/stats/categorical_descriptive_statistics.csv"
+fpath_stats_na_prop_per_columns <- '../report/stats/NA_prop_per_columns.csv'
+fpath_stats_missing_oberations <- "../report/stats/TC_FC_missing_obseration_df.csv"
+
+#-- Models --#
+
+# model file paths
+fpath_model_overall_final <- '../models/overall_final_model.RDS'
+fpath_model_televote_final <- '../models/televote_final_model.RDS'
+fpath_model_jury_final <- '../models/jury_final_model.RDS'
+
+# archived models file paths
+fpath_model_arch_overall_final <- '../models/arch/overall_final_model.RDS'
+fpath_model_arch_televote_final <- '../models/arch/televote_final_model.RDS'
+fpath_model_arch_jury_final <- '../models/arch/jury_final_model.RDS'
+
+#-- Plots --#
+
 # missing values directory
 fdir_plots_missings <- NA
+fdir_plots_bar_charts <- NA
+fdir_plots_histograns <- NA
+fdir_plots_scatterplots <- NA
+# dendrograms
+fpath_plots_dendrogram_edge_betweenness <- NA
+fpath_plots_dendrogram_short_random_walks <- NA
+# networks
+fpath_plots_networks_cob_metric_televote <- NA
+fpath_plots_networks_cob_metric_jury <- NA
+fpath_plots_networks_citizens_metric_televote <- NA
+fpath_plots_networks_citizens_metric_jury <- NA
+fpath_plots_networks_cobcit_metric_televote <- NA
+fpath_plots_networks_cobcit_metric_jury <- NA
+fpath_plots_networks_cobcit_sf1_metric_televote <- NA
+fpath_plots_networks_cobcit_sf1_metric_jury <- NA
+fpath_plots_networks_cap_distance_televote <- NA
+fpath_plots_networks_cap_distance_jury <- NA
+fpath_plots_networks_average_points_televote <- NA
+fpath_plots_networks_average_points_jury <- NA
+fpath_plots_networks_average_points_graph <- NA
 # box-cox plots
 fpath_plots_boxcox_overall_model <- NA
 fpath_plots_boxcox_tele_model <- NA
@@ -41,17 +86,29 @@ fpath_plots_residuals_spreadlevel_tele_model <- NA
 fpath_plots_residuals_spreadlevel_jury_model <- NA
 
 # if generating output report file paths
-if (gen_output_report_files) {
-  # stats
-  fpath_stats_cor_predictors <- "../report/Stats/cor_tests_predictors.csv"
-  fpath_stats_cor_response <- "../report/stats/cor_tests_response.csv"
-  fpath_stats_chisq_response <-"../report/stats/chi_sq_tests_response.csv"
-  fpath_stats_descriptive_numeric <- "../report/stats/numeric_descriptive_statistics.csv"
-  fpath_stats_descriptive_categorical <- "../report/stats/categorical_descriptive_statistics.csv"
-  fpath_stats_na_prop_per_columns <- '../report/stats/NA_prop_per_columns.csv'
-  fpath_stats_missing_oberations <- "../report/stats/TC_FC_missing_obseration_df.csv"
+if (gen_output_report_plot_files) {
   # missing values directory
   fdir_plots_missings <- '../report/plots/missings/'
+  fdir_plots_bar_charts <- '../report/plots/bar_charts'
+  fdir_plots_histograns <- '../report/plots/histograms'
+  fdir_plots_scatterplots <- '../report/plots/scatterplots'
+  # dendrograms
+  fpath_plots_dendrogram_edge_betweenness <- '../report/plots/dendrograms/edge-betweenness-dendrogram.jpg'
+  fpath_plots_dendrogram_short_random_walks <- '../report/plots/dendrograms/short-random-walks-dendrogram.jpg'
+  # networks
+  fpath_plots_networks_cob_metric_televote <- '../report/plots/networks/televote-metric-cob.jpg'
+  fpath_plots_networks_cob_metric_jury <- '../report/plots/networks/jury-metric-cob.jpg'
+  fpath_plots_networks_citizens_metric_televote <- '../report/plots/networks/televote-metric-citizens.jpg'
+  fpath_plots_networks_citizens_metric_jury <- '../report/plots/networks/jury-metric-citizens.jpg'
+  fpath_plots_networks_cobcit_metric_televote <- '../report/plots/networks/televote-metric-cobcit.jpg'
+  fpath_plots_networks_cobcit_metric_jury <- '../report/plots/networks/jury-metric-cobcit.jpg'
+  fpath_plots_networks_cobcit_sf1_metric_televote <- '../report/plots/networks/televote-metric-cobcit-sf1.jpg'
+  fpath_plots_networks_cobcit_sf1_metric_jury <- '../report/plots/networks/jury-metric-cobcit-sf1.jpg'
+  fpath_plots_networks_cap_distance_televote <- '../report/plots/networks/televote-cap-dist.jpg'
+  fpath_plots_networks_cap_distance_jury <- '../report/plots/networks/jury-cap-dist.jpg'
+  fpath_plots_networks_average_points_televote <- '../report/plots/networks/televote-average-points.jpg'
+  fpath_plots_networks_average_points_jury <- '../report/plots/networks/jury-average-points.jpg'
+  fpath_plots_networks_average_points_graph <- '../report/plots/networks/average-points-graph.jpg'
   # box-cox plots
   fpath_plots_boxcox_overall_model <- '../report/plots/boxcox/model_overall_boxcox.jpg'
   fpath_plots_boxcox_tele_model <- '../report/plots/boxcox/model_tele_boxcox.jpg'
@@ -81,30 +138,3 @@ if (gen_output_report_files) {
   fpath_plots_residuals_spreadlevel_jury_model <- '../report/plots/residual/model_jury_spreadlevel.jpg'
 }
 
-# model file paths
-fpath_model_overall_final <- NA
-fpath_model_televote_final <- NA
-fpath_model_jury_final <- NA
-# archived models file paths
-fpath_model_overall_final <- NA
-fpath_model_televote_final <- NA
-fpath_model_jury_final <- NA
-
-# if generating output model file paths
-if (gen_output_model_files) {
-  # model file paths
-  fpath_model_overall_final <- '../models/overall_final_model.RDS'
-  fpath_model_televote_final <- '../models/televote_final_model.RDS'
-  fpath_model_jury_final <- '../models/jury_final_model.RDS'
-  # archived models file paths
-  fpath_model_arch_overall_final <- '../models/arch/overall_final_model.RDS'
-  fpath_model_arch_televote_final <- '../models/arch/televote_final_model.RDS'
-  fpath_model_arch_jury_final <- '../models/arch/jury_final_model.RDS'
-}
-
-# set file paths for data
-fpath_data_processed <- NA
-if (gen_output_data_files) {
-  fpath_data_processed <- '../data/processed_data.csv'
-  
-}
