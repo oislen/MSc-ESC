@@ -32,11 +32,13 @@ plot_scatter <- function(data, col_names, output_dir = 'report/plots/scatterplot
     # create the output plot name
     plot_name <- paste(col, '_vs_Points_Scatterplot.png', sep = '')
     
-    # create output file path
-    output_fpath <- file.path(output_dir, plot_name)
+    if (!is.na(output_dir)) {
+      # create output file path
+      output_fpath <- file.path(output_dir, plot_name)
+      # save plot
+      ggsave(output_fpath)
+    }
     
-    # save plot
-    ggsave(output_fpath)
   }
   return(0)
 }

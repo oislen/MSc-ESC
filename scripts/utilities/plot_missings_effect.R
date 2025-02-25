@@ -14,8 +14,10 @@ plot_missings_effect <- function(col_names, orig_data, comp_data, output_dir = '
       theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
       guides(fill = FALSE)
     
-    # save the plot
-    ggsave(paste(output_dir, col, 'All_Cases_Bar_Chart.png'))
+    if (!is.na(output_dir)){
+      # save the plot
+      ggsave(paste(output_dir, col, 'All_Cases_Bar_Chart.png'))
+    }
     
     # print the plot
     print(plt1)
@@ -28,8 +30,10 @@ plot_missings_effect <- function(col_names, orig_data, comp_data, output_dir = '
       theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
       guides(fill = FALSE)
     
-    # save the plot
-    ggsave(paste(output_dir, col, 'Complete_Cases_Bar_Chart.png'))
+    if (!is.na(output_dir)){
+      # save the plot
+      ggsave(paste(output_dir, col, 'Complete_Cases_Bar_Chart.png'))
+    }
     
     # print the plot
     print(plt2)
