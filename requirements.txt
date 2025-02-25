@@ -9,3 +9,4 @@ r-lmtest
 r-renv
 r-moments
 r-dummy
+r-testthat
