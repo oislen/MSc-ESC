@@ -1,7 +1,15 @@
-# load required libraries
 library(moments)
 
-# define a function to calculate descriptive statistics for categorical variables
+#' Factor Descriptive Statistics
+#' 
+#' @description Generates descriptive statistics for categorical variables within a dataframe
+#' 
+#' @param dataset The dataframe with factor variables
+#' @param col_names The factor variables to generate categorical descriptive statistics for
+#' @param digits The number of digits to round the descriptive statistics to, default is 2
+#' 
+#' @return Returns the categorical descriptive statistics as a dataframe
+#' 
 factor_descriptive_statistics <- function(dataset, col_names, digits = 2) {
   # function that automatically prints relevant descriptive statistics for attributes in a given data set
   # create the data frame to hold the categorical descriptive statistics
