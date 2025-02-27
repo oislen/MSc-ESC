@@ -11,5 +11,6 @@ data_normalisation <- function(dataset) {
   # Convert data to have minimum 0 and maximum 1
   mean <- mean(dataset)
   standard.deviation <- sd(dataset)
-  ((dataset - mean) / standard.deviation)
+  normalised_dataset <- ((dataset - mean) / standard.deviation)
+  return(normalised_dataset)
 }

@@ -1,25 +1,34 @@
+#' Normality Test
+#' 
+#' @description Performs a selection of normality tests on studentized model residuals
+#' 
+#' @param sresid The studentized residuals to perform normality tests on
+#' @param digits The number of digits to round the normality test results to, default is 5
+#' 
+#' @return Returns the normality tests results as a dataframe
+#' 
 normality_tests <- function(sresid, digits = 5) {
-  # shapiro normality test
+  # Shapiro normality test
   shapiro_test <- shapiro.test(sresid)
   shapiro_test_stat <- shapiro_test$statistic
   shapiro_test_pval <- shapiro_test$p.value
-  # anderson darling test
+  # Anderson-Darling test
   ad_test <- ad.test(sresid)
   ad_test_stat <- ad_test$statistic
   ad_test_pval <- ad_test$p.value
-  # cramer-von mises test
+  # Cramer-Von Mises test
   cvm_test <- cvm.test(sresid)
   cvm_test_stat <- cvm_test$statistic
   cvm_test_pval <- cvm_test$p.value
-  # lille test 
+  # Lille test 
   lille_test <- lillie.test(sresid)
   lille_test_stat <- lille_test$statistic
   lille_test_pval <- lille_test$p.value
-  # person test
+  # Person test
   person_test <- pearson.test(sresid)
   person_test_stat <- person_test$statistic
   person_test_pval <- person_test$p.value
-  # shapiro-francia test
+  # Shapiro-Francia test
   sf_test <- sf.test(sresid)
   sf_test_stat <- sf_test$statistic
   sf_test_pval <- sf_test$p.value
