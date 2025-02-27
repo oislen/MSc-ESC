@@ -1,3 +1,13 @@
+#' Plot Dendrogram Chart
+#' 
+#' @description Plots a dendrogram chart for a network community
+#' 
+#' @param community The network community to plot the dendrogram plot for
+#' @param main The main title of the dendrogram plot
+#' @param output_dir The output directory to write the dendrogram plot as a .png file, default is NA
+#' 
+#' @return Returns 0 for successful execution
+#' 
 plot_dendrogram_chart <- function(community, main, output_fpath = NA){
   # if saving file as jpeg
   if (!is.na(output_fpath)){
