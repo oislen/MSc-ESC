@@ -4,7 +4,7 @@
 #' 
 #' @param model The model to plot cooks distance for
 #' @param data The data used to fit the model
-#' @param output_dir The output directory to write the cooks distance plot as a .png file, default is NA
+#' @param output_fpath The output file path to write the cooks distance plot as a .png file, default is NA
 #' 
 #' @return Returns 0 for successful execution
 #' 

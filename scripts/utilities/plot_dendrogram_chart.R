@@ -4,7 +4,7 @@
 #' 
 #' @param community The network community to plot the dendrogram plot for
 #' @param main The main title of the dendrogram plot
-#' @param output_dir The output directory to write the dendrogram plot as a .png file, default is NA
+#' @param output_fpath The output file path to write the dendrogram plot as a .png file, default is NA
 #' 
 #' @return Returns 0 for successful execution
 #' 

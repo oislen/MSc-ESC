@@ -1,7 +1,15 @@
-# load relevant libraries
 library(ggplot2)
 
-# define function to plot and output histograms for given data.frame and vector of column names
+#' Plot Histogram
+#' 
+#' @description Plots a histogram for a given set of columns in a dataset
+#' 
+#' @param dataset The dataframe with numeric features
+#' @param col_names The numeric features to plot with a histogram
+#' @param output_dir The output directory to write the histogram as a .png file, default is 'report/plots/histograms'
+#' 
+#' @return Returns 0 for successful execution
+#' 
 plot_histogram <- function(dataset, col_names, output_dir = 'report/plots/histograms'){
   # use a for loop to generate histograms for each numeric attribute
   for (col in col_names){

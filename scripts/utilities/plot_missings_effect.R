@@ -1,6 +1,16 @@
 library(ggplot2)
 
-# define a function for plotting the effects of removing rows with na values before and after
+#' Plot Missing Effects
+#' 
+#' @description Plots the effects of removing rows with na values before and after
+#' 
+#' @param col_names The column to plot the missing value effects for
+#' @param orig_data The original data with NA values
+#' @param comp_data The completed data without NA values
+#' @param output_dir The output directory to write the missing effects plots as .png files, default is "./report/plots/missings/"
+#' 
+#' @return Returns 0 for successful execution
+#' 
 plot_missings_effect <- function(col_names, orig_data, comp_data, output_dir = './report/plots/missings/'){
   
   # loop through the column names
