@@ -1,5 +1,14 @@
-# IMPORTANT: Correlation does not imply causality
-# Define a function to perform Correlation Tests
+#' Predictor Correlation Tests
+#' 
+#' @description Performs correlation tests for columns pairs in a dataframe
+#' 
+#' @param data A dataframe with columns to perform correlation tests with
+#' @param na.action A string indicating the action to take when dealing with na values, default is 'na.omit'
+#' @param digit An integer indicating the number of digits to round the correlation test output to, default is 5
+#' @param sign_level A float indicating the significance level to set in the correlation tests, default is 0.05
+#' 
+#' @return Returns a dataframe containing the correlation test results
+#' 
 pred_corr_tests <- function (dataset, na.action = "na.omit", digits = 5, sign_level = 0.05) {
   # extract the unique column names
   n_cols = ncol(dataset)
