@@ -10,7 +10,11 @@ library(MASS)
 #' 
 #' @return Returns 0 for successful execution
 #' 
-plot_residuals_vs_fits <- function(model, main = "Standardised Residuals vs Fitted Values", output_fpath = NA){
+plot_residuals_vs_fits <- function(
+    model,
+    main="Standardised Residuals vs Fitted Values",
+    output_fpath=NA
+    ){
   
   # if saving file as jpeg
   if (!is.na(output_fpath)){

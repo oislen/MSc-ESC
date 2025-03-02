@@ -11,7 +11,11 @@ source("utilities/correlation_tests.R")
 #' 
 #' @return Returns a dataframe with any columns having non-significant correlation tests removed
 #' 
-data_reduction_corr <- function(dataset, col_names, corr_threshold = 0.9){
+data_reduction_corr <- function(
+    dataset,
+    col_names,
+    corr_threshold=0.9
+    ){
   # Subset the data to be tested
   sub_df <- dataset %>% subset(select = col_names)
   # Run the Chi-Squared Tests

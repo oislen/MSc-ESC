@@ -10,7 +10,11 @@ library(ggplot2)
 #' 
 #' @return Returns 0 for successful execution
 #' 
-plot_bar_chart <- function(dataset, col_names, output_dir = 'report/plots/bar_charts'){
+plot_bar_chart <- function(
+    dataset,
+    col_names,
+    output_dir='report/plots/bar_charts'
+    ){
   # use a for loop to generate a bar plot for each categorical attributes
   for (col in all_factors){
     

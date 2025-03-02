@@ -8,7 +8,11 @@
 #' 
 #' @return Returns 0 for successful execution
 #' 
-plot_scatter <- function(data, col_names, output_dir = 'report/plots/scatterplots'){
+plot_scatter <- function(
+    data,
+    col_names,
+    output_dir='report/plots/scatterplots'
+    ){
   
   # use a for loop to generate correlation scatter plots
   for (col in col_names){

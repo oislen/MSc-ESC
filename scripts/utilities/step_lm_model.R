@@ -13,7 +13,13 @@ source('utilities/extract_sign_preds.R')
 #' 
 #' @return Returns a list with the stepwise selection model results
 #' 
-step_lm_model <- function(dataset, pred_cols, direction = 'both', steps = 100, trace = 0){
+step_lm_model <- function(
+    dataset,
+    pred_cols,
+    direction='both',
+    steps=100,
+    trace=0
+    ){
   # create an empty list to hold results
   out_list <- list()
   # fit the model

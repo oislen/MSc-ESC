@@ -7,7 +7,10 @@
 #' 
 #' @return Returns the significant predictor variables as a vector
 #' 
-extract_sign_preds <- function(model, p = 0.05){
+extract_sign_preds <- function(
+    model,
+    p=0.05
+    ){
   # create model summary
   mod_summary <- summary(model)
   # Pull out coefficients and p-values

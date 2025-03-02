@@ -10,7 +10,12 @@
 #' 
 #' @return Returns a dataframe containing the chi-sq association tests results
 #' 
-chisq_assoc_test <- function(data, col_names, tar_col_name = "Points", digits = 5, sign_level = 0.05) {
+chisq_assoc_test <- function(
+    data, col_names,
+    tar_col_name="Points",
+    digits = 5,
+    sign_level = 0.05
+    ) {
 
   # set the names of the chi-sq test results
   chisq_results <- c("X", "Y", "P-Value", "Significant")

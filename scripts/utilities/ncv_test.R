@@ -7,7 +7,10 @@
 #' 
 #' @return Returns the non-constant error variance tests results as a dataframe
 #' 
-ncv_test <- function(model, digits = 5) {
+ncv_test <- function(
+    model,
+    digits=5
+    ) {
   ncv_test <- car::ncvTest(model)
   ncv_test_stat <- round(ncv_test$ChiSquare, digits)
   ncv_test_pval <- round(ncv_test$p, digits)

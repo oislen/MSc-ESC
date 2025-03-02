@@ -10,7 +10,11 @@ library(ggplot2)
 #' 
 #' @return Returns 0 for successful execution
 #' 
-plot_histogram <- function(dataset, col_names, output_dir = 'report/plots/histograms'){
+plot_histogram <- function(
+    dataset,
+    col_names,
+    output_dir='report/plots/histograms'
+    ){
   # use a for loop to generate histograms for each numeric attribute
   for (col in col_names){
     

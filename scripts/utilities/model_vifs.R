@@ -7,7 +7,10 @@
 #' 
 #' @return Returns the variance inflation factors as a dataframe
 #' 
-model_vifs <- function(model, sign_threshold = 2) {
+model_vifs <- function(
+    model,
+    sign_threshold=2
+    ) {
   model_vifs <- vif(model)  
   model_vifs_sign <- sqrt(model_vifs) > sign_threshold
   model_vifs_df <- as.data.frame(cbind(model_vifs, model_vifs_sign))

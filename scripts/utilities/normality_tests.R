@@ -7,7 +7,10 @@
 #' 
 #' @return Returns the normality tests results as a dataframe
 #' 
-normality_tests <- function(sresid, digits = 5) {
+normality_tests <- function(
+    sresid,
+    digits=5
+    ) {
   # Shapiro normality test
   shapiro_test <- shapiro.test(sresid)
   shapiro_test_stat <- shapiro_test$statistic

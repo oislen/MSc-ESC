@@ -11,7 +11,11 @@ source("utilities/chisq_tests.R")
 #' 
 #' @return Returns a dataframe with any columns having non-significant chi-square tests removed
 #' 
-data_reduction_chisq <- function(dataset, col_names, p_value = 0.05){
+data_reduction_chisq <- function(
+    dataset,
+    col_names,
+    p_value=0.05
+    ){
   # Subset the data to be tested
   sub_df <- dataset %>% subset(select = col_names)
   # Run the Chi-Squared Tests

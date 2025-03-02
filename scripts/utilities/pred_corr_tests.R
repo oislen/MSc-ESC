@@ -9,7 +9,12 @@
 #' 
 #' @return Returns a dataframe containing the correlation test results
 #' 
-pred_corr_tests <- function (dataset, na.action = "na.omit", digits = 5, sign_level = 0.05) {
+pred_corr_tests <- function(
+    dataset,
+    na.action="na.omit",
+    digits=5,
+    sign_level=0.05
+    ) {
   # extract the unique column names
   n_cols = ncol(dataset)
   dataset_cols = unique(colnames(dataset))

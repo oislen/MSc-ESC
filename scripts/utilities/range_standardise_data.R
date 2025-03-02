@@ -10,7 +10,11 @@ source("utilities/range_normalisation.R")
 #' 
 #' @return Returns the range standardised numeric dataframe
 #' 
-range_standardise_data <- function(dataset, lower_bound = 0, upper_bound = 1) {
+range_standardise_data <- function(
+    dataset,
+    lower_bound=0,
+    upper_bound=1
+    ) {
   standardised_data <- dataset
   # data set: the specified data set to range standardized
   # the inner function defines the range standardization transform, as R does not have one

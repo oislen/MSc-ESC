@@ -8,7 +8,11 @@
 #' 
 #' @return Returns 0 for successful execution
 #' 
-plot_spreadlevel <- function(model, main = "Spread-Level Plot for Overall Model", output_fpath = NA){
+plot_spreadlevel <- function(
+    model,
+    main="Spread-Level Plot for Overall Model",
+    output_fpath=NA
+    ){
   
   # if saving file as jpeg
   if (!is.na(output_fpath)){

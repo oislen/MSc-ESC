@@ -11,7 +11,14 @@
 #' 
 #' @return Returns a dataframe containing the correlation test results
 #' 
-corr_tests <- function(data, col_names, tar_col_name = "Points", na.action = "na.omit", digits = 5, sign_level = 0.05){
+corr_tests <- function(
+    data,
+    col_names,
+    tar_col_name="Points",
+    na.action="na.omit",
+    digits=5,
+    sign_level=0.05
+    ){
   # set the output column names
   output_cols <- c("X", "Y", "Correlation", "P-Value", "Significant")
   # Create a data frame to hold the correlation test data

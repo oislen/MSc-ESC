@@ -8,7 +8,11 @@
 #' 
 #' @return Returns 0 for successful execution
 #' 
-plot_qq <- function(model, main = "QQ-Plot of Overall Model Standardised Residuals", output_fpath = NA){
+plot_qq <- function(
+    model,
+    main="QQ-Plot of Overall Model Standardised Residuals",
+    output_fpath=NA
+    ){
   
   # if saving file as jpeg
   if (!is.na(output_fpath)){

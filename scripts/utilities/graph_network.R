@@ -18,11 +18,11 @@ graph_network <- function(
     weights, 
     from.country = 'From_country', 
     to.country = 'To_country', 
-    plot_type = 'standard', 
-    main = '', 
-    layout = layout.fruchterman.reingold,
-    output_fpath = NA
-){
+    plot_type='standard', 
+    main='', 
+    layout=layout.fruchterman.reingold,
+    output_fpath=NA
+    ){
   # Construct Social Network
   G <- graph_from_data_frame(d = dataset[, c(from.country, to.country)], directed = T)
   # add in the points as weights

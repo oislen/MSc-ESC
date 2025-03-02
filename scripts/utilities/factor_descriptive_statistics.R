@@ -10,7 +10,11 @@ library(moments)
 #' 
 #' @return Returns the categorical descriptive statistics as a dataframe
 #' 
-factor_descriptive_statistics <- function(dataset, col_names, digits = 2) {
+factor_descriptive_statistics <- function(
+    dataset,
+    col_names,
+    digits=2
+    ) {
   # function that automatically prints relevant descriptive statistics for attributes in a given data set
   # create the data frame to hold the categorical descriptive statistics
   # set the name of the statistics being generated

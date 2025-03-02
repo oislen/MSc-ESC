@@ -8,7 +8,11 @@
 #' 
 #' @return Returns 0 for successful execution
 #' 
-plot_residualdist <- function(sresid, main = "Distribution of Standardised Residuals", output_fpath = NA){
+plot_residualdist <- function(
+    sresid,
+    main="Distribution of Standardised Residuals",
+    output_fpath=NA
+    ){
   
   # if saving file as jpeg
   if (!is.na(output_fpath)){

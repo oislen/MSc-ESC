@@ -9,7 +9,12 @@
 #' 
 #' @return Returns a dataframe with the To / From country missing observation 
 #' 
-TC_FC_missing_observations <- function(from_countries, orig_data, comp_data, digits = 2){
+TC_FC_missing_observations <- function(
+    from_countries,
+    orig_data,
+    comp_data,
+    digits=2
+    ){
   # NOTE: Observe how these missing observations effect the To_country and From_country
   # Remember all the migration factors are intrinsically linked to to both
   # From_country and two_country

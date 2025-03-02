@@ -11,7 +11,12 @@ library(ggplot2)
 #' 
 #' @return Returns 0 for successful execution
 #' 
-plot_missings_effect <- function(col_names, orig_data, comp_data, output_dir = './report/plots/missings/'){
+plot_missings_effect <- function(
+    col_names,
+    orig_data,
+    comp_data,
+    output_dir='./report/plots/missings/'
+    ){
   
   # loop through the column names
   for (col in col_names){

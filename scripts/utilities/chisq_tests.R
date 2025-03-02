@@ -7,7 +7,10 @@
 #' 
 #' @return Returns a dataframe containing the chi-sq association tests results
 #' 
-chisq_tests <- function(dataset, digits = 5) {
+chisq_tests <- function(
+    dataset,
+    digits=5
+    ) {
   # create a data frame to store the relevant chi-squared test data
   data_frame_rows <- ncol(dataset)
   chisqtestdf <- as.data.frame(matrix(ncol = 5))

@@ -7,7 +7,10 @@
 #' 
 #' @return Returns a dataframe containing the converted factor data
 #' 
-column_to_factor <- function(dataset, col_names){
+column_to_factor <- function(
+    dataset,
+    col_names
+    ){
   # loop through the columns to be converted
   for (col in col_names){
     # convert the column to factor

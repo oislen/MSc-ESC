@@ -10,7 +10,11 @@ library(car)
 #' 
 #' @return Returns 0 for successful execution
 #' 
-plot_influence <- function(model, main = "Influence Plot", output_fpath = NA){
+plot_influence <- function(
+    model,
+    main="Influence Plot",
+    output_fpath=NA
+    ){
   
   # if saving file as jpeg
   if (!is.na(output_fpath)){

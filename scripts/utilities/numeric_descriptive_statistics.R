@@ -11,7 +11,12 @@ library(moments)
 #' 
 #' @return Returns the numeric descriptive statistics as a dataframe
 #' 
-numeric_descriptive_statistics <- function(dataset, col_names, digits = 3, na.rm = TRUE) {
+numeric_descriptive_statistics <- function(
+    dataset,
+    col_names,
+    digits=3,
+    na.rm=TRUE
+    ) {
   # create the data frame to hold the numeric descriptive statistics
   stats_names <- c("mean", "stdev", "min", "max", "range", "NA %")
   # create a data frame of empty
