@@ -15,12 +15,15 @@ RUN mkdir -p /home/${user} && chown -R ${user}: /home/${user}
 # copy MSc-ESC repo
 COPY . /home/ubuntu/MSc-ESC
 
-# install R
-RUN apt-get install -y r-base
-
 # set up home environment
-RUN useradd ${user}
 RUN mkdir -p /home/${user} && chown -R ${user}: /home/${user}
 
-WORKDIR /home/${user}
+# install R and set up environment
+# https://www.stats.bris.ac.uk/R/
+WORKDIR /home/${user}/MSc-ESC
+RUN apt-get install --no-install-recommends software-properties-common dirmngr -y
+RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" -y
+RUN apt-get install --no-install-recommends r-base -y
+#RUN Rscript -e "renv::restore()"
+
 ENTRYPOINT ["/bin/bash"]
