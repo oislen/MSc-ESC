@@ -1,4 +1,4 @@
-library('dplyr')
+library("dplyr")
 source("utilities/correlation_tests.R")
 
 #' Data Reduction Correlation
@@ -23,7 +23,7 @@ data_reduction_corr <- function(
   # Filter out the significant p-values
   corr_tests_sign <- corr_tests[corr_tests$Correlation > corr_threshold,]
   # extract out the column names for significant columns
-  corr_tests_remove_cols <- unique(corr_tests_sign[,'Y'])
+  corr_tests_remove_cols <- unique(corr_tests_sign[,"Y"])
   # return chi-sq columns to remove
   return(corr_tests_remove_cols)
 }

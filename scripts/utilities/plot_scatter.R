@@ -11,7 +11,7 @@
 plot_scatter <- function(
     data,
     col_names,
-    output_dir='report/plots/scatterplots'
+    output_dir="report/plots/scatterplots"
     ){
   
   # use a for loop to generate correlation scatter plots
@@ -24,7 +24,7 @@ plot_scatter <- function(
     plt = ggplot(data = data, mapping = aes(x = Points, y = data[,col])) + 
       geom_point(shape = 16, colour = "steelblue") + 
       labs(title = paste("Scatterplot of Points vs ",col), x = "Points", y = col)  +  
-      geom_smooth(method ='lm', linetype = "dashed", color="darkred", fill = "red",formula = y ~ x) +
+      geom_smooth(method ="lm", linetype = "dashed", color="darkred", fill = "red",formula = y ~ x) +
       scale_x_discrete(limits = lims) + 
       theme_minimal()
     
@@ -32,7 +32,7 @@ plot_scatter <- function(
     print(plt)
     
     # create the output plot name
-    plot_name <- paste(col, '_vs_Points_Scatterplot.png', sep = '')
+    plot_name <- paste(col, "_vs_Points_Scatterplot.png", sep = "")
     
     if (!is.na(output_dir)) {
       # create output file path

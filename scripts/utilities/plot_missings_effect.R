@@ -1,4 +1,4 @@
-library(ggplot2)
+library("ggplot2")
 
 #' Plot Missing Effects
 #' 
@@ -15,7 +15,7 @@ plot_missings_effect <- function(
     col_names,
     orig_data,
     comp_data,
-    output_dir='./report/plots/missings/'
+    output_dir="./report/plots/missings/"
     ){
   
   # loop through the column names
@@ -31,7 +31,7 @@ plot_missings_effect <- function(
     
     if (!is.na(output_dir)){
       # save the plot
-      ggsave(paste(output_dir, col, 'All_Cases_Bar_Chart.png'))
+      ggsave(paste(output_dir, col, "All_Cases_Bar_Chart.png"))
     }
     
     # print the plot
@@ -47,7 +47,7 @@ plot_missings_effect <- function(
     
     if (!is.na(output_dir)){
       # save the plot
-      ggsave(paste(output_dir, col, 'Complete_Cases_Bar_Chart.png'))
+      ggsave(paste(output_dir, col, "Complete_Cases_Bar_Chart.png"))
     }
     
     # print the plot

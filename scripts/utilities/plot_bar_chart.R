@@ -1,4 +1,4 @@
-library(ggplot2)
+library("ggplot2")
 
 #' Plot Bar Chart
 #' 
@@ -13,7 +13,7 @@ library(ggplot2)
 plot_bar_chart <- function(
     dataset,
     col_names,
-    output_dir='report/plots/bar_charts'
+    output_dir="report/plots/bar_charts"
     ){
   # use a for loop to generate a bar plot for each categorical attributes
   for (col in all_factors){
@@ -30,7 +30,7 @@ plot_bar_chart <- function(
     print(plt)
     
     # create the output plot name
-    plot_name <- paste(col, '_bar_chart.png', sep = '')
+    plot_name <- paste(col, "_bar_chart.png", sep = "")
     
     if (!is.na(output_dir)) {
       # create output file path

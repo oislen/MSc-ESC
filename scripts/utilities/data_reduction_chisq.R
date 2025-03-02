@@ -1,4 +1,4 @@
-library('dplyr')
+library("dplyr")
 source("utilities/chisq_tests.R")
 
 #' Data Reduction Chi-Square
@@ -21,9 +21,9 @@ data_reduction_chisq <- function(
   # Run the Chi-Squared Tests
   chisq_tests <- chisq_tests(dataset = sub_df)
   # Filter out the significant p-values
-  chisq_tests_sign <- chisq_tests[chisq_tests$'P-Value' < p_value,]
+  chisq_tests_sign <- chisq_tests[chisq_tests$"P-Value" < p_value,]
   # extract out the column names for significant columns
-  chisq_test_remove_cols <- unique(chisq_tests_sign[,'Y'])
+  chisq_test_remove_cols <- unique(chisq_tests_sign[,"Y"])
   # return chi-sq columns to remove
   return(chisq_test_remove_cols)
 }

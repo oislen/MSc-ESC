@@ -13,7 +13,7 @@ library(ggplot2)
 plot_histogram <- function(
     dataset,
     col_names,
-    output_dir='report/plots/histograms'
+    output_dir="report/plots/histograms"
     ){
   # use a for loop to generate histograms for each numeric attribute
   for (col in col_names){
@@ -29,7 +29,7 @@ plot_histogram <- function(
     print(plt)
     
     # create the output plot name
-    plot_name <- paste(col, '_histogram.png', sep = '')
+    plot_name <- paste(col, "_histogram.png", sep = "")
     
     if (!is.na(output_dir)) {
       # create output file path

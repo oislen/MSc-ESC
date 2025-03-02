@@ -1,5 +1,5 @@
-source('utilities/extract_preds_by_cats.R')
-source('utilities/extract_sign_preds.R')
+source("utilities/extract_preds_by_cats.R")
+source("utilities/extract_sign_preds.R")
 
 #' Stepwise Linear Model
 #' 
@@ -16,7 +16,7 @@ source('utilities/extract_sign_preds.R')
 step_lm_model <- function(
     dataset,
     pred_cols,
-    direction='both',
+    direction="both",
     steps=100,
     trace=0
     ){
@@ -26,10 +26,10 @@ step_lm_model <- function(
   # define the minimum model 
   out_list$min_model <- lm(Points ~ 1, data = dataset)
   # create a model formula
-  out_list$model_form <- as.formula(paste('Points ~', paste(pred_cols, collapse = ' + ')))
+  out_list$model_form <- as.formula(paste("Points ~", paste(pred_cols, collapse = " + ")))
   # create the maximum model
   out_list$max_model <- formula(lm(out_list$model_form, data = dataset))
-  # my_model_overall <- step(min_model, direction = 'forward', scope = max_model, steps = 100)
+  # my_model_overall <- step(min_model, direction = "forward", scope = max_model, steps = 100)
   out_list$my_model_overall <- step(out_list$min_model, direction = direction, scope = out_list$max_model, steps = steps, trace = 0)
   # get model summary
   out_list$summary <- summary(out_list$my_model_overall)
