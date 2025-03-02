@@ -18,8 +18,9 @@ library(knitr)
 library(igraph)
 library(dplyr)
 # load in custom utility functions
-source("../scripts/utilities/graph_network.R")
-source("../scripts/utilities/plot_dendrogram_chart.R")
+source("utilities/graph_network.R")
+source("utilities/plot_dendrogram_chart.R")
+source('cons.R')
 ```
 
 ## Data Profiling / Preparation
@@ -28,7 +29,7 @@ The historical voting data records the number of points given from one country t
 
 ```{r data-profiling, echo = FALSE}
 # load in the historic voting data for deriving the voting blocs
-past_voting_data <- read.csv(file = "../data/ESC_hist_voting_data.csv", header = T)
+past_voting_data <- read.csv(file = "../data/ESC_hist_voting_data.csv", header = TRUE)
 # get the head of the data
 head(past_voting_data)
 ```
@@ -39,17 +40,19 @@ The historical voting data between all 'from country' and 'to country' combinati
 
 ```{r average-vote-matrix, message = FALSE, echo = FALSE}
 # Average over the voting data
-pvd <- past_voting_data %>% 
-       select(From.country, To.country, Points) %>%
-       group_by(From.country, To.country) %>%
-       summarise(Average.Points = mean(Points)) %>%
-       as.data.frame()
+pvd <- past_voting_data %>%
+  select(From.country, To.country, Points) %>%
+  group_by(From.country, To.country) %>%
+  summarise(Average.Points = mean(Points)) %>%
+  as.data.frame()
 
 # show head of data
 head(pvd)
 
-# write the average voting data to a csv file
-write.csv(x = pvd, file = "../data/average_points.csv", row.names = F)
+if (gen_output_data_files) {
+  # write the average voting data to a csv file
+  write.csv(x = pvd, file = fpath_data_average_points, row.names = FALSE)
+}
 ```
 
 ### Average Points Graph
@@ -60,20 +63,21 @@ The aggregated historical voting data is further filtered to return cases where 
 # graph the data based on the weight of the average point score
 # assumption: an average point score of 8 or more is a sign of bloc voting
 pvdf <- filter(pvd, Average.Points >= 8)
-G <- graph_from_data_frame(d = pvdf, directed = T)
+G <- graph_from_data_frame(d = pvdf, directed = TRUE)
 E(G)$weight <- as.numeric(pvdf$Average.Points)
 # check the graph is weighted
 if (is_weighted(G) == FALSE){
   stop("Voting Network Graph is Unweighted.")
 }
 # plot the average points graph
-graph_network(dataset = pvdf, 
-              main = "Average Points Graph",
-              from.country = 'From.country', 
-              to.country = "To.country", 
-              weights = 'Average.Points',
-              output_fpath = '../report/plots/networks/average-points-graph.jpg'
-              )
+graph_network(
+  dataset = pvdf,
+  main = "Average Points Graph",
+  from.country = 'From.country',
+  to.country = "To.country",
+  weights = 'Average.Points',
+  output_fpath = fpath_plots_networks_average_points_graph
+  )
 ```
 
 ![Average Point Graph](../report/plots/networks/average-points-graph.jpg)\newline
@@ -96,9 +100,11 @@ Edge betweenness clustering works by iteratively removing edges with the highest
 
 ```{r edge-betweenness-clustering-results, echo = FALSE, results = 'hide'}
 # construct a dendrogram (hierarchical clustering method)
-plot_dendrogram_chart(community = com1, 
-                      main = "Dendrogram of Edge Betweenness Clustering",
-                      output_fpath = '../report/plots/dendrograms/edge-betweenness-dendrogram.jpg')
+plot_dendrogram_chart(
+  community = com1,
+  main = "Dendrogram of Edge Betweenness Clustering",
+  output_fpath = fpath_plots_dendrogram_edge_betweenness
+  )
 ```
 
 ![Edge Betweenness Dendrogram](../report/plots/dendrograms/edge-betweenness-dendrogram.jpg)\newline
@@ -117,9 +123,11 @@ Short random walks clustering works by performing short random walks between nod
 
 ```{r short-random-walks-results, echo = FALSE, results = 'hide'}
 # construct a dendrogram (hierarchical clustering method)
-plot_dendrogram_chart(community = com2, 
-                      main = "Dendrogram of Short Random Walks Clustering",
-                      output_fpath = '../report/plots/dendrograms/short-random-walks-dendrogram.jpg')
+plot_dendrogram_chart(
+  community = com2,
+  main = "Dendrogram of Short Random Walks Clustering",
+  output_fpath = fpath_plots_dendrogram_short_random_walks
+  )
 ```
 
 ![Short Random Walks Dendrogram](../report/plots/dendrograms/short-random-walks-dendrogram.jpg)\newline
@@ -136,6 +144,8 @@ voting_bloc_data <- as.data.frame(cbind(com1$names, com1$membership, com2$member
 colnames(voting_bloc_data) <- c("Country", "VBlocs1_EB", "VBlocs2_SRW")
 # results
 voting_bloc_data
-# Writing Voting Bloc Data to csv file
-write.csv(x = voting_bloc_data, file = "../data/voting_bloc_data.csv", row.names = F)
+if (gen_output_data_files){
+  # Writing Voting Bloc Data to csv file
+  write.csv(x = voting_bloc_data, file = fpath_data_voting_bloc, row.names = FALSE)
+}
 ```

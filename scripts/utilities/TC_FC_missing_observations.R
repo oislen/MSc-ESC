@@ -1,4 +1,20 @@
-TC_FC_missing_observations <- function(from_countries, orig_data, comp_data, digits = 2){
+#' To Country / From Country Missing Observations
+#' 
+#' @description Generates missing observation statistics between To / From Countries
+#' 
+#' @param from_countries The from countries
+#' @param orig_data The original dataset with NA values
+#' @param comp_data The complete dataset without NA values
+#' @param digits The number of digits to round the missing observation statistics to, default is 2
+#' 
+#' @return Returns a dataframe with the To / From country missing observation 
+#' 
+TC_FC_missing_observations <- function(
+    from_countries,
+    orig_data,
+    comp_data,
+    digits=2
+    ){
   # NOTE: Observe how these missing observations effect the To_country and From_country
   # Remember all the migration factors are intrinsically linked to to both
   # From_country and two_country

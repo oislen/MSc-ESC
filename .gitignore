@@ -2,4 +2,13 @@
 *.Rhistory
 *.html
 .Rproj.user
+.RData
 MSc-ESC.Rproj
+# renv sub-directories
+renv/library/
+renv/local/
+renv/cellar/
+renv/lock/
+renv/python/
+renv/sandbox/
+renv/staging/

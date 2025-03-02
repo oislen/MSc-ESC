@@ -1,12 +1,23 @@
-# load required libraries
-library(moments)
+library("moments")
 
-# define a function to calculate descriptive statistics for continuous variables
-numeric_descriptive_statistics <- function(dataset, col_names, digits = 3, na.rm = TRUE) {
-  # IMPORTANT NOTE: all the descriptive statistics are by default calculated with the NA values removed
-  # function that automatically prints relevant descriptive statistics for attributes in a given data set
+#' Numeric Descriptive Statistics
+#' 
+#' @description Generates descriptive statistics for continuous variables within a dataframe
+#' 
+#' @param dataset The dataframe with continuous variables
+#' @param col_names The continuous variables to generate numeric descriptive statistics for
+#' @param digits The number of digits to round the descriptive statistics to, default is 3
+#' @param na.rm Whether to remove NA values from the dataset when generating the numeric descriptive statistics, default is True
+#' 
+#' @return Returns the numeric descriptive statistics as a dataframe
+#' 
+numeric_descriptive_statistics <- function(
+    dataset,
+    col_names,
+    digits=3,
+    na.rm=TRUE
+    ) {
   # create the data frame to hold the numeric descriptive statistics
-  # set the name of the statistics being generated
   stats_names <- c("mean", "stdev", "min", "max", "range", "NA %")
   # create a data frame of empty
   numeric_desc_stats <- as.data.frame(matrix(nrow = length(col_names), ncol = length(stats_names), dimnames = list(col_names, stats_names)))

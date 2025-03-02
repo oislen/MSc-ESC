@@ -1,4 +1,18 @@
-plot_residualdist <- function(sresid, main = "Distribution of Standardised Residuals", output_fpath = NA){
+#' Plot Residual Distribution
+#' 
+#' @description Plots distribution of standardised residuals
+#' 
+#' @param sresid The standardised residuals to plot a distribution for
+#' @param main The main title of the distribution plot, default is "Distribution of Standardised Residuals"
+#' @param output_fpath The output file path to write the distribution plot as a .png file, default is NA
+#' 
+#' @return Returns 0 for successful execution
+#' 
+plot_residualdist <- function(
+    sresid,
+    main="Distribution of Standardised Residuals",
+    output_fpath=NA
+    ){
   
   # if saving file as jpeg
   if (!is.na(output_fpath)){
