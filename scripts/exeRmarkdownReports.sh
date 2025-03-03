@@ -3,12 +3,12 @@
 export createPdfReport=1
 
 # generate rmarkdown reports
-Rscript -e "rmarkdown::render(input='01_derive_voting_blocs.Rmd', output_format='pdf_document', output_file='01_derive_voting_blocs.pdf')"
-Rscript -e "rmarkdown::render(input='02_exploratory_data_analysis.Rmd', output_format='pdf_document', output_file='02_exploratory_data_analysis.pdf')"
-Rscript -e "rmarkdown::render(input='03_data_processing.Rmd', output_format='pdf_document', output_file='03_data_processing.pdf')"
-Rscript -e "rmarkdown::render(input='04_data_modelling.Rmd', output_format='pdf_document', output_file='04_data_modelling.pdf')"
-Rscript -e "rmarkdown::render(input='05_model_evaluation.Rmd', output_format='pdf_document', output_file='05_model_evaluation.pdf')"
-Rscript -e "rmarkdown::render(input='06_conclusion.Rmd', output_format='pdf_document', output_file='06_conclusion.pdf')"
+Rscript -e "source('../renv/activate.R'); rmarkdown::render(input='01_derive_voting_blocs.Rmd', output_format='pdf_document', output_file='01_derive_voting_blocs.pdf');"
+Rscript -e "source('../renv/activate.R'); rmarkdown::render(input='02_exploratory_data_analysis.Rmd', output_format='pdf_document', output_file='02_exploratory_data_analysis.pdf');"
+Rscript -e "source('../renv/activate.R'); rmarkdown::render(input='03_data_processing.Rmd', output_format='pdf_document', output_file='03_data_processing.pdf');"
+Rscript -e "source('../renv/activate.R'); rmarkdown::render(input='04_data_modelling.Rmd', output_format='pdf_document', output_file='04_data_modelling.pdf');"
+Rscript -e "source('../renv/activate.R'); rmarkdown::render(input='05_model_evaluation.Rmd', output_format='pdf_document', output_file='05_model_evaluation.pdf');"
+Rscript -e "source('../renv/activate.R'); rmarkdown::render(input='06_conclusion.Rmd', output_format='pdf_document', output_file='06_conclusion.pdf');"
 
 if [[ "$createPdfReport" == 1 ]]; then
 	# move .pdf files to reports

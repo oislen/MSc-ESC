@@ -1,2 +1,2 @@
 #!/bin/bash
-Rscript -e "testthat::test_dir('./utilities/unittests')"
+Rscript -e "source('../renv/activate.R'); testthat::test_dir('./utilities/unittests');"
