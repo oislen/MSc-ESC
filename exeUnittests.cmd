@@ -1,0 +1,1 @@
+call Rscript -e "renv::load(); testthat::test_dir('scripts/utilities/unittests');"
