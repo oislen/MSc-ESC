@@ -1,1 +1,1 @@
-call Rscript -e "testthat::test_dir('./utilities/unittests')"
+call Rscript -e "testthat::test_dir('./utilities/unittests');"
