@@ -33,6 +33,7 @@ RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_r
 RUN apt-get install --no-install-recommends r-base -y
 # install environment
 RUN Rscript -e "options(renv.config.pak.enabled=TRUE); Sys.setenv(RENV_CONFIG_PAK_ENABLED=TRUE); renv::restore();"
+#RUN bash exeRmarkdownReports.sh
 #RUN bash exeUnittests.sh
 
 ENTRYPOINT ["/bin/bash"]
