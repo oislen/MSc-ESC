@@ -1,0 +1,17 @@
+name: Release Tag Main Push
+
+on:
+    workflow_run:
+      workflows: ["Unittest Main Push"]
+      types:
+        - completed
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tag Repo
+        uses: richardsimko/update-tag@v1
+        with:
+          tag_name: ${{ vars.REPO_TAG }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
