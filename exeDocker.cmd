@@ -9,7 +9,7 @@ SET DOCKER_CONTAINER_NAME=esc
 docker image rm -f %DOCKER_IMAGE%
 
 :: build docker image
-call docker build --no-cache -t %DOCKER_IMAGE% .
+call docker build -t %DOCKER_IMAGE% .
 
 :: run docker container
 call docker run --name %DOCKER_CONTAINER_NAME% -it %DOCKER_IMAGE%
