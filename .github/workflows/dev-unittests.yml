@@ -1,10 +1,8 @@
 name: Development Unittest Pull Request
 
 on:
-    workflow_run:
-      workflows: ["Development Trivy File System Scan"]
-      types:
-        - completed
+  pull_request:
+    branches: [ dev, main ]
 
 jobs:
   build:
