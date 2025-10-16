@@ -11,4 +11,4 @@ call conda list
 
 :: install all relevant R libraries
 call conda config --add channels r
-call conda install -c r --file ..\requirements.txt --yes
+call conda install -c r --file requirements.txt --yes
