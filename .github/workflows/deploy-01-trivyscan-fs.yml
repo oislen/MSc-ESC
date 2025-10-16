@@ -1,0 +1,21 @@
+name: Deployment Trivy File System Scan
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  fs-scan:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner in fs mode
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        exit-code: '1'
+        uses: docker/setup-qemu-action@v2
