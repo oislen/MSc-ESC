@@ -1,8 +1,8 @@
-name: Unittest Main Push
+name: Unittest Pull Request
 
 on:
-  push:
-    branches: [ "main" ]
+  pull_request:
+    branches: [ dev, main ]
 
 jobs:
   build:

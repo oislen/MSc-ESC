@@ -2,7 +2,7 @@ name: DockerHub Main Push
 
 on:
     workflow_run:
-      workflows: ["Unittest Main Push"]
+      workflows: ["Release Tag Main Push"]
       types:
         - completed
 jobs:
