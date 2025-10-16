@@ -1,4 +1,4 @@
-name: Development Trivy File System Scan and Unittests
+name: Development Workflow
 
 on:
   pull_request:
