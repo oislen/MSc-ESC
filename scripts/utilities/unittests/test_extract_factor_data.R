@@ -12,7 +12,7 @@ obs_results <- extract_factor_data(dataset=test_data)
 exp_colnames <- c("From_country", "To_country", "Round", "Voting_Method", "Host_Nation", "ComVBlocs1", "ComVBlocs2", "FC_LANGFAM", "TC_LANGFAM", "ComLANGFAM", "Neighbours", "TC_PerfType", "TC_SingerGender", "FC_SONGLANG", "TC_SONGLANG")
 
 testthat::test_that(
-  "Extract Numeric Data Function Tests",
+  "Extract Factor Data Function Tests",
   {
     expect_equal(typeof(obs_results), typeof(test_data))
     expect_equal(nrow(obs_results), nrow(test_data))
