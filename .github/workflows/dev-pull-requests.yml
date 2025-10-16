@@ -19,6 +19,7 @@ jobs:
         exit-code: '1'
 
   r-unittests:
+    needs: trivy-fs-scan
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code

@@ -26,6 +26,7 @@ jobs:
           build-args: GIT_BRANCH=main
 
   trivy-image-scan:
+    needs: dockerhub-image-push
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code

@@ -18,6 +18,7 @@ jobs:
         exit-code: '1'
 
   r-unittests:
+    needs: trivy-fs-scan
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -47,6 +48,7 @@ jobs:
         testthat::test_dir('./scripts/utilities/unittests')
 
   release-tag:
+    needs: r-unittests
     runs-on: ubuntu-latest
     steps:
       - name: Tag Repo
