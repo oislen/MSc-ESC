@@ -1,8 +1,10 @@
 name: Deployment Trivy File System Scan
 
 on:
-  push:
-    branches: [ main ]
+    workflow_run:
+      workflows: ["Deployment DockerHub Image Push"]
+      types:
+        - completed
 
 jobs:
   fs-scan:
