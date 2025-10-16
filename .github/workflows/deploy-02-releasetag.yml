@@ -1,10 +1,11 @@
-name: Release Tag Main Push
+name: Deployment Release Tag
 
 on:
     workflow_run:
-      workflows: ["Unittest Main Push"]
+      workflows: ["Deployment Unittests"]
       types:
         - completed
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
