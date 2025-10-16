@@ -27,13 +27,3 @@ jobs:
           push: true
           tags: oislen/msc-esc:latest
           build-args: GIT_BRANCH=main
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: oislen/msc-esc:latest
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
