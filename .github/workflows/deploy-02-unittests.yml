@@ -1,8 +1,10 @@
-name: Unittest Main Push
+name: Deployment Unittests
 
 on:
-  push:
-    branches: [ main ]
+    workflow_run:
+      workflows: ["Deployment Trivy File System Scan"]
+      types:
+        - completed
 
 jobs:
   build:
