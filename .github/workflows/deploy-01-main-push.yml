@@ -5,7 +5,19 @@ on:
     branches: [ main ]
 
 jobs:
+
+  release-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tag Repo
+        uses: richardsimko/update-tag@v1
+        with:
+          tag_name: ${{ vars.REPO_TAG }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
   trivy-fs-scan:
+    needs: release-tag
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -18,7 +30,7 @@ jobs:
         exit-code: '1'
 
   r-unittests:
-    needs: trivy-fs-scan
+    needs: release-tag
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -46,14 +58,3 @@ jobs:
       run: |
         renv::load()
         testthat::test_dir('./scripts/utilities/unittests')
-
-  release-tag:
-    needs: r-unittests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Tag Repo
-        uses: richardsimko/update-tag@v1
-        with:
-          tag_name: ${{ vars.REPO_TAG }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
