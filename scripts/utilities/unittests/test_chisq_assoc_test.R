@@ -8,9 +8,6 @@ test_data <- read.csv(file="../data/ESC_2016_voting_data.csv", header=TRUE, nrow
 # generate observed test data
 obs_results <- chisq_assoc_test(data=test_data, col_names=c("From_country","FC_LANGFAM"))
 
-print(obs_results)
-print(typeof(obs_results))
-
 testthat::test_that(
   "Chi-Square Association Test Function Tests",
   {

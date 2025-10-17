@@ -8,11 +8,8 @@ test_data <- read.csv(file="../data/ESC_2016_voting_data.csv", header=TRUE, nrow
 # generate observed test data
 obs_results <- chisq_assoc_test(data=test_data, col_names=c("FC_Population","FC_GDP_mil"))
 
-print(obs_results)
-print(typeof(obs_results))
-
 testthat::test_that(
-  "Chi-Square Association Test Function Tests",
+  "Correlation Tests Function Tests",
   {
     expect_equal(typeof(obs_results), "list")
     expect_equal(class(obs_results), "data.frame")
